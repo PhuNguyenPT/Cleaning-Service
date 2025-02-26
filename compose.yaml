@@ -1,0 +1,53 @@
+networks:
+  app_network: # Custom network
+    driver: bridge
+
+services:
+  redis:
+    image: 'redis:latest'
+    container_name: redis_container
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+
+  mongodb:
+    image: 'mongo:latest'
+    container_name: mongodb_container
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: mydatabase
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app_network
+
+  postgres:
+    image: 'postgres:latest'
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  redis_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  postgres_data:
+    driver: local
