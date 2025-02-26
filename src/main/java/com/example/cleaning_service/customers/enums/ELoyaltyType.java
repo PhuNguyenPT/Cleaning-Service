@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers;
+package com.example.cleaning_service.customers.enums;
 
 public enum ELoyaltyType {
     STANDARD,
