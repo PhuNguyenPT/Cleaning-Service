@@ -7,7 +7,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,25 +43,28 @@ public class UserService {
 
     public UserResponse register(AuthRequest authRequest) {
         if (userRepository.existsByUsername(authRequest.username())) {
-            throw new EntityExistsException(authRequest.username() + " already exists!");
+            throw new EntityExistsException("Username: '"  + authRequest.username() + "' already exists!");
         }
         User newUserRequest = UserMapper.fromAuthRequestToUser(authRequest);
 
         // 🔹 Ensure the "USER" role exists and fetch it
         Role userRole = roleService.ensureRoleExists(ERole.USER);
 
-        // 🔹 Create User entity to persist
+        // 🔹 Create a COPY of the permissions set to avoid shared references
+        Set<Permission> copiedPermissions = new HashSet<>(userRole.getPermissions());
+
+        // 🔹 Create User entity with a new set of permissions
         User dbUser = new User(
                 newUserRequest.getUsername(),
-                newUserRequest.getPassword(),
+                passwordEncoder.encode(newUserRequest.getPassword()),
                 userRole,
-                userRole.getPermissions()
+                copiedPermissions // 🔹 Assign the copied set, not the original reference
         );
 
         // 🔹 Save user in the database
         User savedUser = userRepository.save(dbUser);
 
-        return UserMapper.fromUserToUserResponse(savedUser);
+        return UserMapper.fromUserToUserResponseLogin(savedUser);
     }
 
     public UserResponse findById(Long id) {
