@@ -5,6 +5,7 @@ import com.example.cleaning_service.security.users.UserResponse;
 import com.example.cleaning_service.security.users.UserService;
 import com.example.cleaning_service.security.util.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.EntityModel;
@@ -51,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<EntityModel<UserResponse>> register(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<EntityModel<UserResponse>> register(@RequestBody @NotNull AuthRequest authRequest) {
         UserResponse userResponse = userService.register(authRequest);
 
         // Create HAL+JSON response with links
