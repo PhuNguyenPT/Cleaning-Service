@@ -2,7 +2,6 @@ package com.example.cleaning_service.security.users;
 
 import com.example.cleaning_service.security.roles.ERole;
 import com.example.cleaning_service.security.roles.Permission;
-import com.fasterxml.jackson.annotation.JsonRootName;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;

@@ -21,22 +21,22 @@ public class PermissionService {
      */
     @Transactional
     public Set<Permission> ensurePermissionsExist(Set<EPermission> requiredPermissions) {
+        // 🔹 Fetch existing permissions in one query
         Set<Permission> existingPermissions = permissionRepository.findByNameIn(requiredPermissions);
 
-        // Identify missing permissions that need to be saved
+        // 🔹 Identify missing permissions
         Set<EPermission> missingPermissions = requiredPermissions.stream()
                 .filter(permission -> existingPermissions.stream()
                         .noneMatch(existing -> existing.getName().equals(permission)))
                 .collect(Collectors.toSet());
 
-        // Save missing permissions
+        // 🔹 Insert missing permissions in **one batch query**
         if (!missingPermissions.isEmpty()) {
             Set<Permission> newPermissions = missingPermissions.stream()
                     .map(Permission::new)
                     .collect(Collectors.toSet());
 
-            permissionRepository.saveAll(newPermissions);
-            existingPermissions.addAll(newPermissions);
+            existingPermissions.addAll(permissionRepository.saveAll(newPermissions)); // ✅ Batch insert
         }
 
         return existingPermissions;

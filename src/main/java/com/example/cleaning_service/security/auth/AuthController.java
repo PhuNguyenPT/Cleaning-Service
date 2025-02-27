@@ -1,11 +1,15 @@
 package com.example.cleaning_service.security.auth;
 
 import com.example.cleaning_service.security.users.User;
+import com.example.cleaning_service.security.users.UserResponse;
 import com.example.cleaning_service.security.users.UserService;
 import com.example.cleaning_service.security.util.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final JwtUtil jwtUtil;
@@ -41,7 +44,6 @@ public class AuthController {
             String token = jwtUtil.generateToken(user, expDuration);
             jwtService.saveToken(token);
             return ResponseEntity.ok(new AuthResponse(token));
-
         } catch (Exception e) {
             logger.error("Login failed: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid credentials: " + e.getMessage());
@@ -49,9 +51,17 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AuthRequest authRequest) {
-        userService.register(authRequest);
-        return ResponseEntity.ok("User registered successfully!");
+    public ResponseEntity<EntityModel<UserResponse>> register(@RequestBody @Valid AuthRequest authRequest) {
+        UserResponse userResponse = userService.register(authRequest);
+
+        // Create HAL+JSON response with links
+        EntityModel<UserResponse> responseModel = EntityModel.of(userResponse,
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.class).slash("login").withSelfRel(),
+                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.class).slash("register").withSelfRel()
+        );
+
+        return ResponseEntity.created(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(null)).toUri())
+                .body(responseModel);
     }
 
     @PostMapping("/logout")

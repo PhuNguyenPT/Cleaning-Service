@@ -12,10 +12,26 @@ public class UserMapper {
         );
     }
 
+    public static UserResponse fromUserToUserResponseLogin(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                null,
+                null
+        );
+    }
+
     public static User fromAuthRequestToUser(AuthRequest authRequest) {
         return new User(
                 authRequest.username(),
                 authRequest.password()
+        );
+    }
+
+    public static User fromUserRequestToUser(UserRequest userRequest) {
+        return new User(
+                userRequest.username(),
+                userRequest.password()
         );
     }
 }
