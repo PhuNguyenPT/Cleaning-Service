@@ -5,6 +5,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,6 +84,27 @@ public class UserController {
                 .withRel("users")
         );
 
+        return EntityModel.of(userResponse);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteUserById(@PathVariable Long id) {
+        userService.deleteUser(id);
+
+        Link userListLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+                        .getAllUsers())
+                .withRel("users");
+
+        return ResponseEntity.noContent()
+                .header("Link", userListLink.toString()) // Adds the link in the response header
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("{id}")
+    public EntityModel<UserResponse> updateUserById(@PathVariable Long id, @RequestBody UserRequest userRequest) {
+        UserResponse userResponse = userService.updateUser(id, userRequest);
         return EntityModel.of(userResponse);
     }
 }

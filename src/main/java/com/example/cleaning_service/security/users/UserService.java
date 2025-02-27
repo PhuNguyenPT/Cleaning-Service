@@ -67,4 +67,36 @@ public class UserService {
                 .map(UserMapper::fromUserToUserResponse)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public UserResponse updateUser(Long id, UserRequest userRequest) {
+        // Find the existing user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+
+        // Update username if provided
+        if (userRequest.username() != null && !userRequest.username().isEmpty()) {
+            user.setUsername(userRequest.username());
+        }
+
+        // Update password if provided
+        if (userRequest.password() != null && !userRequest.password().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userRequest.password()));
+        }
+
+        // Update role if provided
+        if (userRequest.role() != null) {
+            Role newRole = roleService.ensureRoleExists(userRequest.role());
+            user.setRole(newRole);
+            user.setPermissions(newRole.getPermissions()); // Assign permissions based on role
+        }
+
+        // Save the updated user
+        User updatedUser = userRepository.save(user);
+
+        return UserMapper.fromUserToUserResponse(updatedUser);
+    }
 }

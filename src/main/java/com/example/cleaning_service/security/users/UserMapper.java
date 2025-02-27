@@ -18,4 +18,11 @@ public class UserMapper {
                 authRequest.password()
         );
     }
+
+    public static User fromUserRequestToUser(UserRequest userRequest) {
+        return new User(
+                userRequest.username(),
+                userRequest.password()
+        );
+    }
 }
