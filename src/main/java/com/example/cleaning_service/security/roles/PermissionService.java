@@ -36,7 +36,8 @@ public class PermissionService {
                     .map(Permission::new)
                     .collect(Collectors.toSet());
 
-            existingPermissions.addAll(permissionRepository.saveAll(newPermissions)); // ✅ Batch insert
+            permissionRepository.saveAll(newPermissions); // 🔹 Save permissions before returning them
+            existingPermissions.addAll(newPermissions);
         }
 
         return existingPermissions;

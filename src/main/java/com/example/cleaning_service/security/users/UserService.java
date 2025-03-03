@@ -25,13 +25,14 @@ public class UserService {
     }
 
     public UserResponse saveUser(String username, String password, ERole roleName) {
-        Role role = roleService.ensureRoleExists(roleName);
+        Role userRole = roleService.ensureRoleExists(roleName);
 
-        User user = new User(username, passwordEncoder.encode(password), role, role.getPermissions());
+        // ✅ Use existing managed Permission instances
+        Set<Permission> existingPermissions = new HashSet<>(userRole.getPermissions());
 
-        return UserMapper.fromUserToUserResponse(
-                userRepository.save(user)
-        );
+        User user = new User(username, passwordEncoder.encode(password), userRole, existingPermissions);
+
+        return UserMapper.fromUserToUserResponse(userRepository.save(user));
     }
 
     public List<UserResponse> findAll() {
@@ -95,8 +96,10 @@ public class UserService {
         // Update role if provided
         if (userRequest.role() != null) {
             Role newRole = roleService.ensureRoleExists(userRequest.role());
+            // 🔹 Create a COPY of the permissions set to avoid shared references
+            Set<Permission> copiedPermissions = new HashSet<>(newRole.getPermissions());
             user.setRole(newRole);
-            user.setPermissions(newRole.getPermissions()); // Assign permissions based on role
+            user.setPermissions(copiedPermissions); // Assign permissions based on role
         }
 
         // Save the updated user
