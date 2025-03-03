@@ -1,6 +1,5 @@
 package com.example.cleaning_service.security.config;
 
-import com.example.cleaning_service.security.users.User;
 import com.example.cleaning_service.security.users.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

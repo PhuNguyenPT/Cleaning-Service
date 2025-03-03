@@ -2,13 +2,9 @@ package com.example.cleaning_service.security.data_init;
 
 import com.example.cleaning_service.security.roles.*;
 import com.example.cleaning_service.security.users.User;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class RoleInitializationService {
