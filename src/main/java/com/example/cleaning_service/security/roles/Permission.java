@@ -1,11 +1,12 @@
 package com.example.cleaning_service.security.roles;
 
+import com.example.cleaning_service.audit.Auditable;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "permissions")
-public class Permission implements GrantedAuthority {
+public class Permission extends Auditable implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
