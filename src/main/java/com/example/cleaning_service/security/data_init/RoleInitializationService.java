@@ -22,7 +22,6 @@ public class RoleInitializationService {
     @Transactional
     public User createAdminUser(String email, String password, PasswordEncoder passwordEncoder) {
         Role adminRole = roleService.ensureRoleExists(ERole.ADMIN);
-        User adminUser = new User(email, passwordEncoder.encode(password), adminRole, adminRole.getPermissions());
-        return adminUser;
+        return new User(email, passwordEncoder.encode(password), adminRole, adminRole.getPermissions());
     }
 }
