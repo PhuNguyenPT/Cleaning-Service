@@ -32,6 +32,10 @@ public class RoleService {
 
                     // Create and save the new role
                     Role newRole = new Role(roleName, permissions);
+                    newRole = roleRepository.save(newRole); // 🔹 Ensure Role is saved first
+
+                    newRole.setPermissions(permissions); // 🔹 Explicitly assign permissions
+
                     return roleRepository.save(newRole);
                 });
     }
