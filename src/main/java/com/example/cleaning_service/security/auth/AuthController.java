@@ -5,6 +5,8 @@ import com.example.cleaning_service.security.users.UserResponse;
 import com.example.cleaning_service.security.users.UserService;
 import com.example.cleaning_service.security.util.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +66,11 @@ public class AuthController {
                 .body(responseModel);
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+
         if (token == null || token.isBlank()) {
             return ResponseEntity.badRequest().body("Missing Authorization header");
         }

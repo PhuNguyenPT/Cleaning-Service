@@ -1,5 +1,6 @@
 package com.example.cleaning_service.security.users;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@SecurityRequirement(name = "bearerAuth")
+@PreAuthorize("hasRole('ADMIN')")  // Default rule for all methods
 public class UserController {
     private final UserService userService;
 
@@ -20,7 +23,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @PostMapping(produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<UserResponse> createUser(@RequestBody UserRequest userRequest) {
@@ -45,7 +48,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @GetMapping(produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel<UserResponse> getAllUsers() {
@@ -65,7 +68,7 @@ public class UserController {
         return CollectionModel.of(users, link);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @GetMapping(value = "/{id}", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserResponse> getUserById(@PathVariable Long id) {
@@ -87,7 +90,7 @@ public class UserController {
         return EntityModel.of(userResponse);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteUserById(@PathVariable Long id) {
         userService.deleteUser(id);
@@ -101,7 +104,7 @@ public class UserController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @PutMapping("{id}")
     public EntityModel<UserResponse> updateUserById(@PathVariable Long id, @RequestBody UserRequest userRequest) {
         UserResponse userResponse = userService.updateUser(id, userRequest);

@@ -6,6 +6,7 @@ import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import com.example.cleaning_service.customers.services.CustomerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/customers")
+@SecurityRequirement(name = "bearerAuth")
 public class CustomerController {
     private final CustomerService customerService;
 
