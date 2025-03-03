@@ -1,5 +1,6 @@
 package com.example.cleaning_service.security.users;
 
+import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.security.roles.Permission;
 import com.example.cleaning_service.security.roles.Role;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "users")
-public class User extends RepresentationModel<User> implements UserDetails {
+public class User extends Auditable implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
