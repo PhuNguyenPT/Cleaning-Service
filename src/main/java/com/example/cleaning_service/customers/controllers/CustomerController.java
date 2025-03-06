@@ -1,6 +1,6 @@
 package com.example.cleaning_service.customers.controllers;
 
-import com.example.cleaning_service.customers.ICustomer;
+import com.example.cleaning_service.customers.api.ICustomer;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;

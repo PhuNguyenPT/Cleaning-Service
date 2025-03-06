@@ -1,45 +1,35 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.busness_entity.BusinessEntity;
-import com.example.cleaning_service.customers.IOrganization;
-import com.example.cleaning_service.customers.enums.EDay;
-import com.example.cleaning_service.customers.enums.ELoyaltyType;
+import com.example.cleaning_service.customers.api.IOrganization;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
-import com.example.cleaning_service.customers.ICustomer;
 import jakarta.persistence.*;
-
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "governments")
-public class Government extends BusinessEntity implements ICustomer, IOrganization {
-    private final @Enumerated(EnumType.STRING) @Column(nullable = false)  EOrganizationType organizationType = EOrganizationType.GOVERNMENT;
-    private @Enumerated(EnumType.STRING) @Column(nullable = false) ELoyaltyType loyaltyType;
+public class Government extends AbstractCustomer implements IOrganization {
 
+    private final @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    EOrganizationType organizationType = EOrganizationType.GOVERNMENT;
+
+    @NotBlank
     @Column(nullable = false, unique = true)
     private String taxId;
 
+    @NotBlank
     @Column(nullable = false, unique = true)
     private String registrationNumber;
 
     private String contractorName;
     private String departmentName;
     private boolean isTaxExempt;
-
-    private String billingAddress;
-    private String paymentMethod;
-
-    @Enumerated(EnumType.STRING)
-    Set<EDay> preferredDays = new HashSet<>();
     private boolean isEmergencyServiceAvailable;
 
     public Government() {
-        this.loyaltyType = ELoyaltyType.STANDARD;
     }
 
-    public Government(ELoyaltyType loyaltyType, String taxId, String registrationNumber) {
-        this.loyaltyType = loyaltyType;
+    public Government(String taxId, String registrationNumber) {
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
     }
@@ -68,10 +58,6 @@ public class Government extends BusinessEntity implements ICustomer, IOrganizati
         this.departmentName = departmentName;
     }
 
-    public void setLoyaltyType(ELoyaltyType loyaltyType) {
-        this.loyaltyType = loyaltyType;
-    }
-
     @Override
     public String getTaxId() {
         return this.taxId;
@@ -87,44 +73,12 @@ public class Government extends BusinessEntity implements ICustomer, IOrganizati
         return this.organizationType;
     }
 
-    @Override
-    public ELoyaltyType getLoyaltyType() {
-        return this.loyaltyType;
-    }
-
-    public void setBillingAddress(String billingAddress) {
-        this.billingAddress = billingAddress;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    @Override
-    public String getBillingAddress() {
-        return this.billingAddress;
-    }
-
-    @Override
-    public String getPaymentMethod() {
-        return this.paymentMethod;
-    }
-
     public boolean isTaxExempt() {
         return isTaxExempt;
     }
 
     public void setTaxExempt(boolean taxExempt) {
         isTaxExempt = taxExempt;
-    }
-
-    @Override
-    public Set<EDay> getPreferredDays() {
-        return preferredDays;
-    }
-
-    public void setPreferredDays(Set<EDay> preferredDays) {
-        this.preferredDays = preferredDays;
     }
 
     public boolean isEmergencyServiceAvailable() {

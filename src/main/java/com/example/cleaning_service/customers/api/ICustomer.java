@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers;
+package com.example.cleaning_service.customers.api;
 
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
@@ -10,10 +10,7 @@ public interface ICustomer {
     String getTaxId();
     String getRegistrationNumber();
     EOrganizationType getOrganizationType();
-    default ELoyaltyType getLoyaltyType() {
-        return ELoyaltyType.STANDARD;
-    };
-
+    ELoyaltyType getLoyaltyType();
     String getBillingAddress();
     String getPaymentMethod();
     Set<EDay> getPreferredDays();

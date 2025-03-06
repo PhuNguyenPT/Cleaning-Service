@@ -1,36 +1,32 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.busness_entity.BusinessEntity;
-import com.example.cleaning_service.customers.IOrganization;
+import com.example.cleaning_service.customers.api.IOrganization;
 import com.example.cleaning_service.customers.enums.ECompanyType;
-import com.example.cleaning_service.customers.enums.EDay;
-import com.example.cleaning_service.customers.enums.ELoyaltyType;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
-import com.example.cleaning_service.customers.ICustomer;
 import jakarta.persistence.*;
-
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "companies")
-public class Company extends BusinessEntity implements ICustomer, IOrganization {
+public class Company extends AbstractCustomer implements IOrganization {
 
-    private final @Enumerated(EnumType.STRING) @Column(nullable = false) EOrganizationType organizationType = EOrganizationType.COMPANY;
-    private @Enumerated(EnumType.STRING) @Column(nullable = false) ELoyaltyType loyaltyType;
-    private @Enumerated(EnumType.STRING) @Column(nullable = false) ECompanyType companyType;
+    private final @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    EOrganizationType organizationType = EOrganizationType.COMPANY;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ECompanyType companyType;
+
+    @NotBlank
     @Column(nullable = false, unique = true)
     private String taxId;
 
+    @NotBlank
     @Column(nullable = false, unique = true)
     private String registrationNumber;
-
-    private String billingAddress;
-    private String paymentMethod;
-
-    @Enumerated(EnumType.STRING)
-    private Set<EDay> preferredDays = new HashSet<>();
 
     public Company() {
     }
@@ -39,19 +35,6 @@ public class Company extends BusinessEntity implements ICustomer, IOrganization 
         this.companyType = companyType;
         this.registrationNumber = registrationNumber;
         this.taxId = taxId;
-        this.loyaltyType = ELoyaltyType.STANDARD;
-    }
-
-    public void setBillingAddress(String billingAddress) {
-        this.billingAddress = billingAddress;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public void setLoyaltyType(ELoyaltyType loyaltyType) {
-        this.loyaltyType = loyaltyType;
     }
 
     public ECompanyType getCompanyType() {
@@ -83,29 +66,5 @@ public class Company extends BusinessEntity implements ICustomer, IOrganization 
     @Override
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
-    }
-
-    @Override
-    public ELoyaltyType getLoyaltyType() {
-        return this.loyaltyType;
-    }
-
-    @Override
-    public String getBillingAddress() {
-        return this.billingAddress;
-    }
-
-    @Override
-    public String getPaymentMethod() {
-        return this.paymentMethod;
-    }
-
-    public void setPreferredDays(Set<EDay> preferredDays) {
-        this.preferredDays = preferredDays;
-    }
-
-    @Override
-    public Set<EDay> getPreferredDays() {
-        return this.preferredDays;
     }
 }
