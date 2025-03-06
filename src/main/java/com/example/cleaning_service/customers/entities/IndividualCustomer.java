@@ -1,20 +1,17 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.busness_entity.BusinessEntity;
-import com.example.cleaning_service.customers.enums.EDay;
-import com.example.cleaning_service.customers.enums.ELoyaltyType;
-import com.example.cleaning_service.customers.ICustomer;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 import jakarta.persistence.*;
-
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "individual_customers")
-public class IndividualCustomer extends BusinessEntity implements ICustomer {
-    private final @Enumerated(EnumType.STRING) @Column(nullable = false) EOrganizationType organizationType = EOrganizationType.INDIVIDUAL;
-    private @Enumerated(EnumType.STRING) @Column(nullable = false) ELoyaltyType loyaltyType;
+public class IndividualCustomer extends AbstractCustomer {
+
+    private final @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    EOrganizationType organizationType = EOrganizationType.INDIVIDUAL;
 
     @Column(unique = true)
     private String taxId;
@@ -22,35 +19,28 @@ public class IndividualCustomer extends BusinessEntity implements ICustomer {
     @Column(unique = true)
     private String registrationNumber;
 
-    private Boolean isActive;
+    private Boolean isActive = true;
 
-    private String billingAddress;
-    private String paymentMethod;
+    // Added validation annotations
+    @Override
+    @Email(message = "Please provide a valid email address")
+    public String getEmail() {
+        return super.getEmail();
+    }
 
-    @Enumerated(EnumType.STRING)
-    private Set<EDay> preferredDays = new HashSet<>();
+    @Override
+    @Pattern(regexp = "^[+]?[(]?[0-9]{1,4}[)]?[-\\s.]?[0-9]{3}[-\\s.]?[0-9]{4,6}$",
+            message = "Phone number must be in a valid format")
+    public String getPhone() {
+        return super.getPhone();
+    }
+
     public IndividualCustomer() {
-        this.isActive = true;
-        this.loyaltyType = ELoyaltyType.STANDARD;
     }
 
     public IndividualCustomer(String taxId, String registrationNumber) {
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
-        this.isActive = true;
-        this.loyaltyType = ELoyaltyType.STANDARD;
-    }
-
-    public void setBillingAddress(String billingAddress) {
-        this.billingAddress = billingAddress;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public void setLoyaltyType(ELoyaltyType loyaltyType) {
-        this.loyaltyType = loyaltyType;
     }
 
     public void setTaxId(String taxId) {
@@ -82,25 +72,5 @@ public class IndividualCustomer extends BusinessEntity implements ICustomer {
     @Override
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
-    }
-
-    @Override
-    public ELoyaltyType getLoyaltyType() {
-        return this.loyaltyType;
-    }
-
-    @Override
-    public String getBillingAddress() {
-        return this.billingAddress;
-    }
-
-    @Override
-    public String getPaymentMethod() {
-        return this.paymentMethod;
-    }
-
-    @Override
-    public Set<EDay> getPreferredDays() {
-        return Set.of();
     }
 }
