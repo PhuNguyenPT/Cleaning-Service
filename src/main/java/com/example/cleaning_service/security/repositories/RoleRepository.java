@@ -1,5 +1,7 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.repositories;
 
+import com.example.cleaning_service.security.entities.role.ERole;
+import com.example.cleaning_service.security.entities.role.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
 package com.example.cleaning_service.security.data_init;
 
-import com.example.cleaning_service.security.users.User;
-import com.example.cleaning_service.security.users.UserRepository;
+import com.example.cleaning_service.security.entities.user.User;
+import com.example.cleaning_service.security.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

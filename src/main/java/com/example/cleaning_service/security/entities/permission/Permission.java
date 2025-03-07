@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.entities.permission;
 
 import com.example.cleaning_service.audit.Auditable;
 import jakarta.persistence.*;

@@ -1,4 +1,6 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.entities.role;
+
+import com.example.cleaning_service.security.entities.permission.EPermission;
 
 import java.util.Set;
 

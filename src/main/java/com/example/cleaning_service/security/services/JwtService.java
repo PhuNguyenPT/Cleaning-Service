@@ -1,5 +1,6 @@
-package com.example.cleaning_service.security.util;
+package com.example.cleaning_service.security.services;
 
+import com.example.cleaning_service.security.util.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,6 @@
-package com.example.cleaning_service.security.users;
+package com.example.cleaning_service.security.repositories;
 
+import com.example.cleaning_service.security.entities.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

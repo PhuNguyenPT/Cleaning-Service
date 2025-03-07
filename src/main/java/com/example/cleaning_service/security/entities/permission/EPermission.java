@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.entities.permission;
 
 public enum EPermission {
     MANAGE_USERS, VIEW_REPORTS, MANAGE_ROLES, DELETE_ACCOUNTS,

@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.util;
+package com.example.cleaning_service.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

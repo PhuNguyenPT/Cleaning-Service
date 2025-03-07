@@ -1,7 +1,6 @@
 package com.example.cleaning_service.security.config;
 
-import com.example.cleaning_service.security.util.JwtAuthenticationFilter;
-import com.example.cleaning_service.security.util.JwtService;
+import com.example.cleaning_service.security.services.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

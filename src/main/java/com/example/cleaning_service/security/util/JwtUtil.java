@@ -1,6 +1,6 @@
 package com.example.cleaning_service.security.util;
 
-import com.example.cleaning_service.security.users.User;
+import com.example.cleaning_service.security.entities.user.User;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
 import com.nimbusds.jwt.*;
