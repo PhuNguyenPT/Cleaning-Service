@@ -1,16 +1,25 @@
-package com.example.cleaning_service.security.users;
+package com.example.cleaning_service.security.services;
 
-import com.example.cleaning_service.security.auth.AuthRequest;
-import com.example.cleaning_service.security.roles.*;
+import com.example.cleaning_service.security.dtos.auth.AuthRequest;
+import com.example.cleaning_service.security.dtos.user.UserRequest;
+import com.example.cleaning_service.security.dtos.user.UserResponse;
+import com.example.cleaning_service.security.dtos.user.UserResponseLogin;
+import com.example.cleaning_service.security.entities.role.ERole;
+import com.example.cleaning_service.security.entities.permission.Permission;
+import com.example.cleaning_service.security.entities.role.Role;
+import com.example.cleaning_service.security.entities.user.User;
+import com.example.cleaning_service.security.mapper.UserMapper;
+import com.example.cleaning_service.security.repositories.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -24,6 +33,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public UserResponse saveUser(String username, String password, ERole roleName) {
         Role userRole = roleService.ensureRoleExists(roleName);
 
@@ -35,14 +45,14 @@ public class UserService {
         return UserMapper.fromUserToUserResponse(userRepository.save(user));
     }
 
-    public List<UserResponse> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserMapper::fromUserToUserResponse)
-                .collect(Collectors.toList());
+    @Transactional
+    public Page<UserResponse> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(UserMapper::fromUserToUserResponse);
     }
 
-    public UserResponse register(AuthRequest authRequest) {
+    @Transactional
+    public UserResponseLogin register(AuthRequest authRequest) {
         if (userRepository.existsByUsername(authRequest.username())) {
             throw new EntityExistsException("Username: '"  + authRequest.username() + "' already exists!");
         }
@@ -68,12 +78,14 @@ public class UserService {
         return UserMapper.fromUserToUserResponseLogin(savedUser);
     }
 
+    @Transactional
     public UserResponse findById(Long id) {
         return userRepository.findById(id)
                 .map(UserMapper::fromUserToUserResponse)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
