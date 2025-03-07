@@ -1,10 +1,9 @@
-package com.example.cleaning_service.security.users;
+package com.example.cleaning_service.security.entities.user;
 
 import com.example.cleaning_service.audit.Auditable;
-import com.example.cleaning_service.security.roles.Permission;
-import com.example.cleaning_service.security.roles.Role;
+import com.example.cleaning_service.security.entities.permission.Permission;
+import com.example.cleaning_service.security.entities.role.Role;
 import jakarta.persistence.*;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

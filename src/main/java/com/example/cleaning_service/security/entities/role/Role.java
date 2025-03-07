@@ -1,6 +1,7 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.entities.role;
 
 import com.example.cleaning_service.audit.Auditable;
+import com.example.cleaning_service.security.entities.permission.Permission;
 import jakarta.persistence.*;
 
 import java.util.HashSet;

@@ -1,6 +1,6 @@
-package com.example.cleaning_service.security.config;
+package com.example.cleaning_service.security.services;
 
-import com.example.cleaning_service.security.users.UserRepository;
+import com.example.cleaning_service.security.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

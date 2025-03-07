@@ -1,5 +1,7 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.repositories;
 
+import com.example.cleaning_service.security.entities.permission.EPermission;
+import com.example.cleaning_service.security.entities.permission.Permission;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

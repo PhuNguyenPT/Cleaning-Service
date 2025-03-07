@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.auth;
+package com.example.cleaning_service.security.dtos.auth;
 
 import jakarta.validation.constraints.NotBlank;
 

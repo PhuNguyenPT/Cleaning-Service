@@ -1,9 +1,11 @@
-package com.example.cleaning_service.security.auth;
+package com.example.cleaning_service.security.controllers;
 
-import com.example.cleaning_service.security.users.User;
-import com.example.cleaning_service.security.users.UserResponse;
-import com.example.cleaning_service.security.users.UserService;
-import com.example.cleaning_service.security.util.JwtService;
+import com.example.cleaning_service.security.dtos.auth.AuthRequest;
+import com.example.cleaning_service.security.dtos.auth.AuthResponse;
+import com.example.cleaning_service.security.dtos.user.UserResponseLogin;
+import com.example.cleaning_service.security.entities.user.User;
+import com.example.cleaning_service.security.services.UserService;
+import com.example.cleaning_service.security.services.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,13 +13,16 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/auth")
@@ -36,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@RequestBody @Valid AuthRequest authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password())
@@ -52,18 +57,16 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<EntityModel<UserResponse>> register(@RequestBody @Valid AuthRequest authRequest) {
-        UserResponse userResponse = userService.register(authRequest);
+    @PostMapping(path = "/register", produces = { "application/hal+json" })
+    public EntityModel<UserResponseLogin> register(@RequestBody @Valid AuthRequest authRequest) {
+        UserResponseLogin userResponse = userService.register(authRequest);
 
-        // Create HAL+JSON response with links
-        EntityModel<UserResponse> responseModel = EntityModel.of(userResponse,
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.class).slash("login").withSelfRel(),
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.class).slash("register").withSelfRel()
-        );
+        Link loginLink = linkTo(methodOn(AuthController.class).login(null)).withRel("login");
 
-        return ResponseEntity.created(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(AuthController.class).login(null)).toUri())
-                .body(responseModel);
+        AuthRequest dummy = new AuthRequest("dummy", "dummy");
+        Link selfLink = linkTo(methodOn(AuthController.class).register(dummy)).withSelfRel();
+
+        return EntityModel.of(userResponse, loginLink, selfLink);
     }
 
     @SecurityRequirement(name = "bearerAuth")

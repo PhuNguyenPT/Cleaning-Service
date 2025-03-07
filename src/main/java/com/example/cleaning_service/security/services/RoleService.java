@@ -1,5 +1,10 @@
-package com.example.cleaning_service.security.roles;
+package com.example.cleaning_service.security.services;
 
+import com.example.cleaning_service.security.entities.role.ERole;
+import com.example.cleaning_service.security.entities.role.Role;
+import com.example.cleaning_service.security.repositories.RoleRepository;
+import com.example.cleaning_service.security.entities.permission.EPermission;
+import com.example.cleaning_service.security.entities.permission.Permission;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
