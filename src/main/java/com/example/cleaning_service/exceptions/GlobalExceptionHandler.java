@@ -1,5 +1,6 @@
 package com.example.cleaning_service.exceptions;
 
+import com.nimbusds.jose.JOSEException;
 import jakarta.persistence.EntityExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,5 +74,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ParseException.class)
+    public ResponseEntity<Map<String, String>> handleParseException(ParseException ex) {
+        logger.warn("Token parsing error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Invalid token format"));
+    }
+
+    @ExceptionHandler(JOSEException.class)
+    public ResponseEntity<Map<String, String>> handleJOSEException(JOSEException ex) {
+        logger.error("JWT processing error: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Invalid or tampered JWT signature"));
     }
 }

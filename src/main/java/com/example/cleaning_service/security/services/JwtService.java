@@ -22,16 +22,9 @@ public class JwtService {
     }
 
     @Transactional
-    public void saveToken(String token) {
-        String username;
-        Long expirationMillis;
-        try {
-            username = jwtUtil.extractUsername(token);
-            expirationMillis = jwtUtil.extractExpirationTime(token);
-        } catch (ParseException e) {
-            logger.error("Failed to parse token", e);
-            throw new RuntimeException("Failed to parse token", e);
-        }
+    public void saveToken(String token) throws ParseException { // Let exception propagate
+        String username = jwtUtil.extractUsername(token);
+        Long expirationMillis = jwtUtil.extractExpirationTime(token);
         redisTemplate.opsForValue().set(token, username, expirationMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -40,23 +33,16 @@ public class JwtService {
     }
 
     @Transactional
-    public void logoutToken(String token) {
-        try {
-            Long expirationMillis = jwtUtil.extractExpirationTime(token); // Extract token expiration time
-            long expirationTime = expirationMillis - System.currentTimeMillis(); // Remaining time
+    public void logoutToken(String token) throws ParseException { // Let exception propagate
+        Long expirationMillis = jwtUtil.extractExpirationTime(token);
+        long expirationTime = expirationMillis - System.currentTimeMillis();
 
-            if (expirationTime > 0) {
-                // Store "blacklisted" in Redis with TTL set to token's remaining validity
-                redisTemplate.opsForValue().set(token, "blacklisted", expirationTime, TimeUnit.MILLISECONDS);
-            }
-        } catch (ParseException e) {
-            logger.error("Failed to parse token", e);
-            throw new RuntimeException(e);
+        if (expirationTime > 0) {
+            redisTemplate.opsForValue().set(token, "blacklisted", expirationTime, TimeUnit.MILLISECONDS);
         }
     }
 
     public boolean isTokenBlacklisted(String token) {
-        String value = redisTemplate.opsForValue().get(token);
-        return "blacklisted".equals(value);
+        return "blacklisted".equals(redisTemplate.opsForValue().get(token));
     }
 }
