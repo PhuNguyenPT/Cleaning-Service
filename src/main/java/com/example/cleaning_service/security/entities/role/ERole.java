@@ -1,9 +1,11 @@
 package com.example.cleaning_service.security.entities.role;
 
 import com.example.cleaning_service.security.entities.permission.EPermission;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Set;
 
+@Schema(enumAsRef = true, example = "USER")
 public enum ERole {
     ADMIN(Set.of(EPermission.MANAGE_USERS, EPermission.MANAGE_ROLES, EPermission.VIEW_REPORTS, EPermission.DELETE_ACCOUNTS)),
     USER(Set.of(EPermission.CREATE_ORDERS, EPermission.CANCEL_ORDERS, EPermission.VIEW_ORDERS, EPermission.RATE_CLEANERS)),
