@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtService {
-    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtUtil jwtUtil;
 
@@ -22,7 +21,7 @@ public class JwtService {
     }
 
     @Transactional
-    public void saveToken(String token) throws ParseException { // Let exception propagate
+    public void saveToken(String token) { // Let exception propagate
         String username = jwtUtil.extractUsername(token);
         Long expirationMillis = jwtUtil.extractExpirationTime(token);
         redisTemplate.opsForValue().set(token, username, expirationMillis, TimeUnit.MILLISECONDS);
@@ -33,7 +32,7 @@ public class JwtService {
     }
 
     @Transactional
-    public void logoutToken(String token) throws ParseException { // Let exception propagate
+    public void logoutToken(String token) { // Let exception propagate
         Long expirationMillis = jwtUtil.extractExpirationTime(token);
         long expirationTime = expirationMillis - System.currentTimeMillis();
 

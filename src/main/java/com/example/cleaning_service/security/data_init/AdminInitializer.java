@@ -23,8 +23,7 @@ public class AdminInitializer implements CommandLineRunner {
         // Create an admin user if none exists
         if (userRepository.findByUsername("admin@example.com").isEmpty()) {
             User adminUser = roleInitializationService.createAdminUser(
-                    "admin@example.com",
-                    "adminPassword123",
+                    "admin_user1", "Admin@Pass1234",
                     passwordEncoder
             );
             userRepository.save(adminUser);

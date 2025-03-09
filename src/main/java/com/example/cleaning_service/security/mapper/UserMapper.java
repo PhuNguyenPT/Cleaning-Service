@@ -11,7 +11,7 @@ public class UserMapper {
         return new UserResponse(
                 user.getId(),
                 user.getUsername(),
-                user.getRole().getName(),
+                RoleMapper.fromRoleToRoleResponse(user.getRole()),
                 PermissionMapper.fromPermissionSetToPermissionResponseSet(user.getPermissions())
         );
     }
