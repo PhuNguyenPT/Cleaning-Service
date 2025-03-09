@@ -2,12 +2,12 @@ package com.example.cleaning_service.security.dtos.auth;
 
 import org.springframework.hateoas.RepresentationModel;
 
-public class AuthResponseModel extends RepresentationModel<AuthResponseModel> {
+public class AuthResponseLoginModel extends RepresentationModel<AuthResponseLoginModel> {
 
     private final String accessToken;
     private final Long expiresIn;
 
-    public AuthResponseModel(String accessToken, Long expiresIn) {
+    public AuthResponseLoginModel(String accessToken, Long expiresIn) {
         this.accessToken = accessToken;
         this.expiresIn = expiresIn;
     }
