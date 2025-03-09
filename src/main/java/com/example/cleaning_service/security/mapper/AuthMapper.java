@@ -1,5 +1,6 @@
 package com.example.cleaning_service.security.mapper;
 
+import com.example.cleaning_service.security.dtos.auth.AuthRequest;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseProfile;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseProfileModel;
 import com.example.cleaning_service.security.entities.user.User;
@@ -20,6 +21,13 @@ public class AuthMapper {
                 user.getUsername(),
                 RoleMapper.fromRoleToRoleResponse(user.getRole()),
                 PermissionMapper.fromPermissionSetToPermissionResponseSet(user.getPermissions())
+        );
+    }
+
+    public static User fromAuthRequestToUser(AuthRequest authRequest) {
+        return new User(
+                authRequest.username(),
+                authRequest.password()
         );
     }
 }
