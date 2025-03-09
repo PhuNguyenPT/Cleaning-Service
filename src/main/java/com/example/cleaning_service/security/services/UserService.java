@@ -2,14 +2,12 @@ package com.example.cleaning_service.security.services;
 
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
 import com.example.cleaning_service.security.dtos.user.UserRequest;
-import com.example.cleaning_service.security.dtos.user.UserResponse;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
 import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.mapper.AuthMapper;
-import com.example.cleaning_service.security.mapper.UserMapper;
 import com.example.cleaning_service.security.repositories.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,7 +33,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse saveUser(String username, String password, ERole roleName) {
+    public User saveUser(String username, String password, ERole roleName) {
         Role userRole = roleService.ensureRoleExists(roleName);
 
         // ✅ Use existing managed Permission instances
@@ -43,13 +41,12 @@ public class UserService {
 
         User user = new User(username, passwordEncoder.encode(password), userRole, existingPermissions);
 
-        return UserMapper.fromUserToUserResponse(userRepository.save(user));
+        return userRepository.save(user);
     }
 
     @Transactional
-    public Page<UserResponse> findAll(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(UserMapper::fromUserToUserResponse);
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     @Transactional
@@ -80,9 +77,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse findById(Long id) {
+    public User findById(Long id) {
         return userRepository.findById(id)
-                .map(UserMapper::fromUserToUserResponse)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
@@ -91,7 +87,8 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public UserResponse updateUser(Long id, UserRequest userRequest) {
+    @Transactional
+    public User updateUser(Long id, UserRequest userRequest) {
         // Find the existing user
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
@@ -116,8 +113,6 @@ public class UserService {
         }
 
         // Save the updated user
-        User updatedUser = userRepository.save(user);
-
-        return UserMapper.fromUserToUserResponse(updatedUser);
+        return userRepository.save(user);
     }
 }
