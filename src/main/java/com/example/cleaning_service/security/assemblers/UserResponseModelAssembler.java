@@ -4,6 +4,7 @@ import com.example.cleaning_service.security.controllers.UserController;
 import com.example.cleaning_service.security.dtos.user.UserResponse;
 import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -17,7 +18,7 @@ public class UserResponseModelAssembler extends RepresentationModelAssemblerSupp
     }
 
     @Override
-    public UserResponseModel toModel(UserResponse userResponse) {
+    public @NonNull UserResponseModel toModel(UserResponse userResponse) {
         UserResponseModel model = new UserResponseModel(
                 userResponse.id(),
                 userResponse.username(),
