@@ -1,7 +1,6 @@
 package com.example.cleaning_service.security.mapper;
 
 import com.example.cleaning_service.security.dtos.user.UserResponse;
-import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
 import com.example.cleaning_service.security.entities.user.User;
 
 public class UserMapper {
