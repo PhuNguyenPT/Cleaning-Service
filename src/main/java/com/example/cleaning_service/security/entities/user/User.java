@@ -3,6 +3,7 @@ package com.example.cleaning_service.security.entities.user;
 import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ public class User extends Auditable implements UserDetails {
     private String username;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     private boolean isEnabled;

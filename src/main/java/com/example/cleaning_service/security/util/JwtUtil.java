@@ -4,6 +4,8 @@ import com.example.cleaning_service.security.entities.user.User;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
 import com.nimbusds.jwt.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
     private final KeyProvider keyProvider;
     public JwtUtil(KeyProvider keyProvider) {
         this.keyProvider = keyProvider;
@@ -27,9 +30,8 @@ public class JwtUtil {
      * @param subject The user identifier (e.g., username).
      * @param expirationMillis The expiration time in milliseconds.
      * @return The generated JWT token.
-     * @throws JOSEException If signing fails.
      */
-    public String generateToken(User subject, long expirationMillis) throws JOSEException {
+    public String generateToken(User subject, long expirationMillis) {
         JWSSigner signer = new RSASSASigner(keyProvider.getPrivateKey());
 
         // Extract role and permissions
@@ -50,7 +52,11 @@ public class JwtUtil {
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
-        signedJWT.sign(signer);
+        try {
+            signedJWT.sign(signer);
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        }
 
         return signedJWT.serialize();
     }
@@ -60,11 +66,19 @@ public class JwtUtil {
      *
      * @param token The JWT token.
      * @return The extracted username.
-     * @throws ParseException If parsing fails.
      */
-    public String extractUsername(String token) throws ParseException {
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        return signedJWT.getJWTClaimsSet().getSubject();
+    public String extractUsername(String token)  {
+        SignedJWT signedJWT;
+        try {
+            signedJWT = SignedJWT.parse(token);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return signedJWT.getJWTClaimsSet().getSubject();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -73,31 +87,46 @@ public class JwtUtil {
      * @param token The JWT token.
      * @param userDetails The user details to validate against.
      * @return true if the token is valid, false otherwise.
-     * @throws JOSEException If verification fails.
-     * @throws ParseException If parsing fails.
      */
-    public boolean validateToken(String token, UserDetails userDetails) throws JOSEException, ParseException {
-        SignedJWT signedJWT = SignedJWT.parse(token);
+    public boolean validateToken(String token, UserDetails userDetails) {
+        SignedJWT signedJWT;
+        try {
+            signedJWT = SignedJWT.parse(token);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         JWSVerifier verifier = new RSASSAVerifier(keyProvider.getPublicKey());
 
         // Validate signature
-        if (!signedJWT.verify(verifier)) {
-            return false;
+        try {
+            if (!signedJWT.verify(verifier)) {
+                log.warn("Cannot verify token {}", token);
+                return false;
+            }
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
         }
 
         // Extract claims
-        JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+        JWTClaimsSet claims;
+        try {
+            claims = signedJWT.getJWTClaimsSet();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         String usernameFromToken = claims.getSubject();
         String roleFromToken = extractRole(token);
         Set<String> permissionsFromToken = extractPermissions(token);
 
         // Validate expiration time
         if (new Date().after(claims.getExpirationTime())) {
+            log.warn("Token expired: {}", token);
             return false;
         }
 
         // Validate username
         if (!userDetails.getUsername().equals(usernameFromToken)) {
+            log.warn("Token's username unknown: {}", token);
             return false;
         }
 
@@ -117,25 +146,52 @@ public class JwtUtil {
     /**
      * Extracts the role from a JWT token.
      */
-    public String extractRole(String token) throws ParseException {
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        return signedJWT.getJWTClaimsSet().getStringClaim("role");
+    public String extractRole(String token) {
+        SignedJWT signedJWT;
+        try {
+            signedJWT = SignedJWT.parse(token);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return signedJWT.getJWTClaimsSet().getStringClaim("role");
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Extracts permissions from a JWT token.
      */
-    public Set<String> extractPermissions(String token) throws ParseException {
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        return new HashSet<>(signedJWT.getJWTClaimsSet().getStringListClaim("permissions"));
+    public Set<String> extractPermissions(String token) {
+        SignedJWT signedJWT;
+        try {
+            signedJWT = SignedJWT.parse(token);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return new HashSet<>(signedJWT.getJWTClaimsSet().getStringListClaim("permissions"));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Extracts expiration time from a JWT token.
      */
-    public Long extractExpirationTime(String token) throws ParseException {
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        return signedJWT.getJWTClaimsSet().getExpirationTime().getTime();
+    public Long extractExpirationTime(String token)  {
+        SignedJWT signedJWT;
+        try {
+            signedJWT = SignedJWT.parse(token);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            return signedJWT.getJWTClaimsSet().getExpirationTime().getTime();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

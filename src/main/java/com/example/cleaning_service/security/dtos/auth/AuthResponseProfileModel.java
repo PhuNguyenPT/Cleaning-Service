@@ -1,18 +1,20 @@
-package com.example.cleaning_service.security.dtos.user;
+package com.example.cleaning_service.security.dtos.auth;
 
+import com.example.cleaning_service.security.dtos.user.PermissionResponse;
+import com.example.cleaning_service.security.dtos.user.RoleResponse;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 import java.util.Set;
 
 @Relation(itemRelation = "user", collectionRelation = "users")
-public class UserResponseModel extends RepresentationModel<UserResponseModel> {
+public class AuthResponseProfileModel extends RepresentationModel<AuthResponseProfileModel> {
     private Long id;
     private String username;
     private RoleResponse role;
     private Set<PermissionResponse> permissions;
 
-    public UserResponseModel(Long id, String username, RoleResponse role, Set<PermissionResponse> permissions) {
+    public AuthResponseProfileModel(Long id, String username, RoleResponse role, Set<PermissionResponse> permissions) {
         this.id = id;
         this.username = username;
         this.role = role;
@@ -51,4 +53,3 @@ public class UserResponseModel extends RepresentationModel<UserResponseModel> {
         this.permissions = permissions;
     }
 }
-

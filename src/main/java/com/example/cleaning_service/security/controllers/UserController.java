@@ -12,15 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -43,7 +40,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @PostMapping(produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<UserResponseModel> createUser(@RequestBody @Valid UserRequest userRequest) {
+    public UserResponseModel createUser(@RequestBody @Valid UserRequest userRequest) {
         UserResponse userResponse = userService.saveUser(
                 userRequest.username(),
                 userRequest.password(),
@@ -53,12 +50,13 @@ public class UserController {
         // Convert to UserResponseModel using assembler
         UserResponseModel userResponseModel = userResponseModelAssembler.toModel(userResponse);
 
-        // Add an additional link for all users
+        // Add a link for all users
         PageRequest pageRequest = PageRequest.of(0, 20);
         Link allUsersLink = linkTo(methodOn(UserController.class).getAllUsers(pageRequest)).withRel("users");
 
-        // Return EntityModel with additional links
-        return EntityModel.of(userResponseModel, userResponseModel.getLinks()).add(allUsersLink);
+        userResponseModel.add(allUsersLink);
+        // Return userResponseModel with additional links
+        return userResponseModel;
     }
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
@@ -72,13 +70,10 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @GetMapping(value = "/{id}", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<UserResponseModel> getUserById(@PathVariable Long id) {
+    public UserResponseModel getUserById(@PathVariable Long id) {
         UserResponse userResponse = userService.findById(id);
-
         // Convert to UserResponseModel using assembler
-        UserResponseModel userResponseModel = userResponseModelAssembler.toModel(userResponse);
-
-        return EntityModel.of(userResponseModel, userResponseModel.getLinks());
+        return  userResponseModelAssembler.toModel(userResponse);
     }
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
@@ -97,13 +92,10 @@ public class UserController {
 
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
-    @PutMapping("{id}")
-    public EntityModel<UserResponseModel> updateUserById(@PathVariable Long id, @RequestBody @Valid UserRequest userRequest) {
+    @PutMapping(value = "{id}", produces = "application/hal+json")
+    public UserResponseModel updateUserById(@PathVariable Long id, @RequestBody @Valid UserRequest userRequest) {
         UserResponse userResponse = userService.updateUser(id, userRequest);
-
         // Convert to UserResponseModel using assembler
-        UserResponseModel userResponseModel = userResponseModelAssembler.toModel(userResponse);
-
-        return EntityModel.of(userResponseModel, userResponseModel.getLinks());
+        return userResponseModelAssembler.toModel(userResponse);
     }
 }

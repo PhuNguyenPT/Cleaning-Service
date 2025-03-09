@@ -2,13 +2,13 @@ package com.example.cleaning_service.security.config;
 
 import com.example.cleaning_service.security.services.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
-import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
@@ -50,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 🔹 Check if token exists in Redis (ensure it's valid and not revoked)
             if (!jwtService.isTokenSaved(token)) {
                 logger.warn("Token not found in Redis (possible logout or expiration)");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
             }
 
@@ -61,36 +60,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            try {
-                username = jwtUtil.extractUsername(token);
-            } catch (ParseException e) {
-                logger.error("Error parsing JWT token: {}", e.getMessage());
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
-                return;
-            }
+            username = jwtUtil.extractUsername(token);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            try {
-                if (jwtUtil.validateToken(token, userDetails)) {
-                    String role = jwtUtil.extractRole(token);
-                    Set<GrantedAuthority> authorities = new HashSet<>(userDetails.getAuthorities());
 
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
-
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-            } catch (JOSEException | ParseException e) {
-                logger.error("JWT validation failed: {}", e.getMessage());
+            if (!jwtUtil.validateToken(token, userDetails)) {
+                logger.warn("Invalid JWT token: {}", token);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
             }
+            String role = jwtUtil.extractRole(token);
+            Set<GrantedAuthority> authorities = new HashSet<>(userDetails.getAuthorities());
+
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
         filterChain.doFilter(request, response);
