@@ -3,7 +3,7 @@ package com.example.cleaning_service.security.services;
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
 import com.example.cleaning_service.security.dtos.user.UserRequest;
 import com.example.cleaning_service.security.dtos.user.UserResponse;
-import com.example.cleaning_service.security.dtos.user.UserResponseLogin;
+import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
 import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
@@ -53,7 +53,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseLogin register(AuthRequest authRequest) {
+    public AuthResponseRegister register(AuthRequest authRequest) {
         if (userRepository.existsByUsername(authRequest.username())) {
             throw new EntityExistsException("Username: '"  + authRequest.username() + "' already exists!");
         }
@@ -76,7 +76,7 @@ public class UserService {
         // 🔹 Save user in the database
         User savedUser = userRepository.save(dbUser);
 
-        return UserMapper.fromUserToUserResponseLogin(savedUser);
+        return AuthMapper.fromUserToAuthResponseRegister(savedUser);
     }
 
     @Transactional

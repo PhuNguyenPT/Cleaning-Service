@@ -3,7 +3,7 @@ package com.example.cleaning_service.security.controllers;
 import com.example.cleaning_service.security.assemblers.AuthResponseModelAssembler;
 import com.example.cleaning_service.security.assemblers.AuthResponseProfileModelAssembler;
 import com.example.cleaning_service.security.dtos.auth.*;
-import com.example.cleaning_service.security.dtos.user.UserResponseLogin;
+import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.services.UserService;
@@ -72,14 +72,14 @@ public class AuthController {
 
     @PostMapping(path = "/register", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<UserResponseLogin> register(@RequestBody @Valid AuthRequest authRequest) {
+    public EntityModel<AuthResponseRegister> register(@RequestBody @Valid AuthRequest authRequest) {
 
-        UserResponseLogin userResponse = userService.register(authRequest);
+        AuthResponseRegister authResponseRegister = userService.register(authRequest);
 
         Link loginLink = linkTo(AuthController.class).slash("register").withSelfRel();
         Link selfLink = linkTo(AuthController.class).slash("login").withRel("login");
 
-        return EntityModel.of(userResponse, loginLink, selfLink);
+        return EntityModel.of(authResponseRegister, loginLink, selfLink);
     }
 
     @SecurityRequirement(name = "bearerAuth")
