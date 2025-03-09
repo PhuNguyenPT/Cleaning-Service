@@ -1,9 +1,6 @@
 package com.example.cleaning_service.security.mapper;
 
-import com.example.cleaning_service.security.dtos.auth.AuthRequest;
-import com.example.cleaning_service.security.dtos.auth.AuthResponseProfile;
-import com.example.cleaning_service.security.dtos.auth.AuthResponseProfileModel;
-import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
+import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.user.User;
 
 public class AuthMapper {
@@ -36,6 +33,13 @@ public class AuthMapper {
         return new AuthResponseRegister(
                 user.getId(),
                 user.getUsername()
+        );
+    }
+
+    public static AuthResponseRegisterModel fromAuthResponseRegisterToModel(AuthResponseRegister authResponseRegister) {
+        return new AuthResponseRegisterModel(
+                authResponseRegister.id(),
+                authResponseRegister.username()
         );
     }
 }

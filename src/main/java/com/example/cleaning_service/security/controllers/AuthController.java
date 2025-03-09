@@ -2,6 +2,7 @@ package com.example.cleaning_service.security.controllers;
 
 import com.example.cleaning_service.security.assemblers.AuthResponseModelAssembler;
 import com.example.cleaning_service.security.assemblers.AuthResponseProfileModelAssembler;
+import com.example.cleaning_service.security.assemblers.AuthResponseRegisterModelAssembler;
 import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
 import com.example.cleaning_service.security.entities.user.User;
@@ -12,16 +13,12 @@ import com.example.cleaning_service.security.util.JwtUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,16 +29,18 @@ public class AuthController {
     private final JwtService jwtService;
     private final AuthResponseModelAssembler authResponseModelAssembler;
     private final AuthResponseProfileModelAssembler authResponseProfileModelAssembler;
+    private final AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler;
 
     public AuthController(JwtUtil jwtUtil, UserService userService, AuthenticationManager authenticationManager,
                           JwtService jwtService, AuthResponseModelAssembler authResponseModelAssembler,
-                          AuthResponseProfileModelAssembler authResponseProfileModelAssembler) {
+                          AuthResponseProfileModelAssembler authResponseProfileModelAssembler, AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.authResponseModelAssembler = authResponseModelAssembler;
         this.authResponseProfileModelAssembler = authResponseProfileModelAssembler;
+        this.authResponseRegisterModelAssembler = authResponseRegisterModelAssembler;
     }
 
     @PostMapping(value = "/login", produces = { "application/hal+json" })
@@ -72,14 +71,9 @@ public class AuthController {
 
     @PostMapping(path = "/register", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<AuthResponseRegister> register(@RequestBody @Valid AuthRequest authRequest) {
-
+    public AuthResponseRegisterModel register(@RequestBody @Valid AuthRequest authRequest) {
         AuthResponseRegister authResponseRegister = userService.register(authRequest);
-
-        Link loginLink = linkTo(AuthController.class).slash("register").withSelfRel();
-        Link selfLink = linkTo(AuthController.class).slash("login").withRel("login");
-
-        return EntityModel.of(authResponseRegister, loginLink, selfLink);
+        return authResponseRegisterModelAssembler.toModel(authResponseRegister);
     }
 
     @SecurityRequirement(name = "bearerAuth")
