@@ -4,21 +4,21 @@ import com.example.cleaning_service.security.assemblers.AuthResponseModelAssembl
 import com.example.cleaning_service.security.assemblers.AuthResponseProfileModelAssembler;
 import com.example.cleaning_service.security.assemblers.AuthResponseRegisterModelAssembler;
 import com.example.cleaning_service.security.dtos.auth.*;
-import com.example.cleaning_service.security.dtos.auth.AuthResponseRegister;
 import com.example.cleaning_service.security.entities.user.User;
-import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.services.UserService;
 import com.example.cleaning_service.security.services.JwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/auth")
@@ -45,7 +45,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
-    public AuthResponseModel login(@RequestBody @Valid AuthRequest authRequest) {
+    public AuthResponseLoginModel login(@RequestBody @Valid AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password())
         );
@@ -65,31 +65,36 @@ public class AuthController {
     @GetMapping(value = "/me", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public AuthResponseProfileModel getAuthenticatedUser(@AuthenticationPrincipal User user) {
-        AuthResponseProfile authResponseProfile = AuthMapper.fromUserToAuthResponseProfile(user);
-        return authResponseProfileModelAssembler.toModel(authResponseProfile);
+        return authResponseProfileModelAssembler.toModel(user);
     }
 
     @PostMapping(path = "/register", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponseRegisterModel register(@RequestBody @Valid AuthRequest authRequest) {
-        AuthResponseRegister authResponseRegister = userService.register(authRequest);
-        return authResponseRegisterModelAssembler.toModel(authResponseRegister);
+        User user = userService.register(authRequest);
+        return authResponseRegisterModelAssembler.toModel(user);
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    @PostMapping(path = "/logout", produces = { "application/hal+json" })
+    @ResponseStatus(HttpStatus.OK)
+    public AuthResponseLogoutModel logout(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
 
         token = token.substring(7); // Remove "Bearer " prefix
         jwtService.logoutToken(token);
 
-        return ResponseEntity.ok("Logged out successfully");
+        AuthResponseLogoutModel authResponseLogoutModel = new AuthResponseLogoutModel("Logout successful");
+
+        Link loginLink = linkTo(AuthController.class).slash("login").withRel("login");
+        authResponseLogoutModel.add(loginLink);
+
+        return authResponseLogoutModel;
     }
 
     // Uncomment if refresh token is needed
     /*
-    @GetMapping("/refresh")
+    @GetMapping("/refresh", produces = { "application/hal+json" })
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String token = jwtUtil.extractToken(request);
         String newToken = jwtUtil.refreshToken(token);

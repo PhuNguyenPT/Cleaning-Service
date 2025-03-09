@@ -4,17 +4,8 @@ import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.user.User;
 
 public class AuthMapper {
-    public static AuthResponseProfileModel fromAuthResponseProfileToModel(AuthResponseProfile authResponseProfile) {
+    public static AuthResponseProfileModel fromUserToAuthResponseProfileModel(User user) {
         return new AuthResponseProfileModel(
-                authResponseProfile.id(),
-                authResponseProfile.username(),
-                authResponseProfile.role(),
-                authResponseProfile.permissions()
-        );
-    }
-
-    public static AuthResponseProfile fromUserToAuthResponseProfile(User user) {
-        return new AuthResponseProfile(
                 user.getId(),
                 user.getUsername(),
                 RoleMapper.fromRoleToRoleResponse(user.getRole()),
@@ -29,17 +20,10 @@ public class AuthMapper {
         );
     }
 
-    public static AuthResponseRegister fromUserToAuthResponseRegister(User user) {
-        return new AuthResponseRegister(
+    public static AuthResponseRegisterModel fromUserToAuthResponseRegisterModel(User user) {
+        return new AuthResponseRegisterModel(
                 user.getId(),
                 user.getUsername()
-        );
-    }
-
-    public static AuthResponseRegisterModel fromAuthResponseRegisterToModel(AuthResponseRegister authResponseRegister) {
-        return new AuthResponseRegisterModel(
-                authResponseRegister.id(),
-                authResponseRegister.username()
         );
     }
 }
