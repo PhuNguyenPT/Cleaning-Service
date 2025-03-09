@@ -8,6 +8,7 @@ import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.entities.user.User;
+import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.mapper.UserMapper;
 import com.example.cleaning_service.security.repositories.UserRepository;
 import jakarta.persistence.EntityExistsException;
@@ -56,7 +57,7 @@ public class UserService {
         if (userRepository.existsByUsername(authRequest.username())) {
             throw new EntityExistsException("Username: '"  + authRequest.username() + "' already exists!");
         }
-        User newUserRequest = UserMapper.fromAuthRequestToUser(authRequest);
+        User newUserRequest = AuthMapper.fromAuthRequestToUser(authRequest);
 
         // 🔹 Ensure the "USER" role exists and fetch it
         Role userRole = roleService.ensureRoleExists(ERole.USER);
