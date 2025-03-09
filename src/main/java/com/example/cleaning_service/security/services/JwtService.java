@@ -2,12 +2,9 @@ package com.example.cleaning_service.security.services;
 
 import com.example.cleaning_service.security.util.JwtUtil;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.util.concurrent.TimeUnit;
 
 @Service
