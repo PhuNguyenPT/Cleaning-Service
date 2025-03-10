@@ -2,22 +2,31 @@ package com.example.cleaning_service.busness_entity;
 
 import com.example.cleaning_service.audit.Auditable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 
 @MappedSuperclass
 public class BusinessEntity extends Auditable {
     @Id
     @GeneratedValue
-    protected Integer id;
+    private Integer id;
 
-    protected String name;
-    protected String address;
-    protected String phone;
-    protected String email;
-    protected String city;
-    protected String state;
-    protected String zip;
-    protected String country;
-    protected String notes;
+    private String name;
+    private String address;
+
+    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$",
+            message = "Invalid international phone number format")
+    private String phone;
+
+    @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
+            message = "Please provide a valid email address")
+    private String email;
+
+    private String city;
+    private String state;
+    private String zip;
+    private String country;
+    private String notes;
 
     public Integer getId() {
         return id;

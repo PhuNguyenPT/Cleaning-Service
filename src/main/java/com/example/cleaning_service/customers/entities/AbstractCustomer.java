@@ -4,13 +4,13 @@ import com.example.cleaning_service.busness_entity.BusinessEntity;
 import com.example.cleaning_service.customers.api.ICustomer;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
-import com.example.cleaning_service.customers.enums.EOrganizationType;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class AbstractCustomer extends BusinessEntity implements ICustomer {
 
     @Enumerated(EnumType.STRING)
@@ -30,7 +30,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return loyaltyType;
     }
 
-    public void setLoyaltyType(ELoyaltyType loyaltyType) {
+    protected void setLoyaltyType(ELoyaltyType loyaltyType) {
         this.loyaltyType = loyaltyType;
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return billingAddress;
     }
 
-    public void setBillingAddress(String billingAddress) {
+    protected void setBillingAddress(String billingAddress) {
         this.billingAddress = billingAddress;
     }
 
@@ -48,7 +48,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return paymentMethod;
     }
 
-    public void setPaymentMethod(String paymentMethod) {
+    protected void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
@@ -57,7 +57,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return preferredDays;
     }
 
-    public void setPreferredDays(Set<EDay> preferredDays) {
+    protected void setPreferredDays(Set<EDay> preferredDays) {
         this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
     }
 }

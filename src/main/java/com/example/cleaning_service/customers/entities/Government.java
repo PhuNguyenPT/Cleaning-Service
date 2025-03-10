@@ -1,24 +1,36 @@
 package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.customers.api.IOrganization;
+import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
+import com.example.cleaning_service.validations.ValidRegistrationNumber;
+import com.example.cleaning_service.validations.ValidTaxId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "governments")
 public class Government extends AbstractCustomer implements IOrganization {
 
-    private final @Enumerated(EnumType.STRING)
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    EOrganizationType organizationType = EOrganizationType.GOVERNMENT;
+    private final EOrganizationType organizationType = EOrganizationType.GOVERNMENT;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ECountryType countryType;
 
     @NotBlank
     @Column(nullable = false, unique = true)
+    @ValidTaxId
     private String taxId;
 
     @NotBlank
     @Column(nullable = false, unique = true)
+    @ValidRegistrationNumber
     private String registrationNumber;
 
     private String contractorName;
@@ -29,7 +41,8 @@ public class Government extends AbstractCustomer implements IOrganization {
     public Government() {
     }
 
-    public Government(String taxId, String registrationNumber) {
+    public Government(ECountryType countryType, String taxId, String registrationNumber) {
+        this.countryType = countryType;
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
     }
@@ -71,6 +84,15 @@ public class Government extends AbstractCustomer implements IOrganization {
     @Override
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
+    }
+
+    @Override
+    public ECountryType getCountryType() {
+        return this.countryType;
+    }
+
+    public void setCountryType(ECountryType countryType) {
+        this.countryType = countryType;
     }
 
     public boolean isTaxExempt() {

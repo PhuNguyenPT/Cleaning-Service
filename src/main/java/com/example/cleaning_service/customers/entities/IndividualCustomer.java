@@ -1,36 +1,42 @@
 package com.example.cleaning_service.customers.entities;
 
+import com.example.cleaning_service.customers.api.IOrganization;
+import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
+import com.example.cleaning_service.validations.ValidRegistrationNumber;
+import com.example.cleaning_service.validations.ValidTaxId;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "individual_customers")
-public class IndividualCustomer extends AbstractCustomer {
+public class IndividualCustomer extends AbstractCustomer implements IOrganization {
 
-    private final @Enumerated(EnumType.STRING)
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    EOrganizationType organizationType = EOrganizationType.INDIVIDUAL;
+    private final EOrganizationType organizationType = EOrganizationType.INDIVIDUAL;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ECountryType countryType;
 
     @Column(unique = true)
+    @ValidTaxId
     private String taxId;
 
     @Column(unique = true)
+    @ValidRegistrationNumber
     private String registrationNumber;
-
-    private Boolean isActive = true;
 
     // Added validation annotations
     @Override
-    @Email(message = "Please provide a valid email address")
     public String getEmail() {
         return super.getEmail();
     }
 
     @Override
-    @Pattern(regexp = "^[+]?[(]?[0-9]{1,4}[)]?[-\\s.]?[0-9]{3}[-\\s.]?[0-9]{4,6}$",
-            message = "Phone number must be in a valid format")
     public String getPhone() {
         return super.getPhone();
     }
@@ -38,9 +44,10 @@ public class IndividualCustomer extends AbstractCustomer {
     public IndividualCustomer() {
     }
 
-    public IndividualCustomer(String taxId, String registrationNumber) {
+    public IndividualCustomer(String taxId, String registrationNumber, ECountryType countryType) {
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
+        this.countryType = countryType;
     }
 
     public void setTaxId(String taxId) {
@@ -51,12 +58,8 @@ public class IndividualCustomer extends AbstractCustomer {
         this.registrationNumber = registrationNumber;
     }
 
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setCountryType(ECountryType countryType) {
+        this.countryType = countryType;
     }
 
     @Override
@@ -72,5 +75,10 @@ public class IndividualCustomer extends AbstractCustomer {
     @Override
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
+    }
+
+    @Override
+    public ECountryType getCountryType() {
+        return this.countryType;
     }
 }
