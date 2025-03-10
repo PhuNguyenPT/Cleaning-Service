@@ -1,8 +1,9 @@
-package com.example.cleaning_service.security.services;
+package com.example.cleaning_service.security.services.impl;
 
 import com.example.cleaning_service.security.entities.permission.EPermission;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.repositories.PermissionRepository;
+import com.example.cleaning_service.security.services.IPermissionService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class PermissionService {
+public class PermissionService implements IPermissionService {
 
     private final PermissionRepository permissionRepository;
 
@@ -23,6 +24,7 @@ public class PermissionService {
      * If any permissions are missing, they are created and saved.
      */
     @Transactional
+    @Override
     public Set<Permission> ensurePermissionsExist(Set<EPermission> requiredPermissions) {
         // 🔹 Fetch existing permissions in one query
         Set<Permission> existingPermissions = permissionRepository.findByNameIn(requiredPermissions);

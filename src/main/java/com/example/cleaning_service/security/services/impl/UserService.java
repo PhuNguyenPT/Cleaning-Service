@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.services;
+package com.example.cleaning_service.security.services.impl;
 
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
 import com.example.cleaning_service.security.dtos.user.UserRequest;
@@ -8,6 +8,8 @@ import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.repositories.UserRepository;
+import com.example.cleaning_service.security.services.IRoleService;
+import com.example.cleaning_service.security.services.IUserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -20,18 +22,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class UserService {
+public class UserService implements IUserService {
     private final UserRepository userRepository;
-    private final RoleService roleService;
+    private final IRoleService roleService;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, IRoleService roleService, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
+    @Override
     public User saveUser(String username, String password, ERole roleName) {
         Role userRole = roleService.ensureRoleExists(roleName);
 
@@ -44,11 +47,13 @@ public class UserService {
     }
 
     @Transactional
+    @Override
     public Page<User> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
     @Transactional
+    @Override
     public User register(AuthRequest authRequest) {
         if (userRepository.existsByUsername(authRequest.username())) {
             throw new EntityExistsException("Username: '"  + authRequest.username() + "' already exists!");
@@ -75,17 +80,20 @@ public class UserService {
     }
 
     @Transactional
+    @Override
     public User findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
     @Transactional
+    @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Transactional
+    @Override
     public User updateUser(Long id, UserRequest userRequest) {
         // Find the existing user
         User user = userRepository.findById(id)

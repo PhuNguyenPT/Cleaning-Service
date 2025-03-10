@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.services;
+package com.example.cleaning_service.security.services.impl;
 
 import com.example.cleaning_service.security.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

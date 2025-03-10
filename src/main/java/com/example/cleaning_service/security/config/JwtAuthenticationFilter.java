@@ -1,6 +1,6 @@
 package com.example.cleaning_service.security.config;
 
-import com.example.cleaning_service.security.services.JwtService;
+import com.example.cleaning_service.security.services.IJwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,9 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    private final JwtService jwtService;
+    private final IJwtService jwtService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, IJwtService jwtService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;

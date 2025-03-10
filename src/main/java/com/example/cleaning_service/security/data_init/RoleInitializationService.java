@@ -2,7 +2,7 @@ package com.example.cleaning_service.security.data_init;
 
 import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.role.Role;
-import com.example.cleaning_service.security.services.RoleService;
+import com.example.cleaning_service.security.services.IRoleService;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RoleInitializationService {
-    private final RoleService roleService;
+    private final IRoleService roleService;
 
-    public RoleInitializationService(RoleService roleService) {
+    public RoleInitializationService(IRoleService roleService) {
         this.roleService = roleService;
     }
 
