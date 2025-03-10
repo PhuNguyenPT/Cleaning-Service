@@ -4,12 +4,15 @@ import com.example.cleaning_service.audit.Auditable;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "permissions")
 public class Permission extends Auditable implements GrantedAuthority {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
@@ -21,12 +24,8 @@ public class Permission extends Auditable implements GrantedAuthority {
         this.name = name;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public EPermission getName() {

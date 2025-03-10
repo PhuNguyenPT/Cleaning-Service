@@ -14,8 +14,9 @@ import java.util.*;
 @Table(name = "users")
 public class User extends Auditable implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -58,12 +59,8 @@ public class User extends Auditable implements UserDetails {
         this.password = password;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
-    }
-
-    private void setId(Long id) {
-        this.id = id;
     }
 
     public void setUsername(String username) {
