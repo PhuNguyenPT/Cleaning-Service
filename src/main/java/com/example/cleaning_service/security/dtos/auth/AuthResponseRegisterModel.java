@@ -2,16 +2,18 @@ package com.example.cleaning_service.security.dtos.auth;
 
 import org.springframework.hateoas.RepresentationModel;
 
+import java.util.UUID;
+
 public class AuthResponseRegisterModel extends RepresentationModel<AuthResponseRegisterModel> {
-    private final Long id;
+    private final UUID id;
     private final String username;
 
-    public AuthResponseRegisterModel(Long id, String username) {
+    public AuthResponseRegisterModel(UUID id, String username) {
         this.id = id;
         this.username = username;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

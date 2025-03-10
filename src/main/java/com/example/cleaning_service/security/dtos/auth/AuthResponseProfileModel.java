@@ -6,26 +6,27 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Relation(itemRelation = "user", collectionRelation = "users")
 public class AuthResponseProfileModel extends RepresentationModel<AuthResponseProfileModel> {
-    private Long id;
+    private UUID id;
     private String username;
     private RoleResponse role;
     private Set<PermissionResponse> permissions;
 
-    public AuthResponseProfileModel(Long id, String username, RoleResponse role, Set<PermissionResponse> permissions) {
+    public AuthResponseProfileModel(UUID id, String username, RoleResponse role, Set<PermissionResponse> permissions) {
         this.id = id;
         this.username = username;
         this.role = role;
         this.permissions = permissions;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

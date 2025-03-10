@@ -6,13 +6,15 @@ import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "roles")
 public class Role extends Auditable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
@@ -33,12 +35,8 @@ public class Role extends Auditable {
         this.permissions = permissions;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public ERole getName() {
