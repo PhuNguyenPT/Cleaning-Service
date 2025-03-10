@@ -11,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "customer_details")
 public abstract class AbstractCustomer extends BusinessEntity implements ICustomer {
 
     @Enumerated(EnumType.STRING)
