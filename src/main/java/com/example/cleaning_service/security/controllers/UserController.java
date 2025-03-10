@@ -4,7 +4,7 @@ import com.example.cleaning_service.security.assemblers.UserResponseModelAssembl
 import com.example.cleaning_service.security.dtos.user.UserRequest;
 import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import com.example.cleaning_service.security.entities.user.User;
-import com.example.cleaning_service.security.services.UserService;
+import com.example.cleaning_service.security.services.IUserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -27,11 +27,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")  // Default rule for all methods
 public class UserController {
-    private final UserService userService;
+    private final IUserService userService;
     private final PagedResourcesAssembler<User> pagedResourcesAssembler;
     private final UserResponseModelAssembler userResponseModelAssembler;
 
-    public UserController(UserService userService, PagedResourcesAssembler<User> pagedResourcesAssembler, UserResponseModelAssembler userResponseModelAssembler) {
+    public UserController(IUserService userService, PagedResourcesAssembler<User> pagedResourcesAssembler,
+                          UserResponseModelAssembler userResponseModelAssembler) {
         this.userService = userService;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.userResponseModelAssembler = userResponseModelAssembler;

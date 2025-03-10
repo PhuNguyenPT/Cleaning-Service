@@ -1,6 +1,6 @@
 package com.example.cleaning_service.security.config;
 
-import com.example.cleaning_service.security.services.JwtService;
+import com.example.cleaning_service.security.services.IJwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +42,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, JwtService jwtService) {
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, IJwtService jwtService) {
         return new JwtAuthenticationFilter(jwtUtil, userDetailsService, jwtService);
     }
 

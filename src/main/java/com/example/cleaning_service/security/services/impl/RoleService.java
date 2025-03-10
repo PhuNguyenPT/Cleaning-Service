@@ -1,22 +1,24 @@
-package com.example.cleaning_service.security.services;
+package com.example.cleaning_service.security.services.impl;
 
 import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.repositories.RoleRepository;
 import com.example.cleaning_service.security.entities.permission.EPermission;
 import com.example.cleaning_service.security.entities.permission.Permission;
+import com.example.cleaning_service.security.services.IPermissionService;
+import com.example.cleaning_service.security.services.IRoleService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
 @Service
-public class RoleService {
+public class RoleService implements IRoleService {
 
     private final RoleRepository roleRepository;
-    private final PermissionService permissionService;
+    private final IPermissionService permissionService;
 
-    public RoleService(RoleRepository roleRepository, PermissionService permissionService) {
+    public RoleService(RoleRepository roleRepository, IPermissionService permissionService) {
         this.roleRepository = roleRepository;
         this.permissionService = permissionService;
     }
@@ -26,6 +28,7 @@ public class RoleService {
      * If the role is missing, it is created along with its required permissions.
      */
     @Transactional
+    @Override
     public Role ensureRoleExists(ERole roleName) {
         return roleRepository.findByName(roleName)
                 .orElseGet(() -> {

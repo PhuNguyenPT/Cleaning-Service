@@ -5,8 +5,8 @@ import com.example.cleaning_service.security.assemblers.AuthResponseProfileModel
 import com.example.cleaning_service.security.assemblers.AuthResponseRegisterModelAssembler;
 import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.user.User;
-import com.example.cleaning_service.security.services.UserService;
-import com.example.cleaning_service.security.services.JwtService;
+import com.example.cleaning_service.security.services.IJwtService;
+import com.example.cleaning_service.security.services.IUserService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,15 +24,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RequestMapping("/auth")
 public class AuthController {
     private final JwtUtil jwtUtil;
-    private final UserService userService;
+    private final IUserService userService;
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+    private final IJwtService jwtService;
     private final AuthResponseModelAssembler authResponseModelAssembler;
     private final AuthResponseProfileModelAssembler authResponseProfileModelAssembler;
     private final AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler;
 
-    public AuthController(JwtUtil jwtUtil, UserService userService, AuthenticationManager authenticationManager,
-                          JwtService jwtService, AuthResponseModelAssembler authResponseModelAssembler,
+    public AuthController(JwtUtil jwtUtil, IUserService userService, AuthenticationManager authenticationManager,
+                          IJwtService jwtService, AuthResponseModelAssembler authResponseModelAssembler,
                           AuthResponseProfileModelAssembler authResponseProfileModelAssembler, AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
