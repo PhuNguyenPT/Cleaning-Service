@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "roles", schema = "security")
 public class Role extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,6 +23,7 @@ public class Role extends Auditable {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permissions",
+            schema = "security",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )

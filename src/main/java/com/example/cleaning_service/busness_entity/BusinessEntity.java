@@ -5,11 +5,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.UUID;
+
 @MappedSuperclass
 public class BusinessEntity extends Auditable {
     @Id
-    @GeneratedValue
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String name;
     private String address;
@@ -28,7 +30,7 @@ public class BusinessEntity extends Auditable {
     private String country;
     private String notes;
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 

@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "individual_customers")
+@Table(name = "individual_customers", schema = "customer")
 public class IndividualCustomer extends AbstractCustomer implements IOrganization {
 
     @NotNull

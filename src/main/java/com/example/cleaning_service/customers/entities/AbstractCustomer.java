@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "customer_details")
+@Table(name = "customer_details", schema = "customer")
 public abstract class AbstractCustomer extends BusinessEntity implements ICustomer {
 
     @Enumerated(EnumType.STRING)
@@ -23,7 +23,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "customer_preferred_days")
+    @CollectionTable(name = "customer_preferred_days", schema = "customer")
     protected Set<EDay> preferredDays = new HashSet<>();
 
     @Override
