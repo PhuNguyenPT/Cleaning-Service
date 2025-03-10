@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.UUID;
 
 @Entity
-@Table(name = "permissions")
+@Table(name = "permissions", schema = "security")
 public class Permission extends Auditable implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

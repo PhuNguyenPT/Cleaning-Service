@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "governments")
+@Table(name = "governments", schema = "customer")
 public class Government extends AbstractCustomer implements IOrganization {
 
     @NotNull
