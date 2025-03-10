@@ -2,5 +2,7 @@ package com.example.cleaning_service.security.dtos.user;
 
 import com.example.cleaning_service.security.entities.role.ERole;
 
-public record RoleResponse(Long id, ERole name) {
+import java.util.UUID;
+
+public record RoleResponse(UUID id, ERole name) {
 }
