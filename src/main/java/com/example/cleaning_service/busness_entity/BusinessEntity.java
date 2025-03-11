@@ -24,6 +24,7 @@ public class BusinessEntity extends Auditable {
 
     @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
             message = "Please provide a valid email address")
+    @Column(unique = true)
     private String email;
 
     private String city;
