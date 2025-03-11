@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.customers.api.IOrganization;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 import com.example.cleaning_service.validations.ValidRegistrationNumber;
 import com.example.cleaning_service.validations.ValidTaxId;
