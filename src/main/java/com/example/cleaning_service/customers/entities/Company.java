@@ -22,8 +22,6 @@ public class Company extends AbstractCustomer implements IOrganization {
     @Column(nullable = false)
     private ECompanyType companyType;
 
-
-
     @NotBlank
     @Column(nullable = false, unique = true)
     @ValidTaxId
