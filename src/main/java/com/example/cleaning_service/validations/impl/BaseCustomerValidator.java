@@ -1,5 +1,6 @@
 package com.example.cleaning_service.validations.impl;
 
+import com.example.cleaning_service.busness_entity.BusinessEntity;
 import com.example.cleaning_service.customers.api.ICustomer;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import jakarta.validation.ConstraintValidator;
@@ -12,9 +13,8 @@ public abstract class BaseCustomerValidator<T extends Annotation> implements Con
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        // Get the enclosing entity (must implement ICustomer)
-        Object enclosingEntity = context.unwrap(Object.class);
-        if (value == null || value.isEmpty() || !(enclosingEntity instanceof ICustomer customer)) {
+        Object enclosingEntity = getRootBean(context);
+        if (value == null || value.isEmpty() || !(enclosingEntity instanceof BusinessEntity customer)) {
             return false;
         }
 
@@ -23,6 +23,17 @@ public abstract class BaseCustomerValidator<T extends Annotation> implements Con
         String regex = getRegexForCountry(country);
 
         return Pattern.matches(regex, value);
+    }
+
+    private Object getRootBean(ConstraintValidatorContext context) {
+        try {
+            return context.unwrap(jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder.class)
+                    .addBeanNode()
+                    .addConstraintViolation()
+                    .unwrap(Object.class);
+        } catch (Exception e) {
+            return null;  // In case unwrapping fails
+        }
     }
 
     protected abstract String getRegexForCountry(ECountryType country);
