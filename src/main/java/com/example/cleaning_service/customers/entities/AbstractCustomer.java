@@ -3,6 +3,7 @@ package com.example.cleaning_service.customers.entities;
 import com.example.cleaning_service.busness_entity.BusinessEntity;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
+import com.example.cleaning_service.customers.enums.EPaymentType;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -18,7 +19,9 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     protected ELoyaltyType loyaltyType = ELoyaltyType.STANDARD;
 
     protected String billingAddress;
-    protected String paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    protected EPaymentType paymentMethod;
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
@@ -44,11 +47,11 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     }
 
     @Override
-    public String getPaymentMethod() {
+    public EPaymentType getPaymentMethod() {
         return paymentMethod;
     }
 
-    protected void setPaymentMethod(String paymentMethod) {
+    protected void setPaymentMethod(EPaymentType paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 

@@ -23,17 +23,6 @@ public class IndividualCustomer extends AbstractCustomer implements IOrganizatio
     @ValidRegistrationNumber
     private String registrationNumber;
 
-    // Added validation annotations
-    @Override
-    public String getEmail() {
-        return super.getEmail();
-    }
-
-    @Override
-    public String getPhone() {
-        return super.getPhone();
-    }
-
     public IndividualCustomer() {
     }
 
