@@ -18,7 +18,7 @@ public abstract class BaseCustomerValidator<T extends Annotation> implements Con
         }
 
         // Determine validation based on country type
-        ECountryType country = customer.getCountryType();
+        ECountryType country = customer.getCountry();
         String regex = getRegexForCountry(country);
 
         return Pattern.matches(regex, value);

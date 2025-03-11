@@ -33,7 +33,7 @@ public class BusinessEntity extends Auditable {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ECountryType countryType;
+    private ECountryType country;
 
     private String notes;
 
@@ -106,11 +106,11 @@ public class BusinessEntity extends Auditable {
         this.notes = notes;
     }
 
-    public ECountryType getCountryType() {
-        return countryType;
+    public ECountryType getCountry() {
+        return country;
     }
 
-    public void setCountryType(ECountryType countryType) {
-        this.countryType = countryType;
+    public void setCountry(ECountryType country) {
+        this.country = country;
     }
 }
