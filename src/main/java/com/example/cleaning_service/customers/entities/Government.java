@@ -29,7 +29,7 @@ public class Government extends AbstractCustomer implements IOrganization {
     private String contractorName;
     private String departmentName;
     private boolean isTaxExempt;
-    private boolean isEmergencyServiceAvailable;
+    private boolean requiresEmergencyCleaning;
 
     public Government() {
     }
@@ -86,11 +86,11 @@ public class Government extends AbstractCustomer implements IOrganization {
         isTaxExempt = taxExempt;
     }
 
-    public boolean isEmergencyServiceAvailable() {
-        return isEmergencyServiceAvailable;
+    public boolean isRequiresEmergencyCleaning() {
+        return requiresEmergencyCleaning;
     }
 
-    public void setEmergencyServiceAvailable(boolean emergencyServiceAvailable) {
-        isEmergencyServiceAvailable = emergencyServiceAvailable;
+    public void setRequiresEmergencyCleaning(boolean requiresEmergencyCleaning) {
+        this.requiresEmergencyCleaning = requiresEmergencyCleaning;
     }
 }

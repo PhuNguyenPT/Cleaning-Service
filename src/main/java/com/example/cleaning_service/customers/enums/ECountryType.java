@@ -1,5 +1,8 @@
 package com.example.cleaning_service.customers.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(enumAsRef = true)
 public enum ECountryType {
     AD("Andorra"),
     AE("United Arab Emirates"),
