@@ -1,7 +1,6 @@
 package com.example.cleaning_service.validations.impl;
 
 import com.example.cleaning_service.busness_entity.BusinessEntity;
-import com.example.cleaning_service.customers.api.ICustomer;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
