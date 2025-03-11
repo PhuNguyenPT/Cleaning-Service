@@ -1,8 +1,10 @@
 package com.example.cleaning_service.busness_entity;
 
 import com.example.cleaning_service.audit.Auditable;
+import com.example.cleaning_service.customers.enums.ECountryType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.UUID;
@@ -27,7 +29,12 @@ public class BusinessEntity extends Auditable {
     private String city;
     private String state;
     private String zip;
-    private String country;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ECountryType countryType;
+
     private String notes;
 
     public UUID getId() {
@@ -90,13 +97,6 @@ public class BusinessEntity extends Auditable {
         this.zip = zip;
     }
 
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
 
     public String getNotes() {
         return notes;
@@ -104,5 +104,13 @@ public class BusinessEntity extends Auditable {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public ECountryType getCountryType() {
+        return countryType;
+    }
+
+    public void setCountryType(ECountryType countryType) {
+        this.countryType = countryType;
     }
 }

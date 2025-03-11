@@ -15,5 +15,4 @@ public interface ICustomer {
     String getBillingAddress();
     String getPaymentMethod();
     Set<EDay> getPreferredDays();
-    ECountryType getCountryType();
 }

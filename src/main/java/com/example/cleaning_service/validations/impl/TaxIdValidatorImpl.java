@@ -13,7 +13,7 @@ public class TaxIdValidatorImpl extends BaseCustomerValidator<ValidTaxId> {
             case VN -> "^(\\d{10}|\\d{13})$";       // 10 or 13-digit MST (business & branch)
             case FR -> "^\\d{9}$";                  // 9-digit SIREN (business identifier)
             case SG -> "^[0-9A-Z]{9,10}$";          // 9-10 digit UEN (Singapore)
-            case ZZ -> "^[A-Z0-9-]{8,15}$";         // Generic fallback (8-15 characters)
+            default -> "^[A-Z0-9-]{8,15}$";         // Generic fallback (8-15 characters)
         };
     }
 }

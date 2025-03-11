@@ -1,7 +1,6 @@
 package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.customers.api.IOrganization;
-import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 import com.example.cleaning_service.validations.ValidRegistrationNumber;
 import com.example.cleaning_service.validations.ValidTaxId;
@@ -16,11 +15,6 @@ public class IndividualCustomer extends AbstractCustomer implements IOrganizatio
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private final EOrganizationType organizationType = EOrganizationType.INDIVIDUAL;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ECountryType countryType;
 
     @Column(unique = true)
     @ValidTaxId
@@ -44,10 +38,9 @@ public class IndividualCustomer extends AbstractCustomer implements IOrganizatio
     public IndividualCustomer() {
     }
 
-    public IndividualCustomer(String taxId, String registrationNumber, ECountryType countryType) {
+    public IndividualCustomer(String taxId, String registrationNumber) {
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
-        this.countryType = countryType;
     }
 
     public void setTaxId(String taxId) {
@@ -56,10 +49,6 @@ public class IndividualCustomer extends AbstractCustomer implements IOrganizatio
 
     public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
-    }
-
-    public void setCountryType(ECountryType countryType) {
-        this.countryType = countryType;
     }
 
     @Override
@@ -75,10 +64,5 @@ public class IndividualCustomer extends AbstractCustomer implements IOrganizatio
     @Override
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
-    }
-
-    @Override
-    public ECountryType getCountryType() {
-        return this.countryType;
     }
 }

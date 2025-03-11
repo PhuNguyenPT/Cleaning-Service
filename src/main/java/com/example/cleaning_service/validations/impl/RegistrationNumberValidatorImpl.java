@@ -13,7 +13,7 @@ public class RegistrationNumberValidatorImpl extends BaseCustomerValidator<Valid
             case VN -> "^(\\d{10}|\\d{13})$";      // Vietnam MST (10 or 13 digits)
             case FR -> "^(\\d{9}|[A-Z]{2}\\d{11})$"; // France SIREN (9 digits) or SIRET (14 characters)
             case SG -> "^[0-9A-Z]{9,10}$";        // Singapore UEN (9-10 alphanumeric)
-            case ZZ -> "^[A-Z0-9-]{6,20}$";       // Generic fallback
+            default-> "^[A-Z0-9-]{6,20}$";       // Generic fallback
         };
     }
 }
