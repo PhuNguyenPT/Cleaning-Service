@@ -3,16 +3,14 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd"
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
-
     <changeSet id="create-schemas" author="galaxyfreedom">
         <sql>CREATE SCHEMA IF NOT EXISTS security AUTHORIZATION pg_database_owner;</sql>
         <sql>CREATE SCHEMA IF NOT EXISTS sale AUTHORIZATION pg_database_owner;</sql>
         <sql>CREATE SCHEMA IF NOT EXISTS customer AUTHORIZATION pg_database_owner;</sql>
     </changeSet>
-
-    <changeSet id="1741676209389-1" author="galaxyfreedom">
+    <changeSet id="1741761947042-1" author="galaxyfreedom">
         <createTable schemaName="security" tableName="permissions">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_permissions"/>
@@ -29,7 +27,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209389-2" author="galaxyfreedom">
+    <changeSet id="1741761947042-2" author="galaxyfreedom">
         <createTable schemaName="security" tableName="role_permissions">
             <column name="permission_id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_role_permissions"/>
@@ -39,7 +37,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209389-3" author="galaxyfreedom">
+    <changeSet id="1741761947042-3" author="galaxyfreedom">
         <createTable schemaName="security" tableName="roles">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_roles"/>
@@ -56,7 +54,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209389-4" author="galaxyfreedom">
+    <changeSet id="1741761947042-4" author="galaxyfreedom">
         <createTable schemaName="security" tableName="user_permissions">
             <column name="permission_id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user_permissions"/>
@@ -66,7 +64,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209389-5" author="galaxyfreedom">
+    <changeSet id="1741761947042-5" author="galaxyfreedom">
         <createTable schemaName="security" tableName="users">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_users"/>
@@ -101,47 +99,47 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209389-6" author="galaxyfreedom">
+    <changeSet id="1741761947042-6" author="galaxyfreedom">
         <addUniqueConstraint columnNames="name" constraintName="uc_permissions_name" schemaName="security"
                              tableName="permissions"/>
     </changeSet>
-    <changeSet id="1741676209389-7" author="galaxyfreedom">
+    <changeSet id="1741761947042-7" author="galaxyfreedom">
         <addUniqueConstraint columnNames="name" constraintName="uc_roles_name" schemaName="security" tableName="roles"/>
     </changeSet>
-    <changeSet id="1741676209389-8" author="galaxyfreedom">
+    <changeSet id="1741761947042-8" author="galaxyfreedom">
         <addUniqueConstraint columnNames="username" constraintName="uc_users_username" schemaName="security"
                              tableName="users"/>
     </changeSet>
-    <changeSet id="1741676209389-9" author="galaxyfreedom">
+    <changeSet id="1741761947042-9" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="users" baseTableSchemaName="security"
                                  constraintName="FK_USERS_ON_ROLE" referencedColumnNames="id"
                                  referencedTableName="roles" referencedTableSchemaName="security"/>
     </changeSet>
-    <changeSet id="1741676209389-10" author="galaxyfreedom">
+    <changeSet id="1741761947042-10" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="role_permissions"
                                  baseTableSchemaName="security" constraintName="fk_rolper_on_permission"
                                  referencedColumnNames="id" referencedTableName="permissions"
                                  referencedTableSchemaName="security"/>
     </changeSet>
-    <changeSet id="1741676209389-11" author="galaxyfreedom">
+    <changeSet id="1741761947042-11" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="role_permissions"
                                  baseTableSchemaName="security" constraintName="fk_rolper_on_role"
                                  referencedColumnNames="id" referencedTableName="roles"
                                  referencedTableSchemaName="security"/>
     </changeSet>
-    <changeSet id="1741676209389-12" author="galaxyfreedom">
+    <changeSet id="1741761947042-12" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="permission_id" baseTableName="user_permissions"
                                  baseTableSchemaName="security" constraintName="fk_useper_on_permission"
                                  referencedColumnNames="id" referencedTableName="permissions"
                                  referencedTableSchemaName="security"/>
     </changeSet>
-    <changeSet id="1741676209389-13" author="galaxyfreedom">
+    <changeSet id="1741761947042-13" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_permissions"
                                  baseTableSchemaName="security" constraintName="fk_useper_on_user"
                                  referencedColumnNames="id" referencedTableName="users"
                                  referencedTableSchemaName="security"/>
     </changeSet>
-    <changeSet id="1741676209694-1" author="galaxyfreedom">
+    <changeSet id="1741761947408-1" author="galaxyfreedom">
         <createTable schemaName="customer" tableName="companies">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_companies"/>
@@ -160,7 +158,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209694-2" author="galaxyfreedom">
+    <changeSet id="1741761947408-2" author="galaxyfreedom">
         <createTable schemaName="customer" tableName="customer_details">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_customer_details"/>
@@ -190,7 +188,7 @@
             <column name="payment_method" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209694-3" author="galaxyfreedom">
+    <changeSet id="1741761947408-3" author="galaxyfreedom">
         <createTable schemaName="customer" tableName="customer_preferred_days">
             <column name="company_id" type="UUID">
                 <constraints nullable="false"/>
@@ -198,7 +196,7 @@
             <column name="preferred_days" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209694-4" author="galaxyfreedom">
+    <changeSet id="1741761947408-4" author="galaxyfreedom">
         <createTable schemaName="customer" tableName="governments">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_governments"/>
@@ -217,12 +215,12 @@
             <column name="is_tax_exempt" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_emergency_service_available" type="BOOLEAN">
+            <column name="requires_emergency_cleaning" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209694-5" author="galaxyfreedom">
+    <changeSet id="1741761947408-5" author="galaxyfreedom">
         <createTable schemaName="customer" tableName="individual_customers">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_individual_customers"/>
@@ -234,7 +232,7 @@
             <column name="registration_number" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209694-6" author="galaxyfreedom">
+    <changeSet id="1741761947408-6" author="galaxyfreedom">
         <createTable schemaName="customer" tableName="non_profit_org">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_non_profit_org"/>
@@ -250,67 +248,71 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676209694-7" author="galaxyfreedom">
+    <changeSet id="1741761947408-7" author="galaxyfreedom">
         <addUniqueConstraint columnNames="registration_number" constraintName="uc_companies_registrationnumber"
                              schemaName="customer" tableName="companies"/>
     </changeSet>
-    <changeSet id="1741676209694-8" author="galaxyfreedom">
+    <changeSet id="1741761947408-8" author="galaxyfreedom">
         <addUniqueConstraint columnNames="tax_id" constraintName="uc_companies_taxid" schemaName="customer"
                              tableName="companies"/>
     </changeSet>
-    <changeSet id="1741676209694-9" author="galaxyfreedom">
+    <changeSet id="1741761947408-9" author="galaxyfreedom">
+        <addUniqueConstraint columnNames="email" constraintName="uc_customer_details_email" schemaName="customer"
+                             tableName="customer_details"/>
+    </changeSet>
+    <changeSet id="1741761947408-10" author="galaxyfreedom">
         <addUniqueConstraint columnNames="registration_number" constraintName="uc_governments_registrationnumber"
                              schemaName="customer" tableName="governments"/>
     </changeSet>
-    <changeSet id="1741676209694-10" author="galaxyfreedom">
+    <changeSet id="1741761947408-11" author="galaxyfreedom">
         <addUniqueConstraint columnNames="tax_id" constraintName="uc_governments_taxid" schemaName="customer"
                              tableName="governments"/>
     </changeSet>
-    <changeSet id="1741676209694-11" author="galaxyfreedom">
+    <changeSet id="1741761947408-12" author="galaxyfreedom">
         <addUniqueConstraint columnNames="registration_number"
                              constraintName="uc_individual_customers_registrationnumber" schemaName="customer"
                              tableName="individual_customers"/>
     </changeSet>
-    <changeSet id="1741676209694-12" author="galaxyfreedom">
+    <changeSet id="1741761947408-13" author="galaxyfreedom">
         <addUniqueConstraint columnNames="tax_id" constraintName="uc_individual_customers_taxid" schemaName="customer"
                              tableName="individual_customers"/>
     </changeSet>
-    <changeSet id="1741676209694-13" author="galaxyfreedom">
+    <changeSet id="1741761947408-14" author="galaxyfreedom">
         <addUniqueConstraint columnNames="registration_number" constraintName="uc_non_profit_org_registrationnumber"
                              schemaName="customer" tableName="non_profit_org"/>
     </changeSet>
-    <changeSet id="1741676209694-14" author="galaxyfreedom">
+    <changeSet id="1741761947408-15" author="galaxyfreedom">
         <addUniqueConstraint columnNames="tax_id" constraintName="uc_non_profit_org_taxid" schemaName="customer"
                              tableName="non_profit_org"/>
     </changeSet>
-    <changeSet id="1741676209694-15" author="galaxyfreedom">
+    <changeSet id="1741761947408-16" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="id" baseTableName="companies" baseTableSchemaName="customer"
                                  constraintName="FK_COMPANIES_ON_ID" referencedColumnNames="id"
                                  referencedTableName="customer_details" referencedTableSchemaName="customer"/>
     </changeSet>
-    <changeSet id="1741676209694-16" author="galaxyfreedom">
+    <changeSet id="1741761947408-17" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="id" baseTableName="governments" baseTableSchemaName="customer"
                                  constraintName="FK_GOVERNMENTS_ON_ID" referencedColumnNames="id"
                                  referencedTableName="customer_details" referencedTableSchemaName="customer"/>
     </changeSet>
-    <changeSet id="1741676209694-17" author="galaxyfreedom">
+    <changeSet id="1741761947408-18" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="id" baseTableName="individual_customers"
                                  baseTableSchemaName="customer" constraintName="FK_INDIVIDUAL_CUSTOMERS_ON_ID"
                                  referencedColumnNames="id" referencedTableName="customer_details"
                                  referencedTableSchemaName="customer"/>
     </changeSet>
-    <changeSet id="1741676209694-18" author="galaxyfreedom">
+    <changeSet id="1741761947408-19" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="id" baseTableName="non_profit_org" baseTableSchemaName="customer"
                                  constraintName="FK_NON_PROFIT_ORG_ON_ID" referencedColumnNames="id"
                                  referencedTableName="customer_details" referencedTableSchemaName="customer"/>
     </changeSet>
-    <changeSet id="1741676209694-19" author="galaxyfreedom">
+    <changeSet id="1741761947408-20" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="company_id" baseTableName="customer_preferred_days"
                                  baseTableSchemaName="customer" constraintName="fk_customer_preferred_days_on_company"
                                  referencedColumnNames="id" referencedTableName="companies"
                                  referencedTableSchemaName="customer"/>
     </changeSet>
-    <changeSet id="1741676210002-1" author="galaxyfreedom">
+    <changeSet id="1741761947858-1" author="galaxyfreedom">
         <createTable schemaName="sale" tableName="account_associations">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_account_associations"/>
@@ -337,17 +339,17 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1741676210002-2" author="galaxyfreedom">
+    <changeSet id="1741761947858-2" author="galaxyfreedom">
         <addUniqueConstraint columnNames="user_id" constraintName="uc_account_associations_user" schemaName="sale"
                              tableName="account_associations"/>
     </changeSet>
-    <changeSet id="1741676210002-3" author="galaxyfreedom">
+    <changeSet id="1741761947858-3" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="customer_id" baseTableName="account_associations"
                                  baseTableSchemaName="sale" constraintName="FK_ACCOUNT_ASSOCIATIONS_ON_CUSTOMER"
                                  referencedColumnNames="id" referencedTableName="customer_details"
                                  referencedTableSchemaName="customer"/>
     </changeSet>
-    <changeSet id="1741676210002-4" author="galaxyfreedom">
+    <changeSet id="1741761947858-4" author="galaxyfreedom">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="account_associations"
                                  baseTableSchemaName="sale" constraintName="FK_ACCOUNT_ASSOCIATIONS_ON_USER"
                                  referencedColumnNames="id" referencedTableName="users"
