@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "governments", schema = "customer")
-public class Government extends AbstractCustomer implements IOrganization {
+public non-sealed class Government extends AbstractCustomer implements IOrganization {
 
     @NotNull
     @Enumerated(EnumType.STRING)

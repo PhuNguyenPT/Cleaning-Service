@@ -1,6 +1,7 @@
 package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.busness_entity.BusinessEntity;
+import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
@@ -28,6 +29,21 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     @CollectionTable(name = "customer_preferred_days", schema = "customer")
     protected Set<EDay> preferredDays = new HashSet<>();
 
+    public AbstractCustomer() {
+        super();
+    }
+
+    public AbstractCustomer(String billingAddress, EPaymentType paymentMethod, Set<EDay> preferredDays,
+                            String name, String address, String phone, String email, String city, String state,
+                            String zip, ECountryType country, String notes) {
+
+        super(name, address, phone, email, city, state, zip, country, notes);
+
+        this.billingAddress = billingAddress;
+        this.paymentMethod = paymentMethod;
+        this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
+    }
+
     @Override
     public ELoyaltyType getLoyaltyType() {
         return loyaltyType;
@@ -42,7 +58,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return billingAddress;
     }
 
-    protected void setBillingAddress(String billingAddress) {
+    public void setBillingAddress(String billingAddress) {
         this.billingAddress = billingAddress;
     }
 
@@ -51,7 +67,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return paymentMethod;
     }
 
-    protected void setPaymentMethod(EPaymentType paymentMethod) {
+    public void setPaymentMethod(EPaymentType paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
@@ -60,7 +76,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return preferredDays;
     }
 
-    protected void setPreferredDays(Set<EDay> preferredDays) {
+    public void setPreferredDays(Set<EDay> preferredDays) {
         this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
     }
 }
