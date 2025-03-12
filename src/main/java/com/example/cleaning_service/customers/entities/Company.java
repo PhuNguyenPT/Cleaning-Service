@@ -1,16 +1,17 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.customers.enums.ECompanyType;
-import com.example.cleaning_service.customers.enums.EOrganizationType;
+import com.example.cleaning_service.customers.enums.*;
 import com.example.cleaning_service.validations.ValidRegistrationNumber;
 import com.example.cleaning_service.validations.ValidTaxId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "companies", schema = "customer")
-public class Company extends AbstractCustomer implements IOrganization {
+public non-sealed class Company extends AbstractCustomer implements IOrganization {
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -33,9 +34,16 @@ public class Company extends AbstractCustomer implements IOrganization {
     private String registrationNumber;
 
     public Company() {
+        super();
     }
 
-    public Company(ECompanyType companyType, String registrationNumber, String taxId) {
+    public Company(ECompanyType companyType, String registrationNumber, String taxId,
+                   String billingAddress, EPaymentType paymentMethod, Set<EDay> preferredDays,
+                   String name, String address, String phone, String email, String city, String state,
+                   String zip, ECountryType country, String notes) {
+
+        super(billingAddress, paymentMethod, preferredDays, name, address, phone, email, city, state, zip, country, notes);
+
         this.companyType = companyType;
         this.registrationNumber = registrationNumber;
         this.taxId = taxId;

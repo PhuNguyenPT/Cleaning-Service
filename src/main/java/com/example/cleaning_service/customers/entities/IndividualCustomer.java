@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "individual_customers", schema = "customer")
-public class IndividualCustomer extends AbstractCustomer implements IOrganization {
+public non-sealed class IndividualCustomer extends AbstractCustomer implements IOrganization {
 
     @NotNull
     @Enumerated(EnumType.STRING)

@@ -2,7 +2,7 @@ package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 
-public interface IOrganization {
+public sealed interface IOrganization permits Company, Government, IndividualCustomer, NonProfitOrg {
     String getTaxId();
     String getRegistrationNumber();
     EOrganizationType getOrganizationType();
