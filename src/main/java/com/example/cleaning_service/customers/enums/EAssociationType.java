@@ -2,7 +2,7 @@ package com.example.cleaning_service.customers.enums;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(enumAsRef = true)
+@Schema(enumAsRef = true, example = "OWNER")
 public enum EAssociationType {
     OWNER("Owner of the account"),
     MANAGER("Manager with permissions"),
