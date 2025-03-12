@@ -38,6 +38,21 @@ public class BusinessEntity extends Auditable {
 
     private String notes;
 
+    public BusinessEntity() {
+    }
+
+    public BusinessEntity(String name, String address, String phone, String email, String city, String state, String zip, ECountryType country, String notes) {
+        this.name = name;
+        this.address = address;
+        this.phone = phone;
+        this.email = email;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.country = country;
+        this.notes = notes;
+    }
+
     public UUID getId() {
         return id;
     }
