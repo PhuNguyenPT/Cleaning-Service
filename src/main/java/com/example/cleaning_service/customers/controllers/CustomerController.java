@@ -1,7 +1,6 @@
 package com.example.cleaning_service.customers.controllers;
 
 import com.example.cleaning_service.customers.entities.ICustomer;
-import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
@@ -22,10 +21,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @PostMapping("/companies")
-    public ResponseEntity<Company> createCompany(@RequestBody Company company) {
-        return ResponseEntity.ok(customerService.createCompany(company));
-    }
+
 
     @PostMapping("/governments")
     public ResponseEntity<Government> createGovernment(@RequestBody Government government) {
