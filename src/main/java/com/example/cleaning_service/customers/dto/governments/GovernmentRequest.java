@@ -1,6 +1,5 @@
-package com.example.cleaning_service.customers.dto;
+package com.example.cleaning_service.customers.dto.governments;
 
-import com.example.cleaning_service.customers.enums.ECompanyType;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EPaymentType;
@@ -12,7 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Set;
 
 public record GovernmentRequest(
-        @NotNull ECompanyType companyType,
         @NotBlank @ValidTaxId String taxId,
         @NotBlank @ValidRegistrationNumber String registrationNumber,
         String contractorName,
@@ -29,7 +27,7 @@ public record GovernmentRequest(
         String phone,
         String email,
         String city,
-        String sate,
+        String state,
         String zip,
         @NotNull ECountryType country,
         String notes
