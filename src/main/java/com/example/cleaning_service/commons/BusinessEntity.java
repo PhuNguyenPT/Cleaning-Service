@@ -1,4 +1,4 @@
-package com.example.cleaning_service.busness_entity;
+package com.example.cleaning_service.commons;
 
 import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.customers.enums.ECountryType;
