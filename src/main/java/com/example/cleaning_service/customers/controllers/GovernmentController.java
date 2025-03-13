@@ -41,7 +41,7 @@ public class GovernmentController {
     public GovernmentDetailsResponseModel updateGovernmentById(@PathVariable UUID id,
                                                                @RequestBody @Valid GovernmentUpdateRequest updateRequest,
                                                                @AuthenticationPrincipal User user) {
-        return governmentService.updateCompanyDetails(id, updateRequest, user);
+        return governmentService.updateCompanyDetailsById(id, updateRequest, user);
     }
 
     @DeleteMapping("/{id}")

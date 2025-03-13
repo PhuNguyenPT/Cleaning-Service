@@ -22,29 +22,29 @@ public class AccountAssociationService {
     }
 
     @Transactional
-    protected AccountAssociation saveAccountAssociation(@NotNull AccountAssociationRequest accountAssociationRequest) {
+    AccountAssociation saveAccountAssociation(@NotNull AccountAssociationRequest accountAssociationRequest) {
         AccountAssociation accountAssociation =
                 accountAssociationMapper.fromAccountAssociationRequestToAccountAssociation(accountAssociationRequest);
         return accountAssociationRepository.save(accountAssociation);
     }
 
     @Transactional
-    public AccountAssociation createAccountAssociation(@NotNull AccountAssociationRequest accountAssociationRequest) {
+    AccountAssociation createAccountAssociation(@NotNull AccountAssociationRequest accountAssociationRequest) {
         return saveAccountAssociation(accountAssociationRequest);
     }
 
     @Transactional
-    protected boolean isExistsAccountAssociationByUser(@NotNull User user) {
+    boolean isExistsAccountAssociationByUser(@NotNull User user) {
         return accountAssociationRepository.existsAccountAssociationByUser(user);
     }
 
     @Transactional
-    protected AccountAssociation getAccountAssociationByCustomer(@NotNull AbstractCustomer customer) {
+    AccountAssociation getAccountAssociationByCustomer(@NotNull AbstractCustomer customer) {
         return accountAssociationRepository.findByCustomer(customer);
     }
 
     @Transactional
-    public void detachCustomerFromAssociation(@NotNull AbstractCustomer customer) {
+    void detachCustomerFromAssociation(@NotNull AbstractCustomer customer) {
         AccountAssociation association = getAccountAssociationByCustomer(customer);
         association.setCustomer(null);
         accountAssociationRepository.save(association);

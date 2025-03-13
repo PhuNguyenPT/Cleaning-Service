@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers.assemblers;
+package com.example.cleaning_service.customers.assemblers.companies;
 
 import com.example.cleaning_service.customers.controllers.CompanyController;
 import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;

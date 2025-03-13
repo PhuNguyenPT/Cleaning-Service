@@ -1,8 +1,8 @@
 package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.CompanyDetailsResponseModelAssembler;
-import com.example.cleaning_service.customers.assemblers.CompanyResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.CompanyResponseModelAssembler;
 import com.example.cleaning_service.customers.dto.*;
 import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
@@ -14,6 +14,7 @@ import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class CompanyService {
     @Transactional
     public CompanyResponseModel createCompany(@NotNull CompanyRequest companyRequest, @NotNull User user) {
         if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is already associated with a company.");
+            throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
         }
 
         // Save the company
@@ -88,7 +89,7 @@ public class CompanyService {
     }
 
     @Transactional
-    public CompanyDetailsResponseModel updateCompanyDetails(UUID id, CompanyUpdateRequest updateRequest, User user) {
+    public CompanyDetailsResponseModel updateCompanyDetails(UUID id, @Valid CompanyUpdateRequest updateRequest, User user) {
         Company dbCompany = getByIdAndUser(id, user);
 
         updateCompanyFields(dbCompany, updateRequest);
@@ -105,7 +106,7 @@ public class CompanyService {
      * Updates only the non-null fields of the company.
      */
     @Transactional
-    void updateCompanyFields(Company company, CompanyUpdateRequest companyRequest) {
+    void updateCompanyFields(Company company, @Valid CompanyUpdateRequest companyRequest) {
         if (companyRequest.companyType() != null) {
             company.setCompanyType(companyRequest.companyType());
         }

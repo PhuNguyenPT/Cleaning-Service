@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers.assemblers;
+package com.example.cleaning_service.customers.assemblers.governments;
 
 import com.example.cleaning_service.customers.controllers.GovernmentController;
 import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;

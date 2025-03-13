@@ -1,8 +1,8 @@
 package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.GovernmentDetailsResponseModelAssembler;
-import com.example.cleaning_service.customers.assemblers.GovernmentResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.GovernmentResponseModelAssembler;
 import com.example.cleaning_service.customers.dto.*;
 import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
@@ -43,6 +43,10 @@ public class GovernmentService {
 
     @Transactional
     public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, @NotNull User user) {
+        if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
+            throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
+        }
+
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government dbGovernment = governmentRepository.save(government);
 
@@ -77,7 +81,7 @@ public class GovernmentService {
     }
 
     @Transactional
-    public GovernmentDetailsResponseModel updateCompanyDetails(UUID id, GovernmentUpdateRequest updateRequest, User user) {
+    public GovernmentDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
         Government government = getByIdAndUser(id, user);
 
         updateGovernmentFields(government, updateRequest);
@@ -86,7 +90,7 @@ public class GovernmentService {
     }
 
     @Transactional
-    void updateGovernmentFields(Government government, GovernmentUpdateRequest updateRequest) {
+    void updateGovernmentFields(Government government, @Valid GovernmentUpdateRequest updateRequest) {
         if (updateRequest.taxId() != null) {
             government.setTaxId(updateRequest.taxId());
         }

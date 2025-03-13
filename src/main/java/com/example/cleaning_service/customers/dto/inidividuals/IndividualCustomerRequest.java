@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers.dto;
+package com.example.cleaning_service.customers.dto.inidividuals;
 
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
@@ -10,22 +10,23 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.Set;
 
-public record NonProfitOrgRequest(
-        @NotBlank @ValidTaxId String taxId,
-        @NotBlank @ValidRegistrationNumber String registrationNumber,
+public record IndividualCustomerRequest(
+        @ValidTaxId String taxId,
+        @ValidRegistrationNumber String registrationNumber,
 
         String billingAddress,
         EPaymentType paymentMethod,
         Set<EDay> preferredDays,
 
-        String organizationName,
+        @NotBlank
+        String customerName,
         String address,
         String phone,
         String email,
         String city,
-        String sate,
+        String state,
         String zip,
         @NotNull ECountryType country,
         String notes
-) {
+        ) {
 }
