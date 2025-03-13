@@ -3,7 +3,6 @@ package com.example.cleaning_service.customers.services;
 import com.example.cleaning_service.customers.dto.AccountAssociationRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.AccountAssociation;
-import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.mappers.AccountAssociationMapper;
 import com.example.cleaning_service.customers.repositories.AccountAssociationRepository;
 import com.example.cleaning_service.security.entities.user.User;
@@ -46,4 +45,10 @@ public class AccountAssociationService {
         return accountAssociationRepository.findAllByCustomer(customer);
     }
 
+    @Transactional
+    public void detachCustomerFromAssociations(@NotNull AbstractCustomer customer) {
+        List<AccountAssociation> associations = getAllByCustomer(customer);
+        associations.forEach(association -> association.setCustomer(null));
+        accountAssociationRepository.saveAll(associations);
+    }
 }

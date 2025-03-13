@@ -1,8 +1,13 @@
 package com.example.cleaning_service.customers.services;
 
+import com.example.cleaning_service.commons.BusinessEntityService;
 import com.example.cleaning_service.customers.assemblers.CompanyDetailsResponseModelAssembler;
 import com.example.cleaning_service.customers.assemblers.CompanyResponseModelAssembler;
 import com.example.cleaning_service.customers.dto.*;
+import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
+import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
+import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
 import com.example.cleaning_service.customers.entities.AccountAssociation;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
@@ -21,17 +26,21 @@ public class CompanyService {
     private final AccountAssociationService accountAssociationService;
     private final CompanyResponseModelAssembler companyResponseModelAssembler;
     private final CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler;
+    private final BusinessEntityService businessEntityService;
+    private final AbstractCustomerService abstractCustomerService;
 
-    public CompanyService(CompanyMapper companyMapper, CompanyRepository companyRepository, AccountAssociationService accountAssociationService, CompanyResponseModelAssembler companyResponseModelAssembler, CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler) {
+    public CompanyService(CompanyMapper companyMapper, CompanyRepository companyRepository, AccountAssociationService accountAssociationService, CompanyResponseModelAssembler companyResponseModelAssembler, CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler, BusinessEntityService businessEntityService, AbstractCustomerService abstractCustomerService) {
         this.companyMapper = companyMapper;
         this.companyRepository = companyRepository;
         this.accountAssociationService = accountAssociationService;
         this.companyResponseModelAssembler = companyResponseModelAssembler;
         this.companyDetailsResponseModelAssembler = companyDetailsResponseModelAssembler;
+        this.businessEntityService = businessEntityService;
+        this.abstractCustomerService = abstractCustomerService;
     }
 
     @Transactional
-    protected Company saveCompanyByCompanyRequest(@NotNull CompanyRequest companyRequest) {
+    Company saveCompanyByCompanyRequest(@NotNull CompanyRequest companyRequest) {
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
         return companyRepository.save(company);
     }
@@ -59,7 +68,7 @@ public class CompanyService {
     }
 
     @Transactional
-    protected Company getByIdAndUser(UUID id, User user) {
+    Company getByIdAndUser(UUID id, User user) {
         if (!accountAssociationService.isExistsAccountAssociationByUser(user)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with a company.");
         }
@@ -73,7 +82,7 @@ public class CompanyService {
     }
 
     @Transactional
-    protected Company findById(UUID id) {
+    Company findById(UUID id) {
         return companyRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Company with id " + id + " not found."));
     }
@@ -88,7 +97,7 @@ public class CompanyService {
     }
 
     @Transactional
-    protected Company saveCompany(Company company) {
+    Company saveCompany(Company company) {
         return companyRepository.save(company);
     }
 
@@ -96,51 +105,26 @@ public class CompanyService {
      * Updates only the non-null fields of the company.
      */
     @Transactional
-    protected void updateCompanyFields(Company dbCompany, CompanyUpdateRequest companyRequest) {
+    void updateCompanyFields(Company company, CompanyUpdateRequest companyRequest) {
         if (companyRequest.companyType() != null) {
-            dbCompany.setCompanyType(companyRequest.companyType());
+            company.setCompanyType(companyRequest.companyType());
         }
         if (companyRequest.taxId() != null) {
-            dbCompany.setTaxId(companyRequest.taxId());
+            company.setTaxId(companyRequest.taxId());
         }
         if (companyRequest.registrationNumber() != null) {
-            dbCompany.setRegistrationNumber(companyRequest.registrationNumber());
+            company.setRegistrationNumber(companyRequest.registrationNumber());
         }
-        if (companyRequest.billingAddress() != null) {
-            dbCompany.setBillingAddress(companyRequest.billingAddress());
-        }
-        if (companyRequest.paymentMethod() != null) {
-            dbCompany.setPaymentMethod(companyRequest.paymentMethod());
-        }
-        if (companyRequest.preferredDays() != null) {
-            dbCompany.setPreferredDays(companyRequest.preferredDays());
-        }
-        if (companyRequest.companyName() != null) {
-            dbCompany.setName(companyRequest.companyName());
-        }
-        if (companyRequest.address() != null) {
-            dbCompany.setAddress(companyRequest.address());
-        }
-        if (companyRequest.phone() != null) {
-            dbCompany.setPhone(companyRequest.phone());
-        }
-        if (companyRequest.email() != null) {
-            dbCompany.setEmail(companyRequest.email());
-        }
-        if (companyRequest.city() != null) {
-            dbCompany.setCity(companyRequest.city());
-        }
-        if (companyRequest.state() != null) {
-            dbCompany.setState(companyRequest.state());
-        }
-        if (companyRequest.zip() != null) {
-            dbCompany.setZip(companyRequest.zip());
-        }
-        if (companyRequest.country() != null) {
-            dbCompany.setCountry(companyRequest.country());
-        }
-        if (companyRequest.notes() != null) {
-            dbCompany.setNotes(companyRequest.notes());
-        }
+
+        abstractCustomerService.updateCustomer(company, companyRequest.customerDetails());
+
+        businessEntityService.updateBusinessEntityFields(company, companyRequest.businessEntityDetails());
+    }
+
+    @Transactional
+    public void deleteCompanyById(UUID id, User user) {
+        Company dbCompany = getByIdAndUser(id, user);
+        accountAssociationService.detachCustomerFromAssociations(dbCompany);
+        companyRepository.delete(dbCompany);
     }
 }

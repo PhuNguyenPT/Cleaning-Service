@@ -1,16 +1,16 @@
 package com.example.cleaning_service.customers.mappers;
 
-import com.example.cleaning_service.customers.dto.CompanyDetailsResponseModel;
-import com.example.cleaning_service.customers.dto.CompanyRequest;
-import com.example.cleaning_service.customers.dto.CompanyResponseModel;
+import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
+import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
 import com.example.cleaning_service.customers.entities.Company;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CompanyMapper {
-    public Company fromCompanyRequestToCompany(@NotNull CompanyRequest companyRequest) {
+    public Company fromCompanyRequestToCompany(@NotNull @Valid CompanyRequest companyRequest) {
         return new Company(
                 companyRequest.companyType(),
                 companyRequest.registrationNumber(),

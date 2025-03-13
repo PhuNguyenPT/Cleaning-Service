@@ -1,7 +1,7 @@
 package com.example.cleaning_service.customers.assemblers;
 
 import com.example.cleaning_service.customers.controllers.CompanyController;
-import com.example.cleaning_service.customers.dto.CompanyDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
