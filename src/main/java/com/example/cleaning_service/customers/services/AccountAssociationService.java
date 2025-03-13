@@ -41,14 +41,14 @@ public class AccountAssociationService {
     }
 
     @Transactional
-    protected List<AccountAssociation> getAllByCustomer(@NotNull AbstractCustomer customer) {
-        return accountAssociationRepository.findAllByCustomer(customer);
+    protected AccountAssociation getAccountAssociationByCustomer(@NotNull AbstractCustomer customer) {
+        return accountAssociationRepository.findByCustomer(customer);
     }
 
     @Transactional
-    public void detachCustomerFromAssociations(@NotNull AbstractCustomer customer) {
-        List<AccountAssociation> associations = getAllByCustomer(customer);
-        associations.forEach(association -> association.setCustomer(null));
-        accountAssociationRepository.saveAll(associations);
+    public void detachCustomerFromAssociation(@NotNull AbstractCustomer customer) {
+        AccountAssociation association = getAccountAssociationByCustomer(customer);
+        association.setCustomer(null);
+        accountAssociationRepository.save(association);
     }
 }

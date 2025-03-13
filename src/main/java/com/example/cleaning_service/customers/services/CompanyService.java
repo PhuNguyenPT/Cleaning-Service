@@ -124,7 +124,7 @@ public class CompanyService {
     @Transactional
     public void deleteCompanyById(UUID id, User user) {
         Company dbCompany = getByIdAndUser(id, user);
-        accountAssociationService.detachCustomerFromAssociations(dbCompany);
+        accountAssociationService.detachCustomerFromAssociation(dbCompany);
         companyRepository.delete(dbCompany);
     }
 }

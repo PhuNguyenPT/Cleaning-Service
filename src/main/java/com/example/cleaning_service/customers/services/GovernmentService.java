@@ -119,7 +119,7 @@ public class GovernmentService {
     @Transactional
     public void deleteGovernmentById(UUID id, User user) {
         Government dbGovernment = getByIdAndUser(id, user);
-        accountAssociationService.detachCustomerFromAssociations(dbGovernment);
+        accountAssociationService.detachCustomerFromAssociation(dbGovernment);
         governmentRepository.delete(dbGovernment);
     }
 }
