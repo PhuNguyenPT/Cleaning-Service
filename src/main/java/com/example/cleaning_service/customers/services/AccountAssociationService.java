@@ -10,8 +10,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class AccountAssociationService {
 
