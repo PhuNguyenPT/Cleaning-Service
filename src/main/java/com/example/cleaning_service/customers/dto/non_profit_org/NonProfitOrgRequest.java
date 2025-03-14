@@ -23,7 +23,7 @@ public record NonProfitOrgRequest(
         String phone,
         String email,
         String city,
-        String sate,
+        String state,
         String zip,
         @NotNull ECountryType country,
         String notes
