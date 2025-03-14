@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class AbstractCustomerService {
 
     @Transactional
-    void updateCustomer(AbstractCustomer customer, @NotNull AbstractCustomerRequest customerDetails) {
+    void updateAbstractCustomerDetails(AbstractCustomer customer, @NotNull AbstractCustomerRequest customerDetails) {
         if (customerDetails.billingAddress() != null) {
             customer.setBillingAddress(customerDetails.billingAddress());
         }
