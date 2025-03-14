@@ -43,8 +43,7 @@ public class CompanyService {
     }
 
     @Transactional
-    Company saveCompanyByCompanyRequest(@NotNull CompanyRequest companyRequest) {
-        Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
+    Company saveCompany(@NotNull Company company) {
         return companyRepository.save(company);
     }
 
@@ -55,8 +54,8 @@ public class CompanyService {
         }
 
         // Save the company
-        Company savedCompany = saveCompanyByCompanyRequest(companyRequest);
-
+        Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
+        Company savedCompany = saveCompany(company);
 
         // Create account association
         AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(user, savedCompany);
@@ -97,11 +96,6 @@ public class CompanyService {
         updateCompanyFields(dbCompany, updateRequest);
         Company updatedCompany = saveCompany(dbCompany);
         return companyDetailsResponseModelAssembler.toModel(updatedCompany);
-    }
-
-    @Transactional
-    Company saveCompany(Company company) {
-        return companyRepository.save(company);
     }
 
     /**
