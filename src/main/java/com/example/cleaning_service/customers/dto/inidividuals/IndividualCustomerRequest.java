@@ -18,8 +18,7 @@ public record IndividualCustomerRequest(
         EPaymentType paymentMethod,
         Set<EDay> preferredDays,
 
-        @NotBlank
-        String customerName,
+        @NotBlank String customerName,
         String address,
         String phone,
         String email,

@@ -63,7 +63,8 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
         return registrationNumber;
     }
 
-    public void setRegistrationNumber(String registrationNumber) {
+    @Override
+    public void setRegistrationNumber(@ValidRegistrationNumber String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
 
@@ -72,7 +73,8 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
         return taxId;
     }
 
-    public void setTaxId(String taxId) {
+    @Override
+    public void setTaxId(@ValidTaxId String taxId) {
         this.taxId = taxId;
     }
 

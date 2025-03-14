@@ -47,7 +47,7 @@ public record CompanyRequest(
         EPaymentType paymentMethod,
         Set<EDay> preferredDays,
 
-        String companyName,
+        @NotBlank String companyName,
         String address,
         String phone,
         String email,

@@ -28,6 +28,9 @@ public non-sealed class IndividualCustomer extends AbstractCustomer implements I
     @ValidRegistrationNumber
     private String registrationNumber;
 
+    public IndividualCustomer() {
+    }
+
     public IndividualCustomer(String taxId, String registrationNumber, String billingAddress,
                               EPaymentType paymentMethod, Set<EDay> preferredDays, String name, String address,
                               String phone, String email, String city, String state, String zip, ECountryType country,
@@ -37,11 +40,13 @@ public non-sealed class IndividualCustomer extends AbstractCustomer implements I
         this.registrationNumber = registrationNumber;
     }
 
-    public void setTaxId(String taxId) {
+    @Override
+    public void setTaxId(@ValidTaxId String taxId) {
         this.taxId = taxId;
     }
 
-    public void setRegistrationNumber(String registrationNumber) {
+    @Override
+    public void setRegistrationNumber(@ValidRegistrationNumber String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
 

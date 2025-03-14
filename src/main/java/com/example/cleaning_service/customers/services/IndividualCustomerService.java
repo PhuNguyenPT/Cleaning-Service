@@ -29,10 +29,11 @@ public class IndividualCustomerService {
     private final IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler;
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
+    private final OrganizationDetailsService organizationDetailsService;
 
     public IndividualCustomerService(IndividualCustomerRepository individualCustomerRepository,
                                      IndividualCustomerMapper individualCustomerMapper,
-                                     AccountAssociationService accountAssociationService, IndividualCustomerResponseModelAssembler individualCustomerResponseModelAssembler, IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler, AbstractCustomerService abstractCustomerService, BusinessEntityService businessEntityService) {
+                                     AccountAssociationService accountAssociationService, IndividualCustomerResponseModelAssembler individualCustomerResponseModelAssembler, IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler, AbstractCustomerService abstractCustomerService, BusinessEntityService businessEntityService, OrganizationDetailsService organizationDetailsService) {
         this.individualCustomerRepository = individualCustomerRepository;
         this.individualCustomerMapper = individualCustomerMapper;
         this.accountAssociationService = accountAssociationService;
@@ -40,6 +41,7 @@ public class IndividualCustomerService {
         this.individualCustomerDetailsResponseModelAssembler = individualCustomerDetailsResponseModelAssembler;
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
+        this.organizationDetailsService = organizationDetailsService;
     }
 
     @Transactional
@@ -69,7 +71,7 @@ public class IndividualCustomerService {
     @Transactional
     public IndividualCustomerDetailsResponseModel getIndividualCustomerById(UUID id, User user) {
         IndividualCustomer individualCustomer = getByIdAndUser(id, user);
-        return individualCustomerDetailsResponseModelAssembler.toModel(individualCustomer)
+        return individualCustomerDetailsResponseModelAssembler.toModel(individualCustomer);
     }
 
     @Transactional
@@ -97,14 +99,9 @@ public class IndividualCustomerService {
 
     @Transactional
     void updateCustomerFields(IndividualCustomer individualCustomer, @Valid IndividualCustomerUpdateRequest updateRequest) {
-        if (updateRequest.taxId() != null) {
-            individualCustomer.setTaxId(updateRequest.taxId());
-        }
-        if (updateRequest.registrationNumber() != null) {
-            individualCustomer.setRegistrationNumber(updateRequest.registrationNumber());
-        }
+        organizationDetailsService.updateOrganizationDetails(individualCustomer, updateRequest.organizationDetails());
 
-        abstractCustomerService.updateCustomer(individualCustomer, updateRequest.customerDetails());
+        abstractCustomerService.updateAbstractCustomerDetails(individualCustomer, updateRequest.customerDetails());
 
         businessEntityService.updateBusinessEntityFields(individualCustomer, updateRequest.businessEntityDetails());
     }

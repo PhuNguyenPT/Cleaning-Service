@@ -29,8 +29,9 @@ public class CompanyService {
     private final CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler;
     private final BusinessEntityService businessEntityService;
     private final AbstractCustomerService abstractCustomerService;
+    private final OrganizationDetailsService organizationDetailsService;
 
-    public CompanyService(CompanyMapper companyMapper, CompanyRepository companyRepository, AccountAssociationService accountAssociationService, CompanyResponseModelAssembler companyResponseModelAssembler, CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler, BusinessEntityService businessEntityService, AbstractCustomerService abstractCustomerService) {
+    public CompanyService(CompanyMapper companyMapper, CompanyRepository companyRepository, AccountAssociationService accountAssociationService, CompanyResponseModelAssembler companyResponseModelAssembler, CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler, BusinessEntityService businessEntityService, AbstractCustomerService abstractCustomerService, OrganizationDetailsService organizationDetailsService) {
         this.companyMapper = companyMapper;
         this.companyRepository = companyRepository;
         this.accountAssociationService = accountAssociationService;
@@ -38,6 +39,7 @@ public class CompanyService {
         this.companyDetailsResponseModelAssembler = companyDetailsResponseModelAssembler;
         this.businessEntityService = businessEntityService;
         this.abstractCustomerService = abstractCustomerService;
+        this.organizationDetailsService = organizationDetailsService;
     }
 
     @Transactional
@@ -110,14 +112,10 @@ public class CompanyService {
         if (companyRequest.companyType() != null) {
             company.setCompanyType(companyRequest.companyType());
         }
-        if (companyRequest.taxId() != null) {
-            company.setTaxId(companyRequest.taxId());
-        }
-        if (companyRequest.registrationNumber() != null) {
-            company.setRegistrationNumber(companyRequest.registrationNumber());
-        }
 
-        abstractCustomerService.updateCustomer(company, companyRequest.customerDetails());
+        organizationDetailsService.updateOrganizationDetails(company, companyRequest.organizationDetails());
+
+        abstractCustomerService.updateAbstractCustomerDetails(company, companyRequest.customerDetails());
 
         businessEntityService.updateBusinessEntityFields(company, companyRequest.businessEntityDetails());
     }

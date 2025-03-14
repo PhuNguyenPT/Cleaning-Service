@@ -13,6 +13,7 @@ import java.util.Set;
 public record GovernmentRequest(
         @NotBlank @ValidTaxId String taxId,
         @NotBlank @ValidRegistrationNumber String registrationNumber,
+
         String contractorName,
         String departmentName,
         boolean isTaxExempt,
@@ -22,7 +23,7 @@ public record GovernmentRequest(
         EPaymentType paymentMethod,
         Set<EDay> preferredDays,
 
-        String governmentName,
+        @NotBlank String governmentName,
         String address,
         String phone,
         String email,

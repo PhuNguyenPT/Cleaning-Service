@@ -29,8 +29,9 @@ public class GovernmentService {
     private final GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler;
     private final BusinessEntityService businessEntityService;
     private final AbstractCustomerService abstractCustomerService;
+    private final OrganizationDetailsService organizationDetailsService;
 
-    public GovernmentService(GovernmentRepository governmentRepository, AccountAssociationService accountAssociationService, GovernmentMapper governmentMapper, GovernmentResponseModelAssembler governmentResponseModelAssembler, GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler, BusinessEntityService businessEntityService, AbstractCustomerService abstractCustomerService) {
+    public GovernmentService(GovernmentRepository governmentRepository, AccountAssociationService accountAssociationService, GovernmentMapper governmentMapper, GovernmentResponseModelAssembler governmentResponseModelAssembler, GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler, BusinessEntityService businessEntityService, AbstractCustomerService abstractCustomerService, OrganizationDetailsService organizationDetailsService) {
         this.governmentRepository = governmentRepository;
         this.accountAssociationService = accountAssociationService;
         this.governmentMapper = governmentMapper;
@@ -38,6 +39,7 @@ public class GovernmentService {
         this.governmentDetailsResponseModelAssembler = governmentDetailsResponseModelAssembler;
         this.businessEntityService = businessEntityService;
         this.abstractCustomerService = abstractCustomerService;
+        this.organizationDetailsService = organizationDetailsService;
     }
 
 
@@ -91,12 +93,8 @@ public class GovernmentService {
 
     @Transactional
     void updateGovernmentFields(Government government, @Valid GovernmentUpdateRequest updateRequest) {
-        if (updateRequest.taxId() != null) {
-            government.setTaxId(updateRequest.taxId());
-        }
-        if (updateRequest.registrationNumber() != null) {
-            government.setRegistrationNumber(updateRequest.registrationNumber());
-        }
+        organizationDetailsService.updateOrganizationDetails(government, updateRequest.organizationDetails());
+
         if (updateRequest.contractorName() != null) {
             government.setContractorName(updateRequest.contractorName());
         }
@@ -110,7 +108,7 @@ public class GovernmentService {
             government.setRequiresEmergencyCleaning(updateRequest.requiresEmergencyCleaning());
         }
 
-        abstractCustomerService.updateCustomer(government, updateRequest.customerDetails());
+        abstractCustomerService.updateAbstractCustomerDetails(government, updateRequest.customerDetails());
 
         businessEntityService.updateBusinessEntityFields(government, updateRequest.businessEntityDetails());
     }
