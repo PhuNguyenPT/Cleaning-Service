@@ -34,11 +34,13 @@ public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrgani
         this.registrationNumber = registrationNumber;
     }
 
-    public void setTaxId(String taxId) {
+    @Override
+    public void setTaxId(@ValidTaxId String taxId) {
         this.taxId = taxId;
     }
 
-    public void setRegistrationNumber(String registrationNumber) {
+    @Override
+    public void setRegistrationNumber(@ValidRegistrationNumber String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
 

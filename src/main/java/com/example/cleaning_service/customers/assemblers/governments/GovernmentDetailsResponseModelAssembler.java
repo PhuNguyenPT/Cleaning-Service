@@ -6,7 +6,9 @@ import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 
+@Component
 public class GovernmentDetailsResponseModelAssembler extends RepresentationModelAssemblerSupport<Government, GovernmentDetailsResponseModel> {
 
     private final GovernmentMapper governmentMapper;

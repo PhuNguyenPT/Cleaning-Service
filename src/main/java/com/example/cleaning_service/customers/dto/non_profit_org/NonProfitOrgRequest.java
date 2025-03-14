@@ -18,7 +18,7 @@ public record NonProfitOrgRequest(
         EPaymentType paymentMethod,
         Set<EDay> preferredDays,
 
-        String organizationName,
+        @NotBlank String organizationName,
         String address,
         String phone,
         String email,
