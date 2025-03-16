@@ -3,15 +3,13 @@ package com.example.cleaning_service.customers.dto.governments;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EPaymentType;
-import com.example.cleaning_service.validations.ValidRegistrationNumber;
-import com.example.cleaning_service.validations.ValidTaxId;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
 
 public class GovernmentDetailsResponseModel extends RepresentationModel<GovernmentDetailsResponseModel> {
-    private final @ValidTaxId String taxId;
-    private final @ValidRegistrationNumber String registrationNumber;
+    private final String taxId;
+    private final String registrationNumber;
     private final String contractorName;
     private final String departmentName;
     private final boolean isTaxExempt;
@@ -30,8 +28,8 @@ public class GovernmentDetailsResponseModel extends RepresentationModel<Governme
     private final String notes;
 
     public GovernmentDetailsResponseModel(
-            @ValidTaxId String taxId,
-            @ValidRegistrationNumber String registrationNumber,
+            String taxId,
+            String registrationNumber,
             String contractorName,
             String departmentName,
             boolean isTaxExempt,

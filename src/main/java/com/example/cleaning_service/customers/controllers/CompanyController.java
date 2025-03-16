@@ -63,9 +63,9 @@ public class CompanyController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel updateCompany(@PathVariable UUID id,
-                                                                     @RequestBody @Valid CompanyUpdateRequest updateRequest,
-                                                                     @AuthenticationPrincipal User user) {
-        return companyService.updateCompanyDetails(id, updateRequest, user);
+                                                     @RequestBody @Valid CompanyUpdateRequest updateRequest,
+                                                     @AuthenticationPrincipal User user) {
+        return companyService.updateCompanyDetailsById(id, updateRequest, user);
     }
 
     /**

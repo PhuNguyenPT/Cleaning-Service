@@ -3,6 +3,9 @@ package com.example.cleaning_service.exceptions;
 import com.nimbusds.jose.JOSEException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.RollbackException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,15 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+            errors.put(violation.getPropertyPath().toString(), violation.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEntityNotFoundException(EntityNotFoundException ex) {
@@ -45,14 +57,6 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage()));
 
         return ResponseEntity.badRequest().body(errors);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(RuntimeException ex) {
-        logger.error("Unexpected error: {}", ex.getMessage(), ex);
-        Map<String, String> response = new HashMap<>();
-        response.put("error", "An unexpected error occurred. Please try again later.");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

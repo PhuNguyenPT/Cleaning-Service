@@ -1,8 +1,6 @@
 package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.customers.enums.*;
-import com.example.cleaning_service.validations.ValidRegistrationNumber;
-import com.example.cleaning_service.validations.ValidTaxId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,12 +23,10 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    @ValidTaxId
     private String taxId;
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    @ValidRegistrationNumber
     private String registrationNumber;
 
     public Company() {
@@ -64,7 +60,7 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
     }
 
     @Override
-    public void setRegistrationNumber(@ValidRegistrationNumber String registrationNumber) {
+    public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
 
@@ -74,7 +70,7 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
     }
 
     @Override
-    public void setTaxId(@ValidTaxId String taxId) {
+    public void setTaxId(String taxId) {
         this.taxId = taxId;
     }
 

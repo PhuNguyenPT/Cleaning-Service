@@ -4,8 +4,6 @@ import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
-import com.example.cleaning_service.validations.ValidRegistrationNumber;
-import com.example.cleaning_service.validations.ValidTaxId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,12 +21,10 @@ public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrgani
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    @ValidTaxId
     private String taxId;
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    @ValidRegistrationNumber
     private String registrationNumber;
 
     public NonProfitOrg() {
@@ -43,12 +39,12 @@ public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrgani
     }
 
     @Override
-    public void setTaxId(@ValidTaxId String taxId) {
+    public void setTaxId(String taxId) {
         this.taxId = taxId;
     }
 
     @Override
-    public void setRegistrationNumber(@ValidRegistrationNumber String registrationNumber) {
+    public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
 

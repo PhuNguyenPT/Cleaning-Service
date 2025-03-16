@@ -25,7 +25,7 @@ public class IndividualCustomerController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public IndividualCustomerResponseModel createIndividualCustomer(
-            @Valid IndividualCustomerRequest individualCustomerRequest,
+            @RequestBody@Valid IndividualCustomerRequest individualCustomerRequest,
             @AuthenticationPrincipal User user
             ) {
         return individualCustomerService.createIndividualCustomer(individualCustomerRequest, user);
@@ -35,7 +35,7 @@ public class IndividualCustomerController {
     @ResponseStatus(HttpStatus.OK)
     public IndividualCustomerDetailsResponseModel getIndividualCustomerById(@PathVariable UUID id,
                                                                             @AuthenticationPrincipal User user) {
-        return individualCustomerService.getIndividualCustomerById(id, user);
+        return individualCustomerService.getIndividualCustomerDetailsById(id, user);
     }
 
     @PutMapping("/{id}")

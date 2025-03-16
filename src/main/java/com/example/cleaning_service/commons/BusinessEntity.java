@@ -18,12 +18,23 @@ public class BusinessEntity extends Auditable {
     private String name;
     private String address;
 
-    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$",
-            message = "Invalid international phone number format")
+    @Pattern(
+            regexp = "^\\+?[1-9]\\d{1,14}$",
+            message = "Invalid international phone number format. " +
+                    "Expected format: optional '+' followed by 2 to 15 digits. " +
+                    "Examples: +1234567890, 1234567890."
+    )
     private String phone;
 
-    @Email(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
-            message = "Please provide a valid email address")
+    @Email(
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
+            message = "Invalid email format. " +
+                    "Expected format: local-part@domain.extension. " +
+                    "- Local part: letters, numbers, dots (.), underscores (_), percent (%), plus (+), or hyphens (-). " +
+                    "- Domain: letters, numbers, dots (.) and hyphens (-). " +
+                    "- Extension: 2 to 6 letters (e.g., .com, .net, .org). " +
+                    "Examples: user@example.com, john.doe@company.org."
+    )
     @Column(unique = true)
     private String email;
 
