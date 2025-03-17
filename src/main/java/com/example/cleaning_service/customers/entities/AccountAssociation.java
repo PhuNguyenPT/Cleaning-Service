@@ -20,7 +20,7 @@ public class AccountAssociation extends Auditable {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id")
     private AbstractCustomer customer;
 
     private String notes;
