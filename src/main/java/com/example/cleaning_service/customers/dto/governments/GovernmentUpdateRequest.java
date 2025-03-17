@@ -9,6 +9,8 @@ import com.example.cleaning_service.validator.ITaxIdentifiable;
 import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Schema(description = "Request DTO for creating a government entity",
         example = """
@@ -39,11 +41,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record GovernmentUpdateRequest (
         OrganizationDetailsRequest organizationDetails,
 
+        @Size(min = 2, max = 100, message = "Contractor name must be between 2 and 100 characters")
+        @Pattern(regexp = "^[a-zA-Z\\s-]+$", message = "Contractor name must contain only letters, spaces, and hyphens")
         String contractorName,
+        @Size(min = 2, max = 100, message = "Department name must be between 2 and 100 characters")
+        @Pattern(regexp = "^[a-zA-Z\\s-]+$", message = "Department name must contain only letters, spaces, and hyphens")
         String departmentName,
-        Boolean isTaxExempt,
-        Boolean requiresEmergencyCleaning,
-
+        boolean isTaxExempt,
+        boolean requiresEmergencyCleaning,
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails

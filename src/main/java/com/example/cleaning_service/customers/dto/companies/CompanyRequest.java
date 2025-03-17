@@ -38,9 +38,7 @@ import java.util.Set;
 @ValidRegistrationNumber
 public record CompanyRequest(
         @NotNull ECompanyType companyType,
-
         @NotBlank String taxId,
-
         @NotBlank String registrationNumber,
 
         @Size(min = 10, max = 255, message = "Billing address must be between 10 and 255 characters")

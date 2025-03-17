@@ -8,10 +8,7 @@ import com.example.cleaning_service.validator.ITaxIdentifiable;
 import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 
 import java.util.Set;
 
@@ -38,14 +35,17 @@ import java.util.Set;
 @ValidTaxId
 @ValidRegistrationNumber
 public record IndividualCustomerRequest(
-        String taxId,
-        String registrationNumber,
+        @NotBlank String taxId,
+        @NotBlank String registrationNumber,
 
+        @Size(min = 10, max = 255, message = "Billing address must be between 10 and 255 characters")
         String billingAddress,
         EPaymentType paymentMethod,
         Set<EDay> preferredDays,
 
+        @NotBlank @Size(min = 2, max = 100, message = "Customer name must be between 2 and 100 characters")
         @NotBlank String customerName,
+        @Size(min = 5, max = 200, message = "Address must be between 5 and 200 characters")
         String address,
         @Pattern(
                 regexp = "^\\+?[1-9]\\d{1,14}$",
@@ -64,10 +64,17 @@ public record IndividualCustomerRequest(
                         "Examples: user@example.com, john.doe@company.org."
         )
         String email,
+        @Pattern(regexp = "^[a-zA-Z\\s-]{2,50}$",
+                message = "City name must be 2-50 characters and contain only letters, spaces, and hyphens")
         String city,
+        @Pattern(regexp = "^[a-zA-Z\\s-]{2,50}$",
+                message = "City name must be 2-50 characters and contain only letters, spaces, and hyphens")
         String state,
+        @Pattern(regexp = "^[A-Z0-9\\s-]{2,10}$",
+                message = "Postal code format varies by country. Must be 2-10 characters including letters, numbers, spaces, and hyphens.")
         String zip,
         @NotNull ECountryType country,
+        @Size(max = 500, message = "Notes cannot exceed 500 characters")
         String notes
         ) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
         {

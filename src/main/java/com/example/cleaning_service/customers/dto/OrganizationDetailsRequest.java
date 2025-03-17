@@ -1,7 +1,9 @@
 package com.example.cleaning_service.customers.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record OrganizationDetailsRequest(
-        String taxId,
-        String registrationNumber
+        @NotBlank String taxId,
+        @NotBlank String registrationNumber
 ) {
 }
