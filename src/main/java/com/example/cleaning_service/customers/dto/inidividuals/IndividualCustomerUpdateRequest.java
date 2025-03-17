@@ -14,9 +14,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
         example = """
         {
           "taxId": "123456789",
-          "registrationNumber": "US987654321",
+          "registrationNumber": "US98765432",
           "billingAddress": "789 Main Street, Apt 12B, Chicago, IL 60616, US",
-          "paymentMethod": "CREDIT_CARD",
+          "paymentMethod": "CREDIT",
           "preferredDays": ["TUESDAY", "FRIDAY"],
           "customerName": "John Doe",
           "address": "456 Elm St",
