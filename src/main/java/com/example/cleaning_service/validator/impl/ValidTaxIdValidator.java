@@ -1,16 +1,20 @@
 package com.example.cleaning_service.validator.impl;
 
-import com.example.cleaning_service.validator.TaxIdentifiable;
+import com.example.cleaning_service.validator.ITaxIdentifiable;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.validator.ValidTaxId;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, TaxIdentifiable> {
+public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, ITaxIdentifiable> {
+    private static final Logger logger = LoggerFactory.getLogger(ValidTaxIdValidator.class);
+
     private static final Map<ECountryType, Pattern> TAX_ID_PATTERNS = new HashMap<>();
 
     static {
@@ -32,8 +36,6 @@ public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, TaxI
         // Australia - ABN - 11 digits
         TAX_ID_PATTERNS.put(ECountryType.AU, Pattern.compile("^\\d{11}$"));
 
-        // Add more country-specific patterns as needed
-
         // Default pattern for countries not specifically defined - allow alphanumeric with hyphens, 2-20 chars
         TAX_ID_PATTERNS.put(null, Pattern.compile("^[A-Z0-9\\-]{2,20}$"));
     }
@@ -51,13 +53,16 @@ public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, TaxI
     }
 
     @Override
-    public boolean isValid(TaxIdentifiable taxIdentifiable, ConstraintValidatorContext context) {
-        if (taxIdentifiable == null || taxIdentifiable.getTaxId() == null || taxIdentifiable.getCountry() == null) {
+    public boolean isValid(ITaxIdentifiable taxIdentifiable, ConstraintValidatorContext context) {
+        if (taxIdentifiable == null || (taxIdentifiable.getTaxId() == null && taxIdentifiable.getCountry() == null)) {
+            logger.warn("Validation skipped: entity or both tax ID and country are null.");
             return true; // Let @NotNull or @NotBlank handle these cases
         }
 
         String taxId = taxIdentifiable.getTaxId();
         ECountryType country = taxIdentifiable.getCountry();
+
+        logger.info("Validating tax ID '{}' for country '{}'", taxId, country);
 
         // Get the pattern for the specified country or use default if not found
         Pattern pattern = TAX_ID_PATTERNS.getOrDefault(country, TAX_ID_PATTERNS.get(null));
@@ -65,13 +70,16 @@ public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, TaxI
         boolean isValid = pattern.matcher(taxId).matches();
 
         if (!isValid) {
+            String errorMessage = "Invalid tax ID format for " + country + ". " + getTaxIdFormatMessage(country);
+            logger.warn("Validation failed: {}", errorMessage);
+
             // Customize the error message with country-specific information
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(
-                            "Invalid tax ID format for " + country + ". " + getTaxIdFormatMessage(country))
+            context.buildConstraintViolationWithTemplate(errorMessage)
                     .addPropertyNode("taxId")
                     .addConstraintViolation();
         }
+        logger.info("Validation passed for tax ID '{}'", taxId);
 
         return isValid;
     }

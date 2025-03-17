@@ -1,16 +1,20 @@
 package com.example.cleaning_service.validator.impl;
 
 import com.example.cleaning_service.customers.enums.ECountryType;
-import com.example.cleaning_service.validator.RegistrationNumberIdentifiable;
+import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
 import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class ValidRegistrationNumberValidator implements ConstraintValidator<ValidRegistrationNumber, RegistrationNumberIdentifiable> {
+public class ValidRegistrationNumberValidator implements ConstraintValidator<ValidRegistrationNumber, IRegistrationNumberIdentifiable> {
+    private static final Logger logger = LoggerFactory.getLogger(ValidRegistrationNumberValidator.class);
+
     private static final Map<ECountryType, Pattern> REGISTRATION_NUMBER_PATTERNS = new HashMap<>();
 
     static {
@@ -49,13 +53,16 @@ public class ValidRegistrationNumberValidator implements ConstraintValidator<Val
     }
 
     @Override
-    public boolean isValid(RegistrationNumberIdentifiable entity, ConstraintValidatorContext context) {
-        if (entity == null || entity.getRegistrationNumber() == null || entity.getCountry() == null) {
+    public boolean isValid(IRegistrationNumberIdentifiable entity, ConstraintValidatorContext context) {
+        if (entity == null || (entity.getRegistrationNumber() == null && entity.getCountry() == null)) {
+            logger.warn("Validation skipped: entity or both registration number and country are null.");
             return true; // Let @NotNull or @NotBlank handle these cases
         }
 
         String registrationNumber = entity.getRegistrationNumber();
         ECountryType country = entity.getCountry();
+
+        logger.info("Validating registration number '{}' for country '{}'", registrationNumber, country);
 
         // Get the pattern for the specified country or use default if not found
         Pattern pattern = REGISTRATION_NUMBER_PATTERNS.getOrDefault(country, REGISTRATION_NUMBER_PATTERNS.get(null));
@@ -63,13 +70,16 @@ public class ValidRegistrationNumberValidator implements ConstraintValidator<Val
         boolean isValid = pattern.matcher(registrationNumber).matches();
 
         if (!isValid) {
+            String errorMessage = "Invalid registration number format for " + country + ". " + getRegistrationNumberFormatMessage(country);
+            logger.warn("Validation failed: {}", errorMessage);
+
             // Customize the error message with country-specific information
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(
-                            "Invalid registration number format for " + country + ". " + getRegistrationNumberFormatMessage(country))
+            context.buildConstraintViolationWithTemplate(errorMessage)
                     .addPropertyNode("registrationNumber")
                     .addConstraintViolation();
         }
+        logger.info("Validation passed for registration number '{}'", registrationNumber);
 
         return isValid;
     }
