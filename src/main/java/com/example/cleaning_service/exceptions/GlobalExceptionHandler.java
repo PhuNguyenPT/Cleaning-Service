@@ -3,7 +3,6 @@ package com.example.cleaning_service.exceptions;
 import com.nimbusds.jose.JOSEException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.RollbackException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
