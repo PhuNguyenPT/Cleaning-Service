@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -15,7 +16,7 @@ import java.util.regex.Pattern;
 public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, ITaxIdentifiable> {
     private static final Logger logger = LoggerFactory.getLogger(ValidTaxIdValidator.class);
 
-    private static final Map<ECountryType, Pattern> TAX_ID_PATTERNS = new HashMap<>();
+    private static final Map<ECountryType, Pattern> TAX_ID_PATTERNS = new EnumMap<>(ECountryType.class);
 
     static {
         // United States - 9 digits, may contain hyphens
@@ -35,9 +36,6 @@ public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, ITax
 
         // Australia - ABN - 11 digits
         TAX_ID_PATTERNS.put(ECountryType.AU, Pattern.compile("^\\d{11}$"));
-
-        // Default pattern for countries not specifically defined - allow alphanumeric with hyphens, 2-20 chars
-        TAX_ID_PATTERNS.put(null, Pattern.compile("^[A-Z0-9\\-]{2,20}$"));
     }
 
     private String getTaxIdFormatMessage(ECountryType country) {
@@ -66,6 +64,7 @@ public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, ITax
 
         // Get the pattern for the specified country or use default if not found
         Pattern pattern = TAX_ID_PATTERNS.getOrDefault(country, TAX_ID_PATTERNS.get(null));
+        logger.info("Pattern for country '{}' for tax ID '{}' is '{}'", country, taxId, pattern);
 
         boolean isValid = pattern.matcher(taxId).matches();
 

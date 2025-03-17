@@ -8,14 +8,14 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ValidRegistrationNumberValidator implements ConstraintValidator<ValidRegistrationNumber, IRegistrationNumberIdentifiable> {
     private static final Logger logger = LoggerFactory.getLogger(ValidRegistrationNumberValidator.class);
 
-    private static final Map<ECountryType, Pattern> REGISTRATION_NUMBER_PATTERNS = new HashMap<>();
+    private static final Map<ECountryType, Pattern> REGISTRATION_NUMBER_PATTERNS = new EnumMap<>(ECountryType.class);
 
     static {
         // United States - 2 letters followed by 8 digits
@@ -35,9 +35,6 @@ public class ValidRegistrationNumberValidator implements ConstraintValidator<Val
 
         // Australia - ACN format: 9 digits with optional spaces
         REGISTRATION_NUMBER_PATTERNS.put(ECountryType.AU, Pattern.compile("^\\d{3}\\s?\\d{3}\\s?\\d{3}$"));
-
-        // Default pattern for countries not specifically defined
-        REGISTRATION_NUMBER_PATTERNS.put(null, Pattern.compile("^[A-Z0-9\\-]{5,15}$"));
     }
 
     private String getRegistrationNumberFormatMessage(ECountryType country) {
@@ -66,6 +63,7 @@ public class ValidRegistrationNumberValidator implements ConstraintValidator<Val
 
         // Get the pattern for the specified country or use default if not found
         Pattern pattern = REGISTRATION_NUMBER_PATTERNS.getOrDefault(country, REGISTRATION_NUMBER_PATTERNS.get(null));
+        logger.info("Pattern for country '{}' for registration number '{}' is '{}'", country, registrationNumber, pattern);
 
         boolean isValid = pattern.matcher(registrationNumber).matches();
 
