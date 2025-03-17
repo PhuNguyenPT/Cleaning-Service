@@ -6,7 +6,6 @@ import com.example.cleaning_service.security.entities.user.User;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
