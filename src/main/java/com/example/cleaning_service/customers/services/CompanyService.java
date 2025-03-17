@@ -89,6 +89,8 @@ public class CompanyService {
      */
     @Transactional
     public CompanyResponseModel createCompany(@NotNull CompanyRequest companyRequest, @NotNull User user) {
+        log.info("Attempting to create a company for user: {}", user.getUsername());
+
         if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
             throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
         }
@@ -96,6 +98,7 @@ public class CompanyService {
         // Save the company
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
         Company savedCompany = saveCompany(company);
+        log.info("Company {} saved successfully with ID: {}", savedCompany.getName(), savedCompany.getId());
 
         EAssociationType associationType = organizationDetailsService.getEAssociationTypeByIOrganization(savedCompany);
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedCompany);
@@ -112,7 +115,8 @@ public class CompanyService {
         }
 
         CompanyResponseModel companyResponseModel = companyResponseModelAssembler.toModel(accountCompany);
-        log.info("Created company response: {}", companyResponseModel);
+        log.info("Successfully created company response: {}", companyResponseModel);
+
         return companyResponseModel;
     }
 
@@ -124,7 +128,10 @@ public class CompanyService {
      */
     @Transactional
     Company saveCompany(@NotNull Company company) {
-        return companyRepository.save(company);
+        log.info("Saving company: {}", company);
+        Company savedCompany = companyRepository.save(company);
+        log.info("Company saved with ID: {}", savedCompany.getId());
+        return savedCompany;
     }
 
     /**
@@ -141,9 +148,10 @@ public class CompanyService {
      */
     @Transactional
     public CompanyDetailsResponseModel getCompanyDetailsResponseModelById(UUID id, User user) {
+        log.info("Fetching company details for ID: {} by user: {}", id, user.getUsername());
         Company dbCompany = getByIdAndUser(id, user);
         CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsResponseModelAssembler.toModel(dbCompany);
-        log.info("Retrieved company details response: {}", companyDetailsResponseModel);
+        log.info("Retrieved company details: {}", companyDetailsResponseModel);
         return companyDetailsResponseModel;
     }
 
@@ -163,9 +171,10 @@ public class CompanyService {
      */
     @Transactional
     Company getByIdAndUser(UUID id, User user) {
+        log.info("Fetching company with ID: {} for user: {}", id, user.getUsername());
         Company company = findById(id);
         if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, company)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with the company with id " + id);
+            throw new IllegalStateException("User " + user.getUsername() + " is not associated with the company.");
         }
         return company;
     }
@@ -183,6 +192,7 @@ public class CompanyService {
      */
     @Transactional
     Company findById(UUID id) {
+        log.info("Looking for company with ID: {}", id);
         return companyRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Company with id " + id + " not found."));
     }
@@ -203,10 +213,13 @@ public class CompanyService {
      */
     @Transactional
     public CompanyDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid CompanyUpdateRequest updateRequest, User user) {
+        log.info("Updating company details for ID: {} by user: {}", id, user.getUsername());
         Company dbCompany = getByIdAndUser(id, user);
 
         updateCompanyFields(dbCompany, updateRequest);
         Company updatedCompany = saveCompany(dbCompany);
+
+        log.info("Successfully updated company with ID: {}", updatedCompany.getId());
         return companyDetailsResponseModelAssembler.toModel(updatedCompany);
     }
 
@@ -224,16 +237,20 @@ public class CompanyService {
      */
     @Transactional
     void updateCompanyFields(Company company, @Valid CompanyUpdateRequest companyRequest) {
+        log.debug("Updating fields for company ID: {}", company.getId());
+
         if (companyRequest.companyType() != null) {
+            log.debug("Updating company type: {}", companyRequest.companyType());
             company.setCompanyType(companyRequest.companyType());
         }
 
         organizationDetailsService.updateOrganizationDetails(company, companyRequest.organizationDetails());
-
         abstractCustomerService.updateAbstractCustomerDetails(company, companyRequest.customerDetails());
-
         businessEntityService.updateBusinessEntityFields(company, companyRequest.businessEntityDetails());
+
+        log.info("Successfully updated fields for company ID: {}", company.getId());
     }
+
 
     /**
      * Deletes a company by its ID.
@@ -249,8 +266,13 @@ public class CompanyService {
      */
     @Transactional
     public void deleteCompanyById(UUID id, User user) {
+        log.info("Attempting to delete company with ID: {} by user: {}", id, user.getUsername());
         Company dbCompany = getByIdAndUser(id, user);
+
+        log.info("Detaching company ID: {} from user associations", id);
         accountAssociationService.detachCustomerFromAssociation(dbCompany);
+
         companyRepository.delete(dbCompany);
+        log.info("Successfully deleted company with ID: {}", id);
     }
 }
