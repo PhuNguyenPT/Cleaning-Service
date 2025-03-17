@@ -219,7 +219,7 @@ public class NonProfitOrgService {
 
         abstractCustomerService.updateAbstractCustomerDetails(nonProfitOrg, updateRequest.customerDetails());
 
-        businessEntityService.updateBusinessEntityFields(nonProfitOrg, updateRequest.businessEntityRequest());
+        businessEntityService.updateBusinessEntityFields(nonProfitOrg, updateRequest.businessEntityDetails());
     }
 
     /**
