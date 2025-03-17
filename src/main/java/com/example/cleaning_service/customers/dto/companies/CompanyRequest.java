@@ -1,7 +1,7 @@
 package com.example.cleaning_service.customers.dto.companies;
 
-import com.example.cleaning_service.validator.RegistrationNumberIdentifiable;
-import com.example.cleaning_service.validator.TaxIdentifiable;
+import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
+import com.example.cleaning_service.validator.ITaxIdentifiable;
 import com.example.cleaning_service.customers.enums.ECompanyType;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
@@ -81,7 +81,7 @@ public record CompanyRequest(
         @NotNull ECountryType country,
         @Size(max = 500, message = "Notes cannot exceed 500 characters")
         String notes
-) implements TaxIdentifiable, RegistrationNumberIdentifiable
+) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
 {
         @Override
         public String getRegistrationNumber() {

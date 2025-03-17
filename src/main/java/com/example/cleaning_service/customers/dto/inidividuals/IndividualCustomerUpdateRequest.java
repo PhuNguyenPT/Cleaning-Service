@@ -4,8 +4,8 @@ import com.example.cleaning_service.commons.BusinessEntityRequest;
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;
 import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.enums.ECountryType;
-import com.example.cleaning_service.validator.RegistrationNumberIdentifiable;
-import com.example.cleaning_service.validator.TaxIdentifiable;
+import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
+import com.example.cleaning_service.validator.ITaxIdentifiable;
 
 public record IndividualCustomerUpdateRequest(
         OrganizationDetailsRequest organizationDetails,
@@ -13,7 +13,7 @@ public record IndividualCustomerUpdateRequest(
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
-) implements TaxIdentifiable, RegistrationNumberIdentifiable {
+) implements ITaxIdentifiable, IRegistrationNumberIdentifiable {
     @Override
     public String getRegistrationNumber()
     {

@@ -3,8 +3,10 @@ package com.example.cleaning_service.customers.dto.inidividuals;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EPaymentType;
-import com.example.cleaning_service.validator.RegistrationNumberIdentifiable;
-import com.example.cleaning_service.validator.TaxIdentifiable;
+import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
+import com.example.cleaning_service.validator.ITaxIdentifiable;
+import com.example.cleaning_service.validator.ValidRegistrationNumber;
+import com.example.cleaning_service.validator.ValidTaxId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +35,8 @@ import java.util.Set;
         }
         """
 )
+@ValidTaxId
+@ValidRegistrationNumber
 public record IndividualCustomerRequest(
         String taxId,
         String registrationNumber,
@@ -65,7 +69,7 @@ public record IndividualCustomerRequest(
         String zip,
         @NotNull ECountryType country,
         String notes
-        ) implements TaxIdentifiable, RegistrationNumberIdentifiable
+        ) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
         {
         @Override
         public String getRegistrationNumber() {
