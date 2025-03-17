@@ -47,8 +47,9 @@ public record GovernmentUpdateRequest (
         @Size(min = 2, max = 100, message = "Department name must be between 2 and 100 characters")
         @Pattern(regexp = "^[a-zA-Z\\s-]+$", message = "Department name must contain only letters, spaces, and hyphens")
         String departmentName,
-        boolean isTaxExempt,
-        boolean requiresEmergencyCleaning,
+        Boolean isTaxExempt,
+        Boolean requiresEmergencyCleaning,
+
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
