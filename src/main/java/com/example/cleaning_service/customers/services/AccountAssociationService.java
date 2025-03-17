@@ -136,6 +136,6 @@ public class AccountAssociationService {
     @Transactional
     void deleteAccountAssociationByUser(@NotNull UserDeletedEvent event) {
         accountAssociationRepository.deleteByUser(event.user());
-        log.info("User with id " + event.user().getId() + " 's account successfully deleted.");
+        log.info("User with id {} 's account successfully deleted.", event.user().getId());
     }
 }
