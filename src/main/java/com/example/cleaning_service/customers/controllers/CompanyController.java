@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/companies")
-@PreAuthorize("hasRole('USER')")
 public class CompanyController {
     private final CompanyService companyService;
 
@@ -31,6 +30,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The created company response model.
      */
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(produces = "application/hal+json")
     @ResponseStatus(HttpStatus.CREATED)
     public CompanyResponseModel createCompany(@RequestBody @Valid CompanyRequest companyRequest,
@@ -45,6 +45,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The company details response model.
      */
+    @PreAuthorize("hasRole('USER')")
     @GetMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel getCompanyById(@PathVariable UUID id,
@@ -60,6 +61,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The updated company details.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel updateCompany(@PathVariable UUID id,
@@ -72,11 +74,11 @@ public class CompanyController {
      * Deletes a company by ID for the authenticated user.
      *
      * @param id The UUID of the company.
-     * @param user The authenticated user.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCompany(@PathVariable UUID id, @AuthenticationPrincipal User user) {
-        companyService.deleteCompanyById(id, user);
+    public void deleteCompany(@PathVariable UUID id) {
+        companyService.deleteCompanyById(id);
     }
 }

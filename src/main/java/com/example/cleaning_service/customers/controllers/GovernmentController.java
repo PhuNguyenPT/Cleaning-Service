@@ -8,6 +8,7 @@ import com.example.cleaning_service.customers.services.GovernmentService;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class GovernmentController {
         this.governmentService = governmentService;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public GovernmentResponseModel createGovernment(@RequestBody @Valid GovernmentRequest governmentRequest,
@@ -29,6 +31,7 @@ public class GovernmentController {
         return governmentService.createGovernment(governmentRequest, user);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public GovernmentDetailsResponseModel getGovernmentById(@PathVariable UUID id,
@@ -36,6 +39,7 @@ public class GovernmentController {
         return governmentService.getGovernmentDetailsResponseModelById(id, user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public GovernmentDetailsResponseModel updateGovernmentById(@PathVariable UUID id,
@@ -44,6 +48,7 @@ public class GovernmentController {
         return governmentService.updateCompanyDetailsById(id, updateRequest, user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGovernmentById(@PathVariable UUID id, @AuthenticationPrincipal User user) {

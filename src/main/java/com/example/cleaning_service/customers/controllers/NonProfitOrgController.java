@@ -8,6 +8,7 @@ import com.example.cleaning_service.customers.services.NonProfitOrgService;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class NonProfitOrgController {
         this.nonProfitOrgService = nonProfitOrgService;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public NonProfitOrgResponseModel createProfitOrg(@RequestBody @Valid NonProfitOrgRequest nonProfitOrgRequest,
@@ -29,6 +31,7 @@ public class NonProfitOrgController {
         return nonProfitOrgService.createProfitOrg(nonProfitOrgRequest, user);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public NonProfitOrgDetailsResponseModel getNonProfitOrgById(@PathVariable UUID id,
@@ -36,6 +39,7 @@ public class NonProfitOrgController {
         return nonProfitOrgService.getNonProfitOrgDetailsResponseModelById(id, user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @ResponseStatus
     public NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(@PathVariable UUID id,
@@ -44,6 +48,7 @@ public class NonProfitOrgController {
         return nonProfitOrgService.updateNonProfitOrgDetailsById(id, updateRequest, user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNonProfitOrgById(@PathVariable UUID id, User user) {
