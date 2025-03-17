@@ -2,12 +2,20 @@ package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.customers.dto.AccountAssociationRequest;
 import com.example.cleaning_service.customers.entities.*;
-import com.example.cleaning_service.customers.mappers.AccountAssociationMapper;
+import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.repositories.AccountAssociationRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import com.example.cleaning_service.security.events.UserDeletedEvent;
+import com.example.cleaning_service.security.events.UserRegisteredEvent;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Service class that manages associations between users and customer accounts.
@@ -20,8 +28,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountAssociationService {
 
+    private static final Logger log = LoggerFactory.getLogger(AccountAssociationService.class);
     private final AccountAssociationRepository accountAssociationRepository;
-    private final AccountAssociationMapper accountAssociationMapper;
 
     /**
      * Constructs an `AccountAssociationService` with required dependencies.
@@ -31,11 +39,21 @@ public class AccountAssociationService {
      * 2. Sets up the mapper to convert between DTOs and entities.
      *
      * @param accountAssociationRepository Repository for account association persistence operations.
-     * @param accountAssociationMapper Mapper to convert between DTOs and entities.
      */
-    public AccountAssociationService(AccountAssociationRepository accountAssociationRepository, AccountAssociationMapper accountAssociationMapper) {
+    public AccountAssociationService(AccountAssociationRepository accountAssociationRepository) {
         this.accountAssociationRepository = accountAssociationRepository;
-        this.accountAssociationMapper = accountAssociationMapper;
+    }
+
+    @EventListener
+    @Transactional
+    void createAccountAssociationOnUserRegisteredEvent(@NotNull UserRegisteredEvent event) {
+        AccountAssociation association = new AccountAssociation(event.user(), null, null, true, EAssociationType.OWNER);
+        saveAccountAssociation(association);
+    }
+
+    @Transactional
+    AccountAssociation saveAccountAssociation(AccountAssociation accountAssociation) {
+        return accountAssociationRepository.save(accountAssociation);
     }
 
     /**
@@ -53,6 +71,12 @@ public class AccountAssociationService {
         return accountAssociationRepository.countByCustomer(customer);
     }
 
+    @Transactional
+    AccountAssociation findByUser(@NotNull User user) {
+        return accountAssociationRepository.findByUser(user)
+                .orElseThrow(() -> new EntityNotFoundException("User " + user.getUsername() + "'s account not found"));
+    }
+
     /**
      * Creates a new account association from a request.
      * <p>
@@ -65,24 +89,20 @@ public class AccountAssociationService {
      * @return The created and persisted account association entity.
      */
     @Transactional
-    AccountAssociation createAccountAssociation(@NotNull AccountAssociationRequest accountAssociationRequest) {
-        AccountAssociation accountAssociation = accountAssociationMapper.fromAccountAssociationRequestToAccountAssociation(accountAssociationRequest);
-        return accountAssociationRepository.save(accountAssociation);
-    }
-
-    /**
-     * Checks if a user is associated with any customer account.
-     * <p>
-     * This method performs the following actions:
-     * 1. Queries the system to check if an association exists for the user.
-     * 2. Returns {@code true} if at least one association is found, otherwise returns {@code false}.
-     *
-     * @param user The user to check for associations.
-     * @return {@code true} if the user has at least one association, {@code false} otherwise.
-     */
-    @Transactional
-    boolean isExistsAccountAssociationByUser(@NotNull User user) {
-        return accountAssociationRepository.existsAccountAssociationByUser(user);
+    AccountAssociation updateAccountAssociation(@NotNull AccountAssociationRequest accountAssociationRequest, AccountAssociation accountAssociation) {
+        if (accountAssociationRequest.customer() != null) {
+            accountAssociation.setCustomer(accountAssociationRequest.customer());
+        }
+        if (accountAssociationRequest.isPrimary() != null) {
+            accountAssociation.setPrimary(accountAssociationRequest.isPrimary());
+        }
+        if (accountAssociationRequest.notes() != null) {
+            accountAssociation.setNotes(accountAssociationRequest.notes());
+        }
+        if (accountAssociationRequest.associationType() != null) {
+            accountAssociation.setAssociationType(accountAssociationRequest.associationType());
+        }
+        return saveAccountAssociation(accountAssociation);
     }
 
     /**
@@ -101,35 +121,21 @@ public class AccountAssociationService {
         return !accountAssociationRepository.existsAccountAssociationByUserAndCustomer(user, customer);
     }
 
-    /**
-     * Retrieves the account association for a specific customer.
-     * <p>
-     * This method performs the following actions:
-     * 1. Queries the repository to find an association linked to the given customer.
-     * 2. Returns the found `AccountAssociation` entity.
-     *
-     * @param customer The customer to find associations for.
-     * @return The account association entity for the given customer.
-     */
     @Transactional
-    AccountAssociation getAccountAssociationByCustomer(@NotNull AbstractCustomer customer) {
-        return accountAssociationRepository.findByCustomer(customer);
+    void detachCustomerFromAssociation(@NotNull AbstractCustomer abstractCustomer) {
+        List<AccountAssociation> accountAssociations = findAllByCustomer(abstractCustomer);
+        accountAssociations.forEach(accountAssociation -> accountAssociation.setCustomer(null));
+        accountAssociationRepository.saveAll(accountAssociations);
     }
 
-    /**
-     * Detaches a customer from its account association.
-     * <p>
-     * This method performs the following actions:
-     * 1. Retrieves the existing account association for the given customer.
-     * 2. Sets the customer reference in the association to `null` to detach it.
-     * 3. Saves the updated association to maintain referential integrity.
-     *
-     * @param customer The customer to detach from its association.
-     */
+    List<AccountAssociation> findAllByCustomer(@NotNull AbstractCustomer abstractCustomer) {
+        return accountAssociationRepository.findByCustomer(abstractCustomer);
+    }
+
+    @EventListener
     @Transactional
-    void detachCustomerFromAssociation(@NotNull AbstractCustomer customer) {
-        AccountAssociation association = getAccountAssociationByCustomer(customer);
-        association.setCustomer(null);
-        accountAssociationRepository.save(association);
+    void deleteAccountAssociationByUser(@NotNull UserDeletedEvent event) {
+        accountAssociationRepository.deleteByUser(event.user());
+        log.info("User with id " + event.user().getId() + " 's account successfully deleted.");
     }
 }

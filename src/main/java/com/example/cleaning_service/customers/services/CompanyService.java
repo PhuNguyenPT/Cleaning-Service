@@ -77,23 +77,21 @@ public class CompanyService {
      * Creates a new company and associates it with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Checks if the user is already associated with another account.
-     * 2. Creates and persists a new company based on the request data.
-     * 3. Determines the correct association type and primary status.
-     * 4. Creates an association between the user and the company.
+     * 1. Retrieves the user's current account association.
+     * 2. Creates and persists a new company based on the provided request data.
+     * 3. Determines the appropriate association type and primary status for the company.
+     * 4. Updates the user's account association with the newly created company.
+     * 5. Ensures that the updated account association references a valid company.
      *
      * @param companyRequest The request containing company details.
      * @param user The user to associate with the company.
-     * @return A response model containing the created company information.
-     * @throws IllegalStateException If the user is already associated with an account.
+     * @return A {@link CompanyResponseModel} containing details of the created company.
+     * @throws IllegalStateException If the updated account association does not reference a valid company.
      */
     @Transactional
     public CompanyResponseModel createCompany(@NotNull CompanyRequest companyRequest, @NotNull User user) {
         log.info("Attempting to create a company for user: {}", user.getUsername());
-
-        if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
-        }
+        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         // Save the company
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
@@ -103,14 +101,14 @@ public class CompanyService {
         EAssociationType associationType = organizationDetailsService.getEAssociationTypeByIOrganization(savedCompany);
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedCompany);
 
-        // Create account association
+        // Update account association
         AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
-                user, savedCompany, null, isPrimary, associationType
+                savedCompany, null, isPrimary, associationType
         );
-        AccountAssociation accountAssociation = accountAssociationService.createAccountAssociation(accountAssociationRequest);
+        AccountAssociation updatedAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest,accountAssociation);
 
         // Ensure the account association correctly references a company
-        if (!(accountAssociation.getCustomer() instanceof Company accountCompany)) {
+        if (!(updatedAccountAssociation.getCustomer() instanceof Company accountCompany)) {
             throw new IllegalStateException("Account association does not reference a valid company.");
         }
 
@@ -251,23 +249,10 @@ public class CompanyService {
         log.info("Successfully updated fields for company ID: {}", company.getId());
     }
 
-
-    /**
-     * Deletes a company by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Verifies the company exists and the user has access to it
-     * 2. Detaches the company from any user associations
-     * 3. Deletes the company entity
-     *
-     * @param id The UUID of the company to delete
-     * @param user The user requesting the deletion
-     * @throws IllegalStateException If the company is not found or user doesn't have access
-     */
     @Transactional
-    public void deleteCompanyById(UUID id, User user) {
-        log.info("Attempting to delete company with ID: {} by user: {}", id, user.getUsername());
-        Company dbCompany = getByIdAndUser(id, user);
+    public void deleteCompanyById(UUID id) {
+        log.info("Attempting to delete company with ID: {}", id);
+        Company dbCompany = findById(id);
 
         log.info("Detaching company ID: {} from user associations", id);
         accountAssociationService.detachCustomerFromAssociation(dbCompany);

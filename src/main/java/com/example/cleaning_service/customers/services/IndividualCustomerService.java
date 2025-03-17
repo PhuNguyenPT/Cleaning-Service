@@ -74,21 +74,20 @@ public class IndividualCustomerService {
      * Creates a new individual customer and associates it with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Checks if the user is already associated with another account.
-     * 2. Creates and persists a new individual customer based on the request data.
-     * 3. Determines the correct association type and primary status.
-     * 4. Creates an association between the user and the individual customer.
+     * 1. Retrieves the user's current account association.
+     * 2. Creates and persists a new individual customer based on the provided request data.
+     * 3. Determines the appropriate association type and primary status for the individual customer.
+     * 4. Updates the user's account association with the newly created individual customer.
+     * 5. Ensures that the updated account association references a valid individual customer.
      *
      * @param individualCustomerRequest The request containing individual customer details.
      * @param user The user to associate with the individual customer.
-     * @return A response model containing the created individual customer information.
-     * @throws IllegalStateException If the user is already associated with an account.
+     * @return A {@link IndividualCustomerResponseModel} containing details of the created individual customer.
+     * @throws IllegalStateException If the updated account association does not reference a valid individual customer.
      */
     @Transactional
     public IndividualCustomerResponseModel createIndividualCustomer(@Valid IndividualCustomerRequest individualCustomerRequest, User user) {
-        if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
-        }
+        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         IndividualCustomer individualCustomer = individualCustomerMapper.fromRequestToCustomer(individualCustomerRequest);
         IndividualCustomer savedIndividualCustomer = saveIndividualCustomer(individualCustomer);
@@ -98,9 +97,9 @@ public class IndividualCustomerService {
 
         // Create account association
         AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
-                user, savedIndividualCustomer, null, isPrimary, associationType
+                savedIndividualCustomer, null, isPrimary, associationType
         );
-        AccountAssociation dbAccountAssociation = accountAssociationService.createAccountAssociation(accountAssociationRequest);
+        AccountAssociation dbAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest, accountAssociation);
 
         if (!(dbAccountAssociation.getCustomer() instanceof IndividualCustomer accountCustomer)) {
             throw new IllegalStateException("Account association does not reference a valid individual.");
@@ -227,16 +226,15 @@ public class IndividualCustomerService {
     }
 
     /**
-     * Deletes an individual customer by its ID.
+     * Deletes an individual customer by its ID and ensures it is associated with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Verifies the individual customer exists and the user has access to it.
-     * 2. Detaches the individual customer from any user associations.
-     * 3. Deletes the individual customer entity.
+     * 1. Retrieves the individual customer by its ID and verifies that it is associated with the given user.
+     * 2. Detaches the individual customer from any account associations linked to the user.
+     * 3. Deletes the individual customer from the database.
      *
-     * @param id The UUID of the individual customer to delete.
-     * @param user The user requesting the deletion.
-     * @throws IllegalStateException If the individual customer is not found or the user doesn't have access.
+     * @param id   The unique identifier of the individual customer to be deleted. Must not be {@code null}.
+     * @param user The user requesting the deletion. Must not be {@code null}.
      */
     @Transactional
     public void deleteIndividualCustomerById(UUID id, User user) {

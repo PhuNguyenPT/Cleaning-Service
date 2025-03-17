@@ -74,22 +74,20 @@ public class GovernmentService {
      * Creates a new government entity and associates it with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Checks if the user is already associated with another account.
-     * 2. Creates and persists a new government entity based on the request data.
-     * 3. Determines the correct association type and primary status.
-     * 4. Creates an association between the user and the government entity.
+     * 1. Retrieves the user's current account association.
+     * 2. Creates and persists a new government entity based on the provided request data.
+     * 3. Determines the appropriate association type and primary status for the government.
+     * 4. Updates the user's account association with the newly created government.
+     * 5. Ensures that the updated account association references a valid government.
      *
-     * @param governmentRequest The request containing government details.
+     * @param governmentRequest The request containing government entity details.
      * @param user The user to associate with the government entity.
-     * @return A response model containing the created government entity information.
-     * @throws IllegalStateException If the user is already associated with an account or
-     *                               if the account association does not reference a valid government entity.
+     * @return A {@link GovernmentResponseModel} containing details of the created government entity.
+     * @throws IllegalStateException If the updated account association does not reference a valid government entity.
      */
     @Transactional
     public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, @NotNull User user) {
-        if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
-        }
+        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government savedGovernment = saveGovernment(government);
@@ -99,9 +97,9 @@ public class GovernmentService {
 
         // Create account association
         AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
-                user, savedGovernment, null, isPrimary, associationType
+                savedGovernment, null, isPrimary, associationType
         );
-        AccountAssociation dbAccountAssociation = accountAssociationService.createAccountAssociation(accountAssociationRequest);
+        AccountAssociation dbAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest, accountAssociation);
 
         if (!(dbAccountAssociation.getCustomer() instanceof Government accountGovernment)) {
             throw new IllegalStateException("Account association does not reference a valid government.");
@@ -245,16 +243,15 @@ public class GovernmentService {
     }
 
     /**
-     * Deletes a government entity by its ID.
+     * Deletes a government entity by its ID and ensures it is associated with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Verifies that the government entity exists and that the user has access to it.
-     * 2. Detaches the government entity from any user associations.
+     * 1. Retrieves the government entity by its ID and verifies that it is associated with the given user.
+     * 2. Detaches the government entity from any account associations linked to the user.
      * 3. Deletes the government entity from the database.
      *
-     * @param id The UUID of the government entity to delete.
-     * @param user The user requesting the deletion.
-     * @throws IllegalStateException If the government entity is not found or the user doesn't have access.
+     * @param id   The unique identifier of the government entity to be deleted. Must not be {@code null}.
+     * @param user The user requesting the deletion. Must not be {@code null}.
      */
     @Transactional
     public void deleteGovernmentById(UUID id, User user) {

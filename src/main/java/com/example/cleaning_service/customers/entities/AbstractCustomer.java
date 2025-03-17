@@ -27,7 +27,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "customer_preferred_days", schema = "customer",
-            joinColumns = @JoinColumn(name = "customer_id") )
+            joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"))
     protected Set<EDay> preferredDays = new HashSet<>();
 
     public AbstractCustomer() {

@@ -73,21 +73,20 @@ public class NonProfitOrgService {
      * Creates a new non-profit organization and associates it with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Checks if the user is already associated with another account.
-     * 2. Creates and persists a new non-profit organization based on the request data.
-     * 3. Determines the correct association type and primary status.
-     * 4. Creates an association between the user and the non-profit organization.
+     * 1. Retrieves the user's current account association.
+     * 2. Creates and persists a new non-profit organization based on the provided request data.
+     * 3. Determines the appropriate association type and primary status for the non-profit organization.
+     * 4. Updates the user's account association with the newly created non-profit organization.
+     * 5. Ensures that the updated account association references a valid non-profit organization.
      *
      * @param nonProfitOrgRequest The request containing non-profit organization details.
      * @param user The user to associate with the non-profit organization.
-     * @return A response model containing the created non-profit organization information.
-     * @throws IllegalStateException If the user is already associated with an account.
+     * @return A {@link NonProfitOrgResponseModel} containing details of the created non-profit organization.
+     * @throws IllegalStateException If the updated account association does not reference a valid non-profit organization.
      */
     @Transactional
     public NonProfitOrgResponseModel createProfitOrg(@Valid NonProfitOrgRequest nonProfitOrgRequest, User user) {
-        if (accountAssociationService.isExistsAccountAssociationByUser(user)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is already associated with an account.");
-        }
+        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);
         NonProfitOrg savedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
@@ -97,11 +96,11 @@ public class NonProfitOrgService {
 
         // Create account association
         AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
-                user, savedNonProfitOrg, null, isPrimary, associationType
+                savedNonProfitOrg, null, isPrimary, associationType
         );
-        AccountAssociation accountAssociation = accountAssociationService.createAccountAssociation(accountAssociationRequest);
+        AccountAssociation dbAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest, accountAssociation);
 
-        if(!(accountAssociation.getCustomer() instanceof NonProfitOrg accountNonProfitOrg)) {
+        if(!(dbAccountAssociation.getCustomer() instanceof NonProfitOrg accountNonProfitOrg)) {
             throw new IllegalStateException("Account association does not reference a valid non-profit org.");
         }
         return nonProfitOrgResponseModelAssembler.toModel(accountNonProfitOrg);
@@ -223,16 +222,15 @@ public class NonProfitOrgService {
     }
 
     /**
-     * Deletes a non-profit organization by its ID.
+     * Deletes a non-profit organization by its ID and ensures it is associated with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Verifies the non-profit organization exists and the user has access to it.
-     * 2. Detaches the organization from any user associations.
-     * 3. Deletes the non-profit organization entity.
+     * 1. Retrieves the non-profit organization by its ID and verifies that it is associated with the given user.
+     * 2. Detaches the non-profit organization from any account associations linked to the user.
+     * 3. Deletes the non-profit organization from the database.
      *
-     * @param id The UUID of the non-profit organization to delete.
-     * @param user The user requesting the deletion.
-     * @throws IllegalStateException If the organization is not found or the user doesn't have access.
+     * @param id   The unique identifier of the non-profit organization to be deleted. Must not be {@code null}.
+     * @param user The user requesting the deletion. Must not be {@code null}.
      */
     @Transactional
     public void deleteNonProfitOrgById(UUID id, User user) {
