@@ -26,7 +26,8 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "customer_preferred_days", schema = "customer")
+    @CollectionTable(name = "customer_preferred_days", schema = "customer",
+            joinColumns = @JoinColumn(name = "customer_id") )
     protected Set<EDay> preferredDays = new HashSet<>();
 
     public AbstractCustomer() {
@@ -41,7 +42,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
 
         this.billingAddress = billingAddress;
         this.paymentMethod = paymentMethod;
-        this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
+        this.preferredDays = preferredDays != null ? new HashSet<>(preferredDays) : new HashSet<>();
     }
 
     @Override

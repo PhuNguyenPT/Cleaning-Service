@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -72,7 +74,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @GetMapping(value = "/{id}", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
-    public UserResponseModel getUserById(@PathVariable Long id) {
+    public UserResponseModel getUserById(@PathVariable UUID id) {
         User user = userService.findById(id);
         // Convert to UserResponseModel using assembler
         return  userResponseModelAssembler.toModel(user);
@@ -81,7 +83,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @DeleteMapping(value = "/{id}", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<?> deleteUserById(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUserById(@PathVariable UUID id) {
         userService.deleteUser(id);
 
         Link allUsersLink = linkTo(methodOn(UserController.class).getAllUsers(PageRequest.of(0, 20)))
@@ -95,7 +97,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
     @PutMapping(value = "{id}", produces = "application/hal+json")
-    public UserResponseModel updateUserById(@PathVariable Long id, @RequestBody @Valid UserRequest userRequest) {
+    public UserResponseModel updateUserById(@PathVariable UUID id, @RequestBody @Valid UserRequest userRequest) {
         User user = userService.updateUser(id, userRequest);
         // Convert to UserResponseModel using assembler
         return userResponseModelAssembler.toModel(user);

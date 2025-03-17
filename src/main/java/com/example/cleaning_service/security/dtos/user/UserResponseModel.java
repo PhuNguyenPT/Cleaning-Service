@@ -7,11 +7,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Relation(itemRelation = "user", collectionRelation = "users")
-public class UserResponseModel extends RepresentationModel<UserResponseModel> {
-    private UUID id;
-    private String username;
-    private RoleResponse role;
-    private Set<PermissionResponse> permissions;
+public final class UserResponseModel extends RepresentationModel<UserResponseModel> {
+    private final UUID id;
+    private final String username;
+    private final RoleResponse role;
+    private final Set<PermissionResponse> permissions;
 
     public UserResponseModel(UUID id, String username, RoleResponse role, Set<PermissionResponse> permissions) {
         this.id = id;
@@ -24,32 +24,16 @@ public class UserResponseModel extends RepresentationModel<UserResponseModel> {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getUsername() {
         return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public RoleResponse getRole() {
         return role;
     }
 
-    public void setRole(RoleResponse role) {
-        this.role = role;
-    }
-
     public Set<PermissionResponse> getPermissions() {
         return permissions;
-    }
-
-    public void setPermissions(Set<PermissionResponse> permissions) {
-        this.permissions = permissions;
     }
 }
 

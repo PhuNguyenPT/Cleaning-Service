@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService implements IUserService {
@@ -81,20 +82,20 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public User findById(Long id) {
+    public User findById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
     @Transactional
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }
 
     @Transactional
     @Override
-    public User updateUser(Long id, UserRequest userRequest) {
+    public User updateUser(UUID id, UserRequest userRequest) {
         // Find the existing user
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));

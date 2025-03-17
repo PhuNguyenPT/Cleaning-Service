@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "individual_customers", schema = "customer")
-public non-sealed class IndividualCustomer extends AbstractCustomer implements IOrganization {
+public final class IndividualCustomer extends AbstractCustomer implements IOrganization {
 
     @NotNull
     @Enumerated(EnumType.STRING)

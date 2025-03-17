@@ -7,7 +7,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
 
-public class NonProfitOrgDetailsResponseModel extends RepresentationModel<NonProfitOrgDetailsResponseModel> {
+public final class NonProfitOrgDetailsResponseModel extends RepresentationModel<NonProfitOrgDetailsResponseModel> {
     private final String taxId;
     private final String registrationNumber;
 
@@ -40,5 +40,61 @@ public class NonProfitOrgDetailsResponseModel extends RepresentationModel<NonPro
         this.zip = zip;
         this.country = country;
         this.notes = notes;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public String getBillingAddress() {
+        return billingAddress;
+    }
+
+    public EPaymentType getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public Set<EDay> getPreferredDays() {
+        return preferredDays;
+    }
+
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public ECountryType getCountry() {
+        return country;
+    }
+
+    public String getNotes() {
+        return notes;
     }
 }

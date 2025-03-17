@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "non_profit_org", schema = "customer")
-public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrganization {
+public final class NonProfitOrg extends AbstractCustomer implements IOrganization {
 
     @NotNull
     @Enumerated(EnumType.STRING)

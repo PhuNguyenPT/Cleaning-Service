@@ -31,7 +31,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The created company response model.
      */
-    @PostMapping
+    @PostMapping(produces = "application/hal+json")
     @ResponseStatus(HttpStatus.CREATED)
     public CompanyResponseModel createCompany(@RequestBody @Valid CompanyRequest companyRequest,
                                               @AuthenticationPrincipal User user) {
@@ -45,7 +45,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The company details response model.
      */
-    @GetMapping("/{id}")
+    @GetMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel getCompanyById(@PathVariable UUID id,
                                                       @AuthenticationPrincipal User user) {
@@ -60,7 +60,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The updated company details.
      */
-    @PutMapping("/{id}")
+    @PutMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel updateCompany(@PathVariable UUID id,
                                                      @RequestBody @Valid CompanyUpdateRequest updateRequest,
@@ -74,7 +74,7 @@ public class CompanyController {
      * @param id The UUID of the company.
      * @param user The authenticated user.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompany(@PathVariable UUID id, @AuthenticationPrincipal User user) {
         companyService.deleteCompanyById(id, user);

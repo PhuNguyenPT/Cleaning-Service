@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "governments", schema = "customer")
-public non-sealed class Government extends AbstractCustomer implements IOrganization {
+public final class Government extends AbstractCustomer implements IOrganization {
 
     @NotNull
     @Enumerated(EnumType.STRING)

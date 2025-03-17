@@ -10,7 +10,10 @@ public class AccountAssociationMapper {
     public AccountAssociation fromAccountAssociationRequestToAccountAssociation(AccountAssociationRequest accountAssociationRequest) {
         return new AccountAssociation(
                 accountAssociationRequest.user(),
-                accountAssociationRequest.customer()
+                accountAssociationRequest.customer(),
+                accountAssociationRequest.notes(),
+                accountAssociationRequest.isPrimary(),
+                accountAssociationRequest.associationType()
         );
     }
 }
