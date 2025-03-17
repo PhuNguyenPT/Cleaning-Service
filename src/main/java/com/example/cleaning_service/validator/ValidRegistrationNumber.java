@@ -1,7 +1,6 @@
 package com.example.cleaning_service.validator;
 
 import com.example.cleaning_service.validator.impl.ValidRegistrationNumberValidator;
-import com.example.cleaning_service.validator.impl.ValidTaxIdValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

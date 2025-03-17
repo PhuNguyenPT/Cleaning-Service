@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CompanyDetailsResponseModelAssembler extends RepresentationModelAssemblerSupport<Company, CompanyDetailsResponseModel> {
-
-    private static final Logger log = LoggerFactory.getLogger(CompanyDetailsResponseModelAssembler.class);
     private final CompanyMapper companyMapper;
 
     public CompanyDetailsResponseModelAssembler(CompanyMapper companyMapper) {
@@ -23,15 +21,11 @@ public class CompanyDetailsResponseModelAssembler extends RepresentationModelAss
 
     @Override
     protected @NonNull CompanyDetailsResponseModel instantiateModel(@NonNull Company entity) {
-        CompanyDetailsResponseModel companyDetailsResponseModel = companyMapper.fromCompanyToCompanyDetailsResponseModel(entity);
-        log.info("Retrieved company details response: {}", companyDetailsResponseModel);
-        return companyDetailsResponseModel;
+        return companyMapper.fromCompanyToCompanyDetailsResponseModel(entity);
     }
 
     @Override
     public @NonNull CompanyDetailsResponseModel toModel(@NonNull Company entity) {
-        CompanyDetailsResponseModel companyDetailsResponseModel = createModelWithId(entity.getId(), entity);
-        log.info("Created company details response: {}", companyDetailsResponseModel);
-        return companyDetailsResponseModel;
+        return createModelWithId(entity.getId(), entity);
     }
 }
