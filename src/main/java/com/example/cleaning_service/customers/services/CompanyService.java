@@ -13,7 +13,6 @@ import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
-import com.example.cleaning_service.exceptions.DuplicateFieldsException;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -23,8 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
