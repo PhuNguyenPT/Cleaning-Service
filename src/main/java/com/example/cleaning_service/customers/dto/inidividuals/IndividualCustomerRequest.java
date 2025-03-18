@@ -15,20 +15,20 @@ import java.util.Set;
 @Schema(description = "Request DTO for creating an individual customer",
         example = """
         {
-          "taxId": "123456789",
-          "registrationNumber": "US98765432",
-          "billingAddress": "789 Main Street, Apt 12B, Chicago, IL 60616, US",
+          "taxId": "123-45-6789",
+          "registrationNumber": "12-3456789",
+          "billingAddress": "123 Maple Avenue, Apt 301, Boston, MA 02115, US",
           "paymentMethod": "CREDIT",
-          "preferredDays": ["TUESDAY", "FRIDAY"],
-          "customerName": "John Doe",
-          "address": "456 Elm St",
-          "phone": "+13125557890",
-          "email": "john.doe@example.com",
-          "city": "Chicago",
-          "state": "IL",
-          "zip": "60616",
+          "preferredDays": ["MONDAY", "THURSDAY"],
+          "customerName": "Emma Wilson",
+          "address": "123 Maple Avenue, Apt 301",
+          "phone": "+16175551234",
+          "email": "emma.wilson@example.com",
+          "city": "Boston",
+          "state": "MA",
+          "zip": "02115",
           "country": "US",
-          "notes": "Prefers afternoon appointments"
+          "notes": "Has a dog, please call before arriving. Prefers eco-friendly cleaning products."
         }
         """
 )

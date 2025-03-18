@@ -11,24 +11,31 @@ import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Request DTO for creating a company",
+@Schema(
+        description = "Request DTO for updating a company",
         example = """
         {
           "companyType": "START_UP",
-          "taxId": "123456789",
-          "registrationNumber": "US12345678",
-          "billingAddress": "123 Finance Avenue, Suite 500, San Francisco, CA 94105, US",
-          "paymentMethod": "CASH",
-          "preferredDays": ["MONDAY"],
-          "companyName": "TechCorp Inc.",
-          "address": "456 Elm St",
-          "phone": "+18005551234",
-          "email": "contact@techcorp.com",
-          "city": "New York",
-          "state": "NY",
-          "zip": "10001",
-          "country": "US",
-          "notes": "Preferred customer, requires monthly invoicing."
+          "organizationDetails": {
+            "taxId": "12-3456789",
+            "registrationNumber": "12-3456789",
+          },
+          "customerDetails": {
+            "billingAddress": "123 Finance Avenue, Suite 500, San Francisco, CA 94105, US",
+            "paymentMethod": "CASH",
+            "preferredDays": ["MONDAY", "WEDNESDAY"]
+          },
+          "businessEntityDetails": {
+            "name": "TechCorp Inc.",
+            "address": "456 Elm St",
+            "phone": "+18005551234",
+            "email": "contact@techcorp.com",
+            "city": "New York",
+            "state": "NY",
+            "zip": "10001",
+            "country": "US",
+            "notes": "Preferred customer, requires monthly invoicing."
+          }
         }
         """
 )
@@ -44,16 +51,19 @@ public record CompanyUpdateRequest(
         BusinessEntityRequest businessEntityDetails
 ) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
 {
+    @Schema(hidden = true)
     @Override
     public String getRegistrationNumber() {
         return organizationDetails.registrationNumber();
     }
 
+    @Schema(hidden = true)
     @Override
     public String getTaxId() {
         return organizationDetails.taxId();
     }
 
+    @Schema(hidden = true)
     @Override
     public ECountryType getCountry() {
         return businessEntityDetails.country();

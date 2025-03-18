@@ -17,18 +17,18 @@ import java.util.Set;
         example = """
         {
           "companyType": "START_UP",
-          "taxId": "123456789",
-          "registrationNumber": "US12345678",
+          "taxId": "12-3456789",
+          "registrationNumber": "12-3456789",
           "billingAddress": "123 Finance Avenue, Suite 500, San Francisco, CA 94105, US",
           "paymentMethod": "CASH",
-          "preferredDays": ["MONDAY"],
+          "preferredDays": ["MONDAY", "WEDNESDAY"],
           "companyName": "TechCorp Inc.",
-          "address": "456 Elm St",
+          "address": "456 Elm St, San Francisco, CA 94105",
           "phone": "+18005551234",
           "email": "contact@techcorp.com",
-          "city": "New York",
-          "state": "NY",
-          "zip": "10001",
+          "city": "San Francisco",
+          "state": "CA",
+          "zip": "94105",
           "country": "US",
           "notes": "Preferred customer, requires monthly invoicing."
         }

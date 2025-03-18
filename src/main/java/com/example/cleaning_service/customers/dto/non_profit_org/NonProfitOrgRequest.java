@@ -14,8 +14,8 @@ import java.util.Set;
 @Schema(description = "Request DTO for creating a non-profit organization",
         example = """
         {
-          "taxId": "456789123",
-          "registrationNumber": "USNPO987654",
+          "taxId": "52-1693387",
+          "registrationNumber": "52-1693387",
           "billingAddress": "789 Charity Lane, Suite 200, Los Angeles, CA 90015, US",
           "paymentMethod": "BANK_TRANSFER",
           "preferredDays": ["TUESDAY", "THURSDAY"],

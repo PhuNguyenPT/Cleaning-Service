@@ -10,23 +10,30 @@ import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Request DTO for creating an individual customer",
+@Schema(
+        description = "Request DTO for updating an individual customer",
         example = """
         {
-          "taxId": "123456789",
-          "registrationNumber": "US98765432",
-          "billingAddress": "789 Main Street, Apt 12B, Chicago, IL 60616, US",
-          "paymentMethod": "CREDIT",
-          "preferredDays": ["TUESDAY", "FRIDAY"],
-          "customerName": "John Doe",
-          "address": "456 Elm St",
-          "phone": "+13125557890",
-          "email": "john.doe@example.com",
-          "city": "Chicago",
-          "state": "IL",
-          "zip": "60616",
-          "country": "US",
-          "notes": "Prefers afternoon appointments"
+          "organizationDetails": {
+            "taxId": "123-45-6789",
+            "registrationNumber": "12-3456789"
+          },
+          "customerDetails": {
+            "billingAddress": "35 Park Avenue, Apt 15C, New York, NY 10016, US",
+            "paymentMethod": "CREDIT",
+            "preferredDays": ["TUESDAY", "SATURDAY"]
+          },
+          "businessEntityDetails": {
+            "name": "Rebecca Miller",
+            "address": "35 Park Avenue, Apt 15C",
+            "phone": "+12123334567",
+            "email": "rebecca.miller@example.com",
+            "city": "New York",
+            "state": "NY",
+            "zip": "10016",
+            "country": "US",
+            "notes": "Keys under doormat. Please text when cleaning is complete."
+          }
         }
         """
 )
@@ -38,18 +45,22 @@ public record IndividualCustomerUpdateRequest(
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
-) implements ITaxIdentifiable, IRegistrationNumberIdentifiable {
+) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
+{
+    @Schema(hidden = true)
     @Override
     public String getRegistrationNumber()
     {
         return organizationDetails.registrationNumber();
     }
 
+    @Schema(hidden = true)
     @Override
     public String getTaxId() {
         return organizationDetails.taxId();
     }
 
+    @Schema(hidden = true)
     @Override
     public ECountryType getCountry() {
         return businessEntityDetails.country();

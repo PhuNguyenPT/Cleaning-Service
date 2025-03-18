@@ -15,24 +15,24 @@ import java.util.Set;
 @Schema(description = "Request DTO for creating a government entity",
         example = """
         {
-          "taxId": "987654321",
-          "registrationNumber": "USGOV123456",
-          "contractorName": "John Smith",
-          "departmentName": "Public Works",
+          "taxId": "12-3456789",
+          "registrationNumber": "12-3456789",
+          "contractorName": "Jane Smith",
+          "departmentName": "Environmental Protection",
           "isTaxExempt": true,
           "requiresEmergencyCleaning": false,
-          "billingAddress": "100 State Ave, Washington, DC 20500, US",
+          "billingAddress": "1200 Pennsylvania Avenue NW, Washington, DC 20460, US",
           "paymentMethod": "BANK_TRANSFER",
-          "preferredDays": ["MONDAY", "THURSDAY"],
-          "governmentName": "U.S. Department of Public Works",
-          "address": "1600 Pennsylvania Ave NW",
-          "phone": "+12025550199",
-          "email": "contact@publicworks.gov",
+          "preferredDays": ["TUESDAY", "FRIDAY"],
+          "governmentName": "Environmental Protection Agency",
+          "address": "1200 Pennsylvania Avenue NW",
+          "phone": "+12025551000",
+          "email": "contact@epa.gov",
           "city": "Washington",
           "state": "DC",
-          "zip": "20500",
+          "zip": "20460",
           "country": "US",
-          "notes": "Requires special security clearance"
+          "notes": "Requires background checks for all cleaning staff and eco-friendly cleaning products only."
         }
         """
 )

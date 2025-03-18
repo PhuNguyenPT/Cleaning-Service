@@ -12,59 +12,71 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Request DTO for creating a government entity",
+@Schema(
+        description = "Request DTO for updating a government entity",
         example = """
         {
-          "taxId": "987654321",
-          "registrationNumber": "USGOV123456",
-          "contractorName": "John Smith",
-          "departmentName": "Public Works",
+          "contractorName": "Sarah Johnson",
+          "departmentName": "Transportation",
           "isTaxExempt": true,
           "requiresEmergencyCleaning": false,
-          "billingAddress": "100 State Ave, Washington, DC 20500, US",
-          "paymentMethod": "BANK_TRANSFER",
-          "preferredDays": ["MONDAY", "THURSDAY"],
-          "governmentName": "U.S. Department of Public Works",
-          "address": "1600 Pennsylvania Ave NW",
-          "phone": "+12025550199",
-          "email": "contact@publicworks.gov",
-          "city": "Washington",
-          "state": "DC",
-          "zip": "20500",
-          "country": "US",
-          "notes": "Requires special security clearance"
+          "organizationDetails": {
+            "taxId": "12-3456789",
+            "registrationNumber": "12-3456789"
+          },
+          "customerDetails": {
+            "billingAddress": "1200 New Jersey Ave SE, Washington, DC 20590, US",
+            "paymentMethod": "BANK_TRANSFER",
+            "preferredDays": ["MONDAY", "WEDNESDAY"]
+          },
+          "businessEntityDetails": {
+            "name": "Department of Transportation",
+            "address": "1200 New Jersey Ave SE",
+            "phone": "+12023664000",
+            "email": "contact@dot.gov",
+            "city": "Washington",
+            "state": "DC",
+            "zip": "20590",
+            "country": "US",
+            "notes": "Special security access required. Please schedule cleaning after business hours."
+          }
         }
         """
 )
 @ValidTaxId
 @ValidRegistrationNumber
 public record GovernmentUpdateRequest (
-        OrganizationDetailsRequest organizationDetails,
-
         @Size(min = 2, max = 100, message = "Contractor name must be between 2 and 100 characters")
         @Pattern(regexp = "^[a-zA-Z\\s-]+$", message = "Contractor name must contain only letters, spaces, and hyphens")
+        @Schema(example = "John Smith")
         String contractorName,
         @Size(min = 2, max = 100, message = "Department name must be between 2 and 100 characters")
         @Pattern(regexp = "^[a-zA-Z\\s-]+$", message = "Department name must contain only letters, spaces, and hyphens")
+        @Schema(example = "Public Works")
         String departmentName,
         Boolean isTaxExempt,
         Boolean requiresEmergencyCleaning,
+
+        OrganizationDetailsRequest organizationDetails,
 
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
 ) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
 {
+    @Schema(hidden = true)
     @Override
     public String getRegistrationNumber() {
         return organizationDetails.registrationNumber();
     }
 
+    @Schema(hidden = true)
     @Override
     public String getTaxId() {
         return organizationDetails.taxId();
     }
 
+    @Schema(hidden = true)
     @Override
     public ECountryType getCountry() {
         return businessEntityDetails.country();
