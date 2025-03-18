@@ -4,7 +4,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.util.UUID;
 
-public class AuthResponseRegisterModel extends RepresentationModel<AuthResponseRegisterModel> {
+public final class AuthResponseRegisterModel extends RepresentationModel<AuthResponseRegisterModel> {
     private final UUID id;
     private final String username;
 

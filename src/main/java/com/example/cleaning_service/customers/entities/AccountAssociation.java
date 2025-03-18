@@ -20,7 +20,7 @@ public class AccountAssociation extends Auditable {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id")
     private AbstractCustomer customer;
 
     private String notes;
@@ -33,9 +33,13 @@ public class AccountAssociation extends Auditable {
     public AccountAssociation() {
     }
 
-    public AccountAssociation(User user, AbstractCustomer customer) {
+    public AccountAssociation(User user, AbstractCustomer customer, String notes, boolean isPrimary,
+                              EAssociationType associationType) {
         this.user = user;
         this.customer = customer;
+        this.notes = notes;
+        this.isPrimary = isPrimary;
+        this.associationType = associationType;
     }
 
     // Getters and setters

@@ -1,15 +1,26 @@
 package com.example.cleaning_service.customers.entities;
 
+import com.example.cleaning_service.customers.enums.ECountryType;
+import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
-import com.example.cleaning_service.validations.ValidRegistrationNumber;
-import com.example.cleaning_service.validations.ValidTaxId;
+import com.example.cleaning_service.customers.enums.EPaymentType;
+import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
+import com.example.cleaning_service.validator.ITaxIdentifiable;
+import com.example.cleaning_service.validator.ValidRegistrationNumber;
+import com.example.cleaning_service.validator.ValidTaxId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "governments", schema = "customer")
-public non-sealed class Government extends AbstractCustomer implements IOrganization {
+@ValidTaxId
+@ValidRegistrationNumber
+public final class Government extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
+        IRegistrationNumberIdentifiable
+{
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -18,12 +29,10 @@ public non-sealed class Government extends AbstractCustomer implements IOrganiza
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    @ValidTaxId
     private String taxId;
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    @ValidRegistrationNumber
     private String registrationNumber;
 
     private String contractorName;
@@ -33,16 +42,25 @@ public non-sealed class Government extends AbstractCustomer implements IOrganiza
 
     public Government() {
     }
-
-    public Government(String taxId, String registrationNumber) {
+    public Government(String taxId, String registrationNumber, String contractorName, String departmentName,
+                      boolean isTaxExempt, boolean requiresEmergencyCleaning, String billingAddress,
+                      EPaymentType paymentMethod, Set<EDay> preferredDays, String name, String address, String phone,
+                      String email, String city, String state, String zip, ECountryType country, String notes) {
+        super(billingAddress, paymentMethod, preferredDays, name, address, phone, email, city, state, zip, country, notes);
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
+        this.contractorName = contractorName;
+        this.departmentName = departmentName;
+        this.isTaxExempt = isTaxExempt;
+        this.requiresEmergencyCleaning = requiresEmergencyCleaning;
     }
 
+    @Override
     public void setTaxId(String taxId) {
         this.taxId = taxId;
     }
 
+    @Override
     public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
@@ -92,5 +110,20 @@ public non-sealed class Government extends AbstractCustomer implements IOrganiza
 
     public void setRequiresEmergencyCleaning(boolean requiresEmergencyCleaning) {
         this.requiresEmergencyCleaning = requiresEmergencyCleaning;
+    }
+
+    @Override
+    public String registrationNumber() {
+        return this.registrationNumber;
+    }
+
+    @Override
+    public String taxId() {
+        return this.taxId;
+    }
+
+    @Override
+    public ECountryType country() {
+        return this.getCountry();
     }
 }

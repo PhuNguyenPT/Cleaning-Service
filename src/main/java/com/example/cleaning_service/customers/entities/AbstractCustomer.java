@@ -1,6 +1,6 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.busness_entity.BusinessEntity;
+import com.example.cleaning_service.commons.BusinessEntity;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
@@ -26,7 +26,8 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
 
     @ElementCollection
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "customer_preferred_days", schema = "customer")
+    @CollectionTable(name = "customer_preferred_days", schema = "customer",
+            joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"))
     protected Set<EDay> preferredDays = new HashSet<>();
 
     public AbstractCustomer() {
@@ -41,7 +42,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
 
         this.billingAddress = billingAddress;
         this.paymentMethod = paymentMethod;
-        this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
+        this.preferredDays = preferredDays != null ? new HashSet<>(preferredDays) : new HashSet<>();
     }
 
     @Override

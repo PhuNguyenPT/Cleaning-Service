@@ -1,6 +1,6 @@
 package com.example.cleaning_service.security.assemblers;
 
-import com.example.cleaning_service.security.controllers.UserController;
+import com.example.cleaning_service.security.controllers.AdminController;
 import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.mapper.UserMapper;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class UserResponseModelAssembler extends RepresentationModelAssemblerSupport<User, UserResponseModel> {
 
     public UserResponseModelAssembler() {
-        super(UserController.class, UserResponseModel.class);
+        super(AdminController.class, UserResponseModel.class);
     }
 
     @Override

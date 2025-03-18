@@ -1,43 +1,40 @@
 package com.example.cleaning_service.customers.services;
 
-import com.example.cleaning_service.customers.entities.ICustomer;
-import com.example.cleaning_service.customers.entities.Government;
-import com.example.cleaning_service.customers.entities.IndividualCustomer;
-import com.example.cleaning_service.customers.entities.NonProfitOrg;
-import com.example.cleaning_service.customers.repositories.GovernmentRepository;
-import com.example.cleaning_service.customers.repositories.IndividualCustomerRepository;
-import com.example.cleaning_service.customers.repositories.NonProfitOrgRepository;
+import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
+import com.example.cleaning_service.exceptions.DuplicateFieldsException;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class CustomerService {
-    private final GovernmentRepository governmentRepository;
-    private final NonProfitOrgRepository nonProfitOrgRepository;
-    private final IndividualCustomerRepository individualCustomerRepository;
 
-    public CustomerService(GovernmentRepository governmentRepository, NonProfitOrgRepository nonProfitOrgRepository, IndividualCustomerRepository individualCustomerRepository) {
-        this.governmentRepository = governmentRepository;
-        this.nonProfitOrgRepository = nonProfitOrgRepository;
-        this.individualCustomerRepository = individualCustomerRepository;
-    }
+    <T extends DuplicatedValidatable> void checkDuplicatedFields(
+            @NotNull T request,
+            Function<String, Boolean> taxIdChecker,
+            Function<String, Boolean> registrationNumberChecker,
+            Function<String, Boolean> emailChecker) {
 
-    public Government createGovernment(Government government) {
-        return governmentRepository.save(government);
-    }
+        Map<String, String> duplicateFields = new HashMap<>();
 
-    public NonProfitOrg createNonProfit(NonProfitOrg nonProfitOrg) {
-        return nonProfitOrgRepository.save(nonProfitOrg);
-    }
+        if (taxIdChecker.apply(request.taxId())) {
+            duplicateFields.put("taxId", "Entity with this tax ID already exists");
+        }
 
-    public IndividualCustomer createIndividualCustomer(IndividualCustomer individualCustomer) {
-        return individualCustomerRepository.save(individualCustomer);
-    }
+        if (registrationNumberChecker.apply(request.registrationNumber())) {
+            duplicateFields.put("registrationNumber", "Entity with this registration number already exists");
+        }
 
-    public List<ICustomer> getAllCustomers() {
-        return new ArrayList<>();
+        if (emailChecker.apply(request.email())) {
+            duplicateFields.put("email", "Entity with this email already exists");
+        }
+
+        if (!duplicateFields.isEmpty()) {
+            throw new DuplicateFieldsException(duplicateFields);
+        }
     }
 }
 
