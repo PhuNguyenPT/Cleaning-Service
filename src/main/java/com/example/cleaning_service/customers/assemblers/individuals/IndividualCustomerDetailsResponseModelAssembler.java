@@ -24,6 +24,6 @@ public class IndividualCustomerDetailsResponseModelAssembler extends Representat
 
     @Override
     public @NonNull IndividualCustomerDetailsResponseModel toModel(@NonNull IndividualCustomer individualCustomer) {
-        return null;
+        return createModelWithId(individualCustomer.getId(), individualCustomer);
     }
 }
