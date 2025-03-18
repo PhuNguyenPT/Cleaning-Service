@@ -154,7 +154,7 @@ public class NonProfitOrgService {
     @Transactional
     NonProfitOrg getByIdAndUser(UUID id, User user) {
         NonProfitOrg nonProfitOrg = findById(id);
-        if (!(accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, nonProfitOrg))) {
+        if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, nonProfitOrg)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with a non-profit organization.");
         }
         return nonProfitOrg;
