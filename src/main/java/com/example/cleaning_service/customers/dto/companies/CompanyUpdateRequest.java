@@ -2,6 +2,7 @@ package com.example.cleaning_service.customers.dto.companies;
 
 import com.example.cleaning_service.commons.BusinessEntityRequest;
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;
+import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
 import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.enums.ECompanyType;
 import com.example.cleaning_service.customers.enums.ECountryType;
@@ -49,23 +50,28 @@ public record CompanyUpdateRequest(
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
-) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
+) implements ITaxIdentifiable, IRegistrationNumberIdentifiable, DuplicatedValidatable
 {
     @Schema(hidden = true)
     @Override
-    public String getRegistrationNumber() {
+    public String registrationNumber() {
         return organizationDetails.registrationNumber();
+    }
+
+    @Override
+    public String email() {
+        return businessEntityDetails.email();
     }
 
     @Schema(hidden = true)
     @Override
-    public String getTaxId() {
+    public String taxId() {
         return organizationDetails.taxId();
     }
 
     @Schema(hidden = true)
     @Override
-    public ECountryType getCountry() {
+    public ECountryType country() {
         return businessEntityDetails.country();
     }
 }

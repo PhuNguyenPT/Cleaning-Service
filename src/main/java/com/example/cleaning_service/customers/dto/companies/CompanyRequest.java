@@ -1,5 +1,6 @@
 package com.example.cleaning_service.customers.dto.companies;
 
+import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
 import com.example.cleaning_service.validator.ITaxIdentifiable;
 import com.example.cleaning_service.customers.enums.ECompanyType;
@@ -79,20 +80,5 @@ public record CompanyRequest(
         @NotNull ECountryType country,
         @Size(max = 500, message = "Notes cannot exceed 500 characters")
         String notes
-) implements ITaxIdentifiable, IRegistrationNumberIdentifiable
-{
-        @Override
-        public String getRegistrationNumber() {
-                return registrationNumber;
-        }
-
-        @Override
-        public String getTaxId() {
-                return taxId;
-        }
-
-        @Override
-        public ECountryType getCountry() {
-                return country;
-        }
-}
+) implements ITaxIdentifiable, IRegistrationNumberIdentifiable, DuplicatedValidatable
+{}

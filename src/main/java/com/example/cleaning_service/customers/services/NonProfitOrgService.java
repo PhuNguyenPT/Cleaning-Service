@@ -17,6 +17,8 @@ import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -29,6 +31,7 @@ import java.util.UUID;
  */
 @Service
 public class NonProfitOrgService {
+    private static final Logger log = LoggerFactory.getLogger(NonProfitOrgService.class);
     private final NonProfitOrgRepository nonProfitOrgRepository;
     private final AccountAssociationService accountAssociationService;
     private final OrganizationDetailsService organizationDetailsService;
@@ -37,6 +40,7 @@ public class NonProfitOrgService {
     private final NonProfitOrgMapper nonProfitOrgMapper;
     private final NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler;
     private final NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler;
+    private final CustomerService customerService;
 
     /**
      * Constructs a NonProfitOrgService with required dependencies.
@@ -58,7 +62,7 @@ public class NonProfitOrgService {
             BusinessEntityService businessEntityService,
             NonProfitOrgMapper nonProfitOrgMapper,
             NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler,
-            NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler) {
+            NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.nonProfitOrgRepository = nonProfitOrgRepository;
         this.accountAssociationService = accountAssociationService;
@@ -68,6 +72,7 @@ public class NonProfitOrgService {
         this.nonProfitOrgMapper = nonProfitOrgMapper;
         this.nonProfitOrgResponseModelAssembler = nonProfitOrgResponseModelAssembler;
         this.nonProfitOrgDetailsResponseModelAssembler = nonProfitOrgDetailsResponseModelAssembler;
+        this.customerService = customerService;
     }
 
     /**
@@ -87,6 +92,14 @@ public class NonProfitOrgService {
      */
     @Transactional
     public NonProfitOrgResponseModel createProfitOrg(@Valid NonProfitOrgRequest nonProfitOrgRequest, User user) {
+        log.info("Check duplicated fields");
+        customerService.checkDuplicatedFields(
+                nonProfitOrgRequest,
+                nonProfitOrgRepository::existsByTaxId,
+                nonProfitOrgRepository::existsByRegistrationNumber,
+                nonProfitOrgRepository::existsByEmail
+        );
+
         AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);

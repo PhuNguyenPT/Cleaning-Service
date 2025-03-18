@@ -111,4 +111,19 @@ public final class Government extends AbstractCustomer implements IOrganization,
     public void setRequiresEmergencyCleaning(boolean requiresEmergencyCleaning) {
         this.requiresEmergencyCleaning = requiresEmergencyCleaning;
     }
+
+    @Override
+    public String registrationNumber() {
+        return this.registrationNumber;
+    }
+
+    @Override
+    public String taxId() {
+        return this.taxId;
+    }
+
+    @Override
+    public ECountryType country() {
+        return this.getCountry();
+    }
 }

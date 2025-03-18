@@ -41,6 +41,7 @@ public class IndividualCustomerService {
     private final IndividualCustomerMapper individualCustomerMapper;
     private final IndividualCustomerResponseModelAssembler individualCustomerResponseModelAssembler;
     private final IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler;
+    private final CustomerService customerService;
 
     /**
      * Constructs an IndividualCustomerService with required dependencies.
@@ -62,7 +63,7 @@ public class IndividualCustomerService {
             OrganizationDetailsService organizationDetailsService,
             IndividualCustomerMapper individualCustomerMapper,
             IndividualCustomerResponseModelAssembler individualCustomerResponseModelAssembler,
-            IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler) {
+            IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.individualCustomerRepository = individualCustomerRepository;
         this.accountAssociationService = accountAssociationService;
@@ -72,6 +73,7 @@ public class IndividualCustomerService {
         this.individualCustomerMapper = individualCustomerMapper;
         this.individualCustomerResponseModelAssembler = individualCustomerResponseModelAssembler;
         this.individualCustomerDetailsResponseModelAssembler = individualCustomerDetailsResponseModelAssembler;
+        this.customerService = customerService;
     }
 
     /**
@@ -91,6 +93,13 @@ public class IndividualCustomerService {
      */
     @Transactional
     public IndividualCustomerResponseModel createIndividualCustomer(@Valid IndividualCustomerRequest individualCustomerRequest, User user) {
+        log.info("Check duplicated fields");
+        customerService.checkDuplicatedFields(
+                individualCustomerRequest,
+                individualCustomerRepository::existsByTaxId,
+                individualCustomerRepository::existsByRegistrationNumber,
+                individualCustomerRepository::existsByEmail
+        );
         log.info("Attempting to create an individual customer for user: {}", user.getUsername());
         AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 

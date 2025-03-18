@@ -13,6 +13,7 @@ import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
+import com.example.cleaning_service.exceptions.DuplicateFieldsException;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -22,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,6 +44,7 @@ public class CompanyService {
     private final CompanyMapper companyMapper;
     private final CompanyResponseModelAssembler companyResponseModelAssembler;
     private final CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler;
+    private final CustomerService customerService;
 
     /**
      * Constructs a CompanyService with required dependencies.
@@ -62,7 +66,7 @@ public class CompanyService {
             OrganizationDetailsService organizationDetailsService,
             CompanyMapper companyMapper,
             CompanyResponseModelAssembler companyResponseModelAssembler,
-            CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler) {
+            CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.companyRepository = companyRepository;
         this.accountAssociationService = accountAssociationService;
@@ -72,6 +76,7 @@ public class CompanyService {
         this.companyMapper = companyMapper;
         this.companyResponseModelAssembler = companyResponseModelAssembler;
         this.companyDetailsResponseModelAssembler = companyDetailsResponseModelAssembler;
+        this.customerService = customerService;
     }
 
     /**
@@ -91,6 +96,14 @@ public class CompanyService {
      */
     @Transactional
     public CompanyResponseModel createCompany(@NotNull CompanyRequest companyRequest, @NotNull User user) {
+        log.info("Check duplicated fields");
+        customerService.checkDuplicatedFields(
+                companyRequest,
+                companyRepository::existsByTaxId,
+                companyRepository::existsByRegistrationNumber,
+                companyRepository::existsByEmail
+        );
+
         log.info("Attempting to create a company for user: {}", user.getUsername());
         AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 

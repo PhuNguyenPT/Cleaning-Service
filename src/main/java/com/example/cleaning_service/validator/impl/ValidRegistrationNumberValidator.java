@@ -59,8 +59,8 @@ public class ValidRegistrationNumberValidator implements ConstraintValidator<Val
             return true; // Let @NotNull or @NotBlank handle these cases
         }
 
-        String registrationNumber = entity.getRegistrationNumber();
-        ECountryType country = entity.getCountry();
+        String registrationNumber = entity.registrationNumber();
+        ECountryType country = entity.country();
 
         if (registrationNumber == null || registrationNumber.isBlank()) {
             logger.warn("Validation failed: registration number is null or empty.");

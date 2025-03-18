@@ -118,4 +118,9 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "A database constraint was violated"));
     }
 
+    @ExceptionHandler(DuplicateFieldsException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateFieldsException(
+            DuplicateFieldsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getDuplicateFields());
+    }
 }

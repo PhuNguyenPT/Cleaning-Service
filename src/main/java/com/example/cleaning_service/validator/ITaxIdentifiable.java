@@ -3,6 +3,6 @@ package com.example.cleaning_service.validator;
 import com.example.cleaning_service.customers.enums.ECountryType;
 
 public interface ITaxIdentifiable {
-    String getTaxId();
-    ECountryType getCountry();
+    String taxId();
+    ECountryType country();
 }

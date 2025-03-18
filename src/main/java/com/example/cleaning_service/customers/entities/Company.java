@@ -86,4 +86,19 @@ public final class Company extends AbstractCustomer implements IOrganization, IT
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
     }
+
+    @Override
+    public String registrationNumber() {
+        return this.registrationNumber;
+    }
+
+    @Override
+    public String taxId() {
+        return this.taxId;
+    }
+
+    @Override
+    public ECountryType country() {
+        return this.getCountry();
+    }
 }

@@ -18,6 +18,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -30,6 +32,7 @@ import java.util.UUID;
  */
 @Service
 public class GovernmentService {
+    private static final Logger log = LoggerFactory.getLogger(GovernmentService.class);
     private final GovernmentRepository governmentRepository;
     private final AccountAssociationService accountAssociationService;
     private final BusinessEntityService businessEntityService;
@@ -38,6 +41,7 @@ public class GovernmentService {
     private final GovernmentMapper governmentMapper;
     private final GovernmentResponseModelAssembler governmentResponseModelAssembler;
     private final GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler;
+    private final CustomerService customerService;
 
     /**
      * Constructs a GovernmentService with required dependencies.
@@ -59,7 +63,7 @@ public class GovernmentService {
             OrganizationDetailsService organizationDetailsService,
             GovernmentMapper governmentMapper,
             GovernmentResponseModelAssembler governmentResponseModelAssembler,
-            GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler) {
+            GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.governmentRepository = governmentRepository;
         this.accountAssociationService = accountAssociationService;
@@ -69,6 +73,7 @@ public class GovernmentService {
         this.governmentMapper = governmentMapper;
         this.governmentResponseModelAssembler = governmentResponseModelAssembler;
         this.governmentDetailsResponseModelAssembler = governmentDetailsResponseModelAssembler;
+        this.customerService = customerService;
     }
 
     /**
@@ -88,6 +93,13 @@ public class GovernmentService {
      */
     @Transactional
     public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, @NotNull User user) {
+        log.info("Check duplicated fields");
+        customerService.checkDuplicatedFields(
+                governmentRequest,
+                governmentRepository::existsByTaxId,
+                governmentRepository::existsByRegistrationNumber,
+                governmentRepository::existsByEmail
+        );
         AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
