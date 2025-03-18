@@ -25,23 +25,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/admin")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")  // Default rule for all methods
-public class UserController {
+public class AdminController {
     private final IUserService userService;
     private final PagedResourcesAssembler<User> pagedResourcesAssembler;
     private final UserResponseModelAssembler userResponseModelAssembler;
 
-    public UserController(IUserService userService, PagedResourcesAssembler<User> pagedResourcesAssembler,
-                          UserResponseModelAssembler userResponseModelAssembler) {
+    public AdminController(IUserService userService, UserResponseModelAssembler userResponseModelAssembler) {
         this.userService = userService;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.userResponseModelAssembler = userResponseModelAssembler;
+        this.pagedResourcesAssembler = new PagedResourcesAssembler<>(null, null);
     }
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
-    @PostMapping(produces = { "application/hal+json" })
+    @PostMapping(path = "/users",produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseModel createUser(@RequestBody @Valid UserRequest userRequest) {
         User savedUser = userService.saveUser(
@@ -55,7 +54,7 @@ public class UserController {
 
         // Add a link for all users
         PageRequest pageRequest = PageRequest.of(0, 20);
-        Link allUsersLink = linkTo(methodOn(UserController.class).getAllUsers(pageRequest)).withRel("users");
+        Link allUsersLink = linkTo(methodOn(AdminController.class).getAllUsers(pageRequest)).withRel("users");
 
         userResponseModel.add(allUsersLink);
         // Return userResponseModel with additional links
@@ -63,7 +62,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
-    @GetMapping(produces = { "application/hal+json" })
+    @GetMapping(path = "/users",produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public PagedModel<UserResponseModel> getAllUsers(@ParameterObject Pageable pageable) {
         Page<User> userPage = userService.findAll(pageable);
@@ -72,7 +71,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
-    @GetMapping(value = "/{id}", produces = { "application/hal+json" })
+    @GetMapping(path = "/users/{id}", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public UserResponseModel getUserById(@PathVariable UUID id) {
         User user = userService.findById(id);
@@ -81,12 +80,12 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
-    @DeleteMapping(value = "/{id}", produces = { "application/hal+json" })
+    @DeleteMapping(path = "/users/{id}", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<?> deleteUserById(@PathVariable UUID id) {
         userService.deleteUser(id);
 
-        Link allUsersLink = linkTo(methodOn(UserController.class).getAllUsers(PageRequest.of(0, 20)))
+        Link allUsersLink = linkTo(methodOn(AdminController.class).getAllUsers(PageRequest.of(0, 20)))
                 .withRel("allUsers");
 
         return ResponseEntity.noContent()
@@ -96,7 +95,7 @@ public class UserController {
 
 
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('MANAGE_USERS')")
-    @PutMapping(value = "{id}", produces = "application/hal+json")
+    @PutMapping(path = "/users/{id}", produces = "application/hal+json")
     public UserResponseModel updateUserById(@PathVariable UUID id, @RequestBody @Valid UserRequest userRequest) {
         User user = userService.updateUser(id, userRequest);
         // Convert to UserResponseModel using assembler
