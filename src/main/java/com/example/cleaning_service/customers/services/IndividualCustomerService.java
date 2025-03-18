@@ -14,8 +14,11 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
 import com.example.cleaning_service.customers.repositories.IndividualCustomerRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -29,6 +32,7 @@ import java.util.UUID;
 @Service
 public class IndividualCustomerService {
 
+    private static final Logger log = LoggerFactory.getLogger(IndividualCustomerService.class);
     private final IndividualCustomerRepository individualCustomerRepository;
     private final AccountAssociationService accountAssociationService;
     private final AbstractCustomerService abstractCustomerService;
@@ -87,10 +91,12 @@ public class IndividualCustomerService {
      */
     @Transactional
     public IndividualCustomerResponseModel createIndividualCustomer(@Valid IndividualCustomerRequest individualCustomerRequest, User user) {
+        log.info("Attempting to create an individual customer for user: {}", user.getUsername());
         AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
 
         IndividualCustomer individualCustomer = individualCustomerMapper.fromRequestToCustomer(individualCustomerRequest);
         IndividualCustomer savedIndividualCustomer = saveIndividualCustomer(individualCustomer);
+        log.info("Individual customer {} saved successfully with ID: {}", savedIndividualCustomer.getName(), savedIndividualCustomer.getId());
 
         EAssociationType associationType = organizationDetailsService.getEAssociationTypeByIOrganization(savedIndividualCustomer);
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedIndividualCustomer);
@@ -105,7 +111,9 @@ public class IndividualCustomerService {
             throw new IllegalStateException("Account association does not reference a valid individual.");
         }
 
-        return individualCustomerResponseModelAssembler.toModel(accountCustomer);
+        IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerResponseModelAssembler.toModel(accountCustomer);
+        log.info("Successfully created individual customer response: {}", individualCustomerResponseModel);
+        return individualCustomerResponseModel;
     }
 
     /**
@@ -137,8 +145,12 @@ public class IndividualCustomerService {
      */
     @Transactional
     public IndividualCustomerDetailsResponseModel getIndividualCustomerDetailsById(UUID id, User user) {
+        log.info("Retrieving individual details for ID: {} by user: {}", id, user.getUsername());
         IndividualCustomer individualCustomer = getByIdAndUser(id, user);
-        return individualCustomerDetailsResponseModelAssembler.toModel(individualCustomer);
+        IndividualCustomerDetailsResponseModel individualCustomerDetailsResponseModel =
+                individualCustomerDetailsResponseModelAssembler.toModel(individualCustomer);
+        log.info("Retrieved individual details: {}", individualCustomerDetailsResponseModel);
+        return individualCustomerDetailsResponseModel;
     }
 
     /**
@@ -157,7 +169,7 @@ public class IndividualCustomerService {
     @Transactional
     IndividualCustomer getByIdAndUser(UUID id, User user) {
         IndividualCustomer individualCustomer = findById(id);
-        if (!(accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, individualCustomer))) {
+        if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, individualCustomer)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with an individual customer with id " + id);
         }
         return individualCustomer;
@@ -173,12 +185,12 @@ public class IndividualCustomerService {
      *
      * @param id The UUID of the individual customer to find.
      * @return The individual customer entity if found.
-     * @throws IllegalStateException If no individual customer exists with the given ID.
+     * @throws EntityNotFoundException If no individual customer exists with the given ID.
      */
     @Transactional
     IndividualCustomer findById(UUID id) {
         return individualCustomerRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Individual customer with id " + id + " does not exist."));
+                .orElseThrow(() -> new EntityNotFoundException("Individual customer with id " + id + " does not exist."));
     }
 
     /**

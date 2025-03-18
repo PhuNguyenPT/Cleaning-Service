@@ -14,6 +14,7 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -146,7 +147,7 @@ public class CompanyService {
      */
     @Transactional
     public CompanyDetailsResponseModel getCompanyDetailsResponseModelById(UUID id, User user) {
-        log.info("Fetching company details for ID: {} by user: {}", id, user.getUsername());
+        log.info("Retrieving company details for ID: {} by user: {}", id, user.getUsername());
         Company dbCompany = getByIdAndUser(id, user);
         CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsResponseModelAssembler.toModel(dbCompany);
         log.info("Retrieved company details: {}", companyDetailsResponseModel);
@@ -186,13 +187,13 @@ public class CompanyService {
      * 3. If no company is found, an {@code IllegalStateException} is thrown.
      * @param id The UUID of the company to find
      * @return The company entity if found
-     * @throws IllegalStateException If no company exists with the given ID
+     * @throws EntityNotFoundException If no company exists with the given ID
      */
     @Transactional
     Company findById(UUID id) {
         log.info("Looking for company with ID: {}", id);
         return companyRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Company with id " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Company with id " + id + " not found."));
     }
 
     /**

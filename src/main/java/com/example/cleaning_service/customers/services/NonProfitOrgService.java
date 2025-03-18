@@ -14,6 +14,7 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
 import com.example.cleaning_service.customers.repositories.NonProfitOrgRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
@@ -169,12 +170,12 @@ public class NonProfitOrgService {
      *
      * @param id The UUID of the non-profit organization to find.
      * @return The non-profit organization entity if found.
-     * @throws IllegalStateException If no non-profit organization exists with the given ID.
+     * @throws EntityNotFoundException If no non-profit organization exists with the given ID.
      */
     @Transactional
     NonProfitOrg findById(UUID id) {
         return nonProfitOrgRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Non-profit org " + id + "not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Non-profit org " + id + "not found."));
     }
 
     /**

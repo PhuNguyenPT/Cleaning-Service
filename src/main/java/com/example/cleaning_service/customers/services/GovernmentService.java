@@ -14,6 +14,7 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
 import com.example.cleaning_service.customers.repositories.GovernmentRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -175,12 +176,12 @@ public class GovernmentService {
      *
      * @param id The UUID of the government entity to find.
      * @return The government entity if found.
-     * @throws IllegalStateException If no government entity exists with the given ID.
+     * @throws EntityNotFoundException If no government entity exists with the given ID.
      */
     @Transactional
     Government findById(UUID id) {
         return governmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Government with id " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found."));
     }
 
     /**
