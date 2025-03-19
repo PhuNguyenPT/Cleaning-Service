@@ -28,7 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AdminController {
     private final IUserService userService;
 
-    public AdminController(IUserService userService, UserResponseModelAssembler userResponseModelAssembler) {
+    public AdminController(IUserService userService) {
         this.userService = userService;
     }
 
