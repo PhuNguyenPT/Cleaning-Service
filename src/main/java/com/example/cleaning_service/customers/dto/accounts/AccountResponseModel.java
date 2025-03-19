@@ -3,8 +3,6 @@ package com.example.cleaning_service.customers.dto.accounts;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.lang.NonNull;
 
-import java.util.UUID;
-
 public class AccountResponseModel extends RepresentationModel<AccountResponseModel> {
     private final String username;
     private final String email;

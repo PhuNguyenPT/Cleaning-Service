@@ -1,7 +1,6 @@
 package com.example.cleaning_service.security.services;
 
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
-import com.example.cleaning_service.security.dtos.auth.AuthResponseLoginModel;
 import com.example.cleaning_service.security.dtos.user.UserRequest;
 import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import com.example.cleaning_service.security.entities.user.User;
