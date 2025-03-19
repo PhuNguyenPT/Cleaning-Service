@@ -1,7 +1,10 @@
 package com.example.cleaning_service.security.services.impl;
 
+import com.example.cleaning_service.security.assemblers.UserResponseModelAssembler;
+import com.example.cleaning_service.security.controllers.AdminController;
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
 import com.example.cleaning_service.security.dtos.user.UserRequest;
+import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
@@ -15,17 +18,25 @@ import com.example.cleaning_service.security.services.IUserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
 public class UserService implements IUserService {
@@ -34,30 +45,61 @@ public class UserService implements IUserService {
     private final IRoleService roleService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final PagedResourcesAssembler<User> pagedResourcesAssembler;
+    private final UserResponseModelAssembler userResponseModelAssembler;
 
-    public UserService(UserRepository userRepository, IRoleService roleService, BCryptPasswordEncoder passwordEncoder, ApplicationEventPublisher applicationEventPublisher) {
+    public UserService(UserRepository userRepository, IRoleService roleService, BCryptPasswordEncoder passwordEncoder,
+                       ApplicationEventPublisher applicationEventPublisher,
+                       UserResponseModelAssembler userResponseModelAssembler) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.pagedResourcesAssembler = new PagedResourcesAssembler<>(null, null);
+        this.userResponseModelAssembler = userResponseModelAssembler;
+    }
+
+
+
+    @Override
+    @Transactional
+    public UserResponseModel createUser(UserRequest userRequest) {
+        User savedUser = saveUser(
+                userRequest.username(),
+                userRequest.password(),
+                userRequest.role()
+        );
+
+        // Convert to UserResponseModel using assembler
+        UserResponseModel userResponseModel = userResponseModelAssembler.toModel(savedUser);
+
+        // Add a link for all users
+        PageRequest pageRequest = PageRequest.of(0, 20);
+        Link allUsersLink = linkTo(methodOn(AdminController.class).getAllUsers(pageRequest)).withRel("users");
+
+        userResponseModel.add(allUsersLink);
+        // Return userResponseModel with additional links
+        return userResponseModel;
     }
 
     @Transactional
-    @Override
-    public User saveUser(String username, String password, ERole roleName) {
+    User saveUser(String username, String password, ERole roleName) {
         Role userRole = roleService.ensureRoleExists(roleName);
+        log.info("User role: {}", userRole);
 
         // ✅ Use existing managed Permission instances
         Set<Permission> existingPermissions = new HashSet<>(userRole.getPermissions());
+        log.info("User role permissions: {}", existingPermissions);
 
         User user = new User(username, passwordEncoder.encode(password), userRole, existingPermissions);
+        log.info("Saving user {}", user);
 
         return userRepository.save(user);
     }
 
     @Transactional
     @Override
-    public Page<User> findAll(Pageable pageable) {
+    public PagedModel<UserResponseModel> findAll(Pageable pageable) {
         log.info("Fetching all users with pagination - Page: {}, Size: {}, Sort: {}",
                 pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
@@ -65,8 +107,8 @@ public class UserService implements IUserService {
 
         log.info("Fetched {} users on current page out of {} total users.",
                 users.getNumberOfElements(), users.getTotalElements());
-
-        return users;
+        pagedResourcesAssembler.setForceFirstAndLastRels(true);
+        return pagedResourcesAssembler.toModel(users, userResponseModelAssembler);
     }
 
 
@@ -106,10 +148,15 @@ public class UserService implements IUserService {
         return savedUser;
     }
 
+    @Override
+    @Transactional
+    public UserResponseModel getUserResponseModelById(@NotNull UUID id) {
+        User user = findById(id);
+        return  userResponseModelAssembler.toModel(user);
+    }
 
     @Transactional
-    @Override
-    public User findById(UUID id) {
+    User findById(UUID id) {
         log.info("Fetching user with ID: {}", id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
@@ -132,7 +179,7 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public User updateUser(UUID id, UserRequest userRequest) {
+    public UserResponseModel updateUser(UUID id, UserRequest userRequest) {
         log.info("Attempting to update user with ID: {}", id);
 
         // Find the existing user
@@ -166,6 +213,6 @@ public class UserService implements IUserService {
         User updatedUser = userRepository.save(user);
         log.info("User with ID: {} successfully updated.", id);
 
-        return updatedUser;
+        return userResponseModelAssembler.toModel(updatedUser);
     }
 }

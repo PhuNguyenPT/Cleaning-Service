@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Relation(itemRelation = "user", collectionRelation = "users")
-public final class AuthResponseProfileModel extends RepresentationModel<AuthResponseProfileModel> {
+public class AuthResponseProfileModel extends RepresentationModel<AuthResponseProfileModel> {
     private final UUID id;
     private final String username;
     private final RoleResponse role;

@@ -138,4 +138,19 @@ public class User extends Auditable implements UserDetails {
     public boolean isEnabled() {
         return isEnabled;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", isEnabled=" + isEnabled +
+                ", isAccountNonExpired=" + isAccountNonExpired +
+                ", isAccountNonLocked=" + isAccountNonLocked +
+                ", isCredentialsNonExpired=" + isCredentialsNonExpired +
+                ", role=" + role +
+                ", permissions=" + permissions +
+                '}';
+    }
 }
