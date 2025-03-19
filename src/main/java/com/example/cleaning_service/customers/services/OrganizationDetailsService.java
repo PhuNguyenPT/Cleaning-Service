@@ -21,7 +21,7 @@ public class OrganizationDetailsService {
     private static final Logger log = LoggerFactory.getLogger(OrganizationDetailsService.class);
 
     @Transactional
-    void updateOrganizationDetails(IOrganization organization, @Valid OrganizationDetailsRequest organizationDetailsUpdateRequest) {
+    void updateOrganizationDetails(@NotNull IOrganization organization, @Valid OrganizationDetailsRequest organizationDetailsUpdateRequest) {
         if (organizationDetailsUpdateRequest.taxId() != null) {
             organization.setTaxId(organizationDetailsUpdateRequest.taxId());
         }
@@ -39,7 +39,7 @@ public class OrganizationDetailsService {
     }
     
     @Transactional
-    boolean getIsPrimaryByIOrganization(IOrganization organization) {
+    boolean getIsPrimaryByIOrganization(@NotNull IOrganization organization) {
         return switch (organization) {
             case Company _, Government _, NonProfitOrg _ -> false;
             case IndividualCustomer _ -> true;

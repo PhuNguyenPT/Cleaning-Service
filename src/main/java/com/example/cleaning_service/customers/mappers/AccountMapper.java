@@ -10,17 +10,17 @@ import org.springframework.stereotype.Component;
 public class AccountMapper {
     public AccountDetailsResponseModel fromAccountToDetailsResponseModel(@NotNull Account account) {
         return new AccountDetailsResponseModel(
-                account.getNotes(),
+                account.getNotes() != null ? account.getNotes() : null,
                 account.isPrimary(),
-                account.getAssociationType()
+                account.getAssociationType() != null ? account.getAssociationType() : null
         );
     }
 
     public AccountResponseModel fromAccountToResponseModel(@NotNull Account account) {
         return new AccountResponseModel(
-                account.getUser().getUsername(),
-                account.getCustomer().getEmail(),
-                account.getCustomer().getName()
+                account.getUser() != null ? account.getUser().getUsername() : null,
+                account.getCustomer() != null ? account.getCustomer().getEmail() : null,
+                account.getCustomer() != null ? account.getCustomer().getName() : null
         );
     }
 }
