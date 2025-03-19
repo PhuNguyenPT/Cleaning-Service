@@ -8,8 +8,8 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "account_associations", schema = "sale")
-public class AccountAssociation extends Auditable {
+@Table(name = "account", schema = "sale")
+public class Account extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
@@ -30,11 +30,11 @@ public class AccountAssociation extends Auditable {
     @Column(nullable = false)
     private EAssociationType associationType;
 
-    public AccountAssociation() {
+    public Account() {
     }
 
-    public AccountAssociation(User user, AbstractCustomer customer, String notes, boolean isPrimary,
-                              EAssociationType associationType) {
+    public Account(User user, AbstractCustomer customer, String notes, boolean isPrimary,
+                   EAssociationType associationType) {
         this.user = user;
         this.customer = customer;
         this.notes = notes;
@@ -86,5 +86,17 @@ public class AccountAssociation extends Auditable {
 
     public void setAssociationType(EAssociationType associationType) {
         this.associationType = associationType;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", user=" + user +
+                ", customer=" + customer +
+                ", notes='" + notes + '\'' +
+                ", isPrimary=" + isPrimary +
+                ", associationType=" + associationType +
+                '}';
     }
 }

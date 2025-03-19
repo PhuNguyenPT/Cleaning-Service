@@ -3,12 +3,12 @@ package com.example.cleaning_service.customers.services;
 import com.example.cleaning_service.commons.BusinessEntityService;
 import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsResponseModelAssembler;
 import com.example.cleaning_service.customers.assemblers.companies.CompanyResponseModelAssembler;
-import com.example.cleaning_service.customers.dto.*;
+import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
 import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
-import com.example.cleaning_service.customers.entities.AccountAssociation;
+import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
@@ -34,7 +34,7 @@ import java.util.UUID;
 public class CompanyService {
     private static final Logger log = LoggerFactory.getLogger(CompanyService.class);
     private final CompanyRepository companyRepository;
-    private final AccountAssociationService accountAssociationService;
+    private final AccountService accountService;
     private final BusinessEntityService businessEntityService;
     private final AbstractCustomerService abstractCustomerService;
     private final OrganizationDetailsService organizationDetailsService;
@@ -47,7 +47,7 @@ public class CompanyService {
      * Constructs a CompanyService with required dependencies.
      *
      * @param companyRepository Repository for company persistence operations.
-     * @param accountAssociationService Service for managing user-company associations.
+     * @param accountService Service for managing user-company associations.
      * @param businessEntityService Service for managing business entity operations.
      * @param abstractCustomerService Service for managing customer-related operations.
      * @param organizationDetailsService Service for managing organization-specific operations.
@@ -57,7 +57,7 @@ public class CompanyService {
      */
     public CompanyService(
             CompanyRepository companyRepository,
-            AccountAssociationService accountAssociationService,
+            AccountService accountService,
             BusinessEntityService businessEntityService,
             AbstractCustomerService abstractCustomerService,
             OrganizationDetailsService organizationDetailsService,
@@ -66,7 +66,7 @@ public class CompanyService {
             CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.companyRepository = companyRepository;
-        this.accountAssociationService = accountAssociationService;
+        this.accountService = accountService;
         this.businessEntityService = businessEntityService;
         this.abstractCustomerService = abstractCustomerService;
         this.organizationDetailsService = organizationDetailsService;
@@ -102,7 +102,7 @@ public class CompanyService {
         );
 
         log.info("Attempting to create a company for user: {}", user.getUsername());
-        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
+        Account account = accountService.findByUser(user);
 
         // Save the company
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
@@ -113,13 +113,13 @@ public class CompanyService {
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedCompany);
 
         // Update account association
-        AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
+        AccountRequest accountRequest = new AccountRequest(
                 savedCompany, null, isPrimary, associationType
         );
-        AccountAssociation updatedAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest,accountAssociation);
+        Account updatedAccount = accountService.updateAccount(accountRequest, account);
 
         // Ensure the account association correctly references a company
-        if (!(updatedAccountAssociation.getCustomer() instanceof Company accountCompany)) {
+        if (!(updatedAccount.getCustomer() instanceof Company accountCompany)) {
             throw new IllegalStateException("Account association does not reference a valid company.");
         }
 
@@ -182,7 +182,7 @@ public class CompanyService {
     Company getByIdAndUser(UUID id, User user) {
         log.info("Fetching company with ID: {} for user: {}", id, user.getUsername());
         Company company = findById(id);
-        if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, company)) {
+        if (accountService.isNotExistsAccountByUserAndCustomer(user, company)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with the company.");
         }
         return company;
@@ -266,7 +266,7 @@ public class CompanyService {
         Company dbCompany = findById(id);
 
         log.info("Detaching company ID: {} from user associations", id);
-        accountAssociationService.detachCustomerFromAssociation(dbCompany);
+        accountService.detachCustomerFromAccount(dbCompany);
 
         companyRepository.delete(dbCompany);
         log.info("Successfully deleted company with ID: {}", id);

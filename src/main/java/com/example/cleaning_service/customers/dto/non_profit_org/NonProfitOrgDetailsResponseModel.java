@@ -7,7 +7,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
 
-public final class NonProfitOrgDetailsResponseModel extends RepresentationModel<NonProfitOrgDetailsResponseModel> {
+public class NonProfitOrgDetailsResponseModel extends RepresentationModel<NonProfitOrgDetailsResponseModel> {
     private final String taxId;
     private final String registrationNumber;
 

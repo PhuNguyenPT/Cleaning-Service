@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Relation(itemRelation = "user", collectionRelation = "users")
-public final class UserResponseModel extends RepresentationModel<UserResponseModel> {
+public class UserResponseModel extends RepresentationModel<UserResponseModel> {
     private final UUID id;
     private final String username;
     private final RoleResponse role;

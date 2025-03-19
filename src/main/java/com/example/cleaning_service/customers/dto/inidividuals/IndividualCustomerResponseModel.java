@@ -4,7 +4,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.util.UUID;
 
-public final class IndividualCustomerResponseModel extends RepresentationModel<IndividualCustomerResponseModel> {
+public class IndividualCustomerResponseModel extends RepresentationModel<IndividualCustomerResponseModel> {
     private final UUID id;
     private final String name;
 

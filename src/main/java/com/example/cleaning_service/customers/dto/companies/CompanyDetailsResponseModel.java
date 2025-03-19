@@ -6,7 +6,7 @@ import org.springframework.hateoas.RepresentationModel;
 import java.util.Set;
 import java.util.UUID;
 
-public final class CompanyDetailsResponseModel extends RepresentationModel<CompanyDetailsResponseModel> {
+public class CompanyDetailsResponseModel extends RepresentationModel<CompanyDetailsResponseModel> {
     private final UUID id;
     private final EOrganizationType organizationType;
     private final ECompanyType companyType;

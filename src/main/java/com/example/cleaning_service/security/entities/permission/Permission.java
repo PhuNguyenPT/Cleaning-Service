@@ -40,4 +40,12 @@ public class Permission extends Auditable implements GrantedAuthority {
     public String getAuthority() {
         return name.toString();
     }
+
+    @Override
+    public String toString() {
+        return "Permission{" +
+                "name=" + name +
+                ", id=" + id +
+                '}';
+    }
 }

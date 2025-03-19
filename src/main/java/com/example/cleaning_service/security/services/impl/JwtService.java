@@ -1,51 +1,85 @@
 package com.example.cleaning_service.security.services.impl;
 
+import com.example.cleaning_service.security.entities.tokens.TokenEntity;
+import com.example.cleaning_service.security.repositories.TokenRepository;
 import com.example.cleaning_service.security.services.IJwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import jakarta.transaction.Transactional;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class JwtService implements IJwtService {
-    private final RedisTemplate<String, String> redisTemplate;
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+    private final TokenRepository tokenRepository;
     private final JwtUtil jwtUtil;
 
-    public JwtService(RedisTemplate<String, String> redisTemplate, JwtUtil jwtUtil) {
-        this.redisTemplate = redisTemplate;
+    public JwtService(TokenRepository tokenRepository, JwtUtil jwtUtil) {
+        this.tokenRepository = tokenRepository;
         this.jwtUtil = jwtUtil;
     }
 
     @Transactional
     @Override
-    public void saveToken(String token) { // Let exception propagate
+    public void saveToken(String token) {
+        log.info("Saving token for authentication");
         String username = jwtUtil.extractUsername(token);
         Long expirationMillis = jwtUtil.extractExpirationTime(token);
-        redisTemplate.opsForValue().set(token, username, expirationMillis, TimeUnit.MILLISECONDS);
+        long timeToLive = expirationMillis - System.currentTimeMillis();
+        if (timeToLive <= 0) {
+            log.warn("Attempted to save expired token for user: {}", username);
+        }
+
+        log.debug("Token TTL: {} ms for user: {}", timeToLive, username);
+        TokenEntity tokenEntity = new TokenEntity(token, username, timeToLive);
+        TokenEntity savedEntity = tokenRepository.save(tokenEntity);
+        log.info("Token successfully saved: {}", savedEntity);
     }
 
     @Transactional
     @Override
-    public boolean isTokenSaved(String token) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(token));
+    public boolean existsTokenById(String token) {
+        log.debug("Checking if token exists in repository");
+        boolean exists = tokenRepository.existsById(token);
+        if (!exists) {
+            log.debug("Token not found in repository");
+        }
+
+        tokenRepository.findById(token).ifPresent(tokenEntity ->
+                log.debug("Token found in repository: {}", tokenEntity));
+        return exists;
     }
 
     @Transactional
     @Override
-    public void logoutToken(String token) { // Let exception propagate
-        Long expirationMillis = jwtUtil.extractExpirationTime(token);
-        long expirationTime = expirationMillis - System.currentTimeMillis();
+    public void logoutToken(String token) {
+        log.info("Processing logout for token");
+        tokenRepository.findById(token).ifPresent(tokenEntity -> {
+            log.debug("Found token: {}, marking as blacklisted", tokenEntity);
+            tokenEntity.setBlacklisted(true);
+            TokenEntity updatedEntity = tokenRepository.save(tokenEntity);
+            log.info("Token successfully blacklisted: {}", updatedEntity);
+        });
 
-        if (expirationTime > 0) {
-            redisTemplate.opsForValue().set(token, "blacklisted", expirationTime, TimeUnit.MILLISECONDS);
+        if (!tokenRepository.existsById(token)) {
+            log.warn("Attempted to blacklist non-existent token");
         }
     }
 
     @Transactional
     @Override
     public boolean isTokenBlacklisted(String token) {
-        return "blacklisted".equals(redisTemplate.opsForValue().get(token));
+        log.debug("Checking if token is blacklisted");
+        return tokenRepository.findById(token)
+                .map(tokenEntity -> {
+                    boolean isBlacklisted = tokenEntity.isBlacklisted();
+                    log.debug("Token status: {}, Blacklisted: {}", tokenEntity, isBlacklisted);
+                    return isBlacklisted;
+                })
+                .orElseGet(() -> {
+                    log.debug("Token is blacklisted not found in repository");
+                    return false;
+                });
     }
 }

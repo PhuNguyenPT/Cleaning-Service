@@ -3,12 +3,12 @@ package com.example.cleaning_service.customers.services;
 import com.example.cleaning_service.commons.BusinessEntityService;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerDetailsResponseModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerResponseModelAssembler;
-import com.example.cleaning_service.customers.dto.AccountAssociationRequest;
+import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerUpdateRequest;
-import com.example.cleaning_service.customers.entities.AccountAssociation;
+import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
@@ -34,7 +34,7 @@ public class IndividualCustomerService {
 
     private static final Logger log = LoggerFactory.getLogger(IndividualCustomerService.class);
     private final IndividualCustomerRepository individualCustomerRepository;
-    private final AccountAssociationService accountAssociationService;
+    private final AccountService accountService;
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
     private final OrganizationDetailsService organizationDetailsService;
@@ -47,7 +47,7 @@ public class IndividualCustomerService {
      * Constructs an IndividualCustomerService with required dependencies.
      *
      * @param individualCustomerRepository Repository for individual customer entity persistence operations.
-     * @param accountAssociationService Service for managing user-individual customer associations.
+     * @param accountService Service for managing user-individual customer associations.
      * @param abstractCustomerService Service for managing common customer-related operations.
      * @param businessEntityService Service for managing business entity operations.
      * @param organizationDetailsService Service for managing organization-specific operations.
@@ -57,7 +57,7 @@ public class IndividualCustomerService {
      */
     public IndividualCustomerService(
             IndividualCustomerRepository individualCustomerRepository,
-            AccountAssociationService accountAssociationService,
+            AccountService accountService,
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
             OrganizationDetailsService organizationDetailsService,
@@ -66,7 +66,7 @@ public class IndividualCustomerService {
             IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.individualCustomerRepository = individualCustomerRepository;
-        this.accountAssociationService = accountAssociationService;
+        this.accountService = accountService;
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
         this.organizationDetailsService = organizationDetailsService;
@@ -101,7 +101,7 @@ public class IndividualCustomerService {
                 individualCustomerRepository::existsByEmail
         );
         log.info("Attempting to create an individual customer for user: {}", user.getUsername());
-        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
+        Account account = accountService.findByUser(user);
 
         IndividualCustomer individualCustomer = individualCustomerMapper.fromRequestToCustomer(individualCustomerRequest);
         IndividualCustomer savedIndividualCustomer = saveIndividualCustomer(individualCustomer);
@@ -111,12 +111,12 @@ public class IndividualCustomerService {
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedIndividualCustomer);
 
         // Create account association
-        AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
+        AccountRequest accountRequest = new AccountRequest(
                 savedIndividualCustomer, null, isPrimary, associationType
         );
-        AccountAssociation dbAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest, accountAssociation);
+        Account dbAccount = accountService.updateAccount(accountRequest, account);
 
-        if (!(dbAccountAssociation.getCustomer() instanceof IndividualCustomer accountCustomer)) {
+        if (!(dbAccount.getCustomer() instanceof IndividualCustomer accountCustomer)) {
             throw new IllegalStateException("Account association does not reference a valid individual.");
         }
 
@@ -178,7 +178,7 @@ public class IndividualCustomerService {
     @Transactional
     IndividualCustomer getByIdAndUser(UUID id, User user) {
         IndividualCustomer individualCustomer = findById(id);
-        if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, individualCustomer)) {
+        if (accountService.isNotExistsAccountByUserAndCustomer(user, individualCustomer)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with an individual customer with id " + id);
         }
         return individualCustomer;
@@ -260,7 +260,7 @@ public class IndividualCustomerService {
     @Transactional
     public void deleteIndividualCustomerById(UUID id, User user) {
         IndividualCustomer individualCustomer = getByIdAndUser(id, user);
-        accountAssociationService.detachCustomerFromAssociation(individualCustomer);
+        accountService.detachCustomerFromAccount(individualCustomer);
         individualCustomerRepository.delete(individualCustomer);
     }
 }

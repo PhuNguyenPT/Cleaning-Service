@@ -13,10 +13,10 @@ import java.util.UUID;
 public class BusinessEntity extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    protected UUID id;
 
-    private String name;
-    private String address;
+    protected String name;
+    protected String address;
 
     @Pattern(
             regexp = "^\\+?[1-9]\\d{1,14}$",
@@ -24,7 +24,7 @@ public class BusinessEntity extends Auditable {
                     "Expected format: optional '+' followed by 2 to 15 digits. " +
                     "Examples: +1234567890, 1234567890."
     )
-    private String phone;
+    protected String phone;
 
     @Email(
             regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
@@ -36,18 +36,18 @@ public class BusinessEntity extends Auditable {
                     "Examples: user@example.com, john.doe@company.org."
     )
     @Column(unique = true)
-    private String email;
+    protected String email;
 
-    private String city;
-    private String state;
-    private String zip;
+    protected String city;
+    protected String state;
+    protected String zip;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ECountryType country;
+    protected ECountryType country;
 
-    private String notes;
+    protected String notes;
 
     public BusinessEntity() {
     }
@@ -139,5 +139,21 @@ public class BusinessEntity extends Auditable {
 
     public void setCountry(ECountryType country) {
         this.country = country;
+    }
+
+    @Override
+    public String toString() {
+        return "BusinessEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                ", country=" + country +
+                ", notes='" + notes + '\'' +
+                '}';
     }
 }

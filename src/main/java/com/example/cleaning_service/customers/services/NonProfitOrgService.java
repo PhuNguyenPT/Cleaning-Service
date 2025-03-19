@@ -3,12 +3,12 @@ package com.example.cleaning_service.customers.services;
 import com.example.cleaning_service.commons.BusinessEntityService;
 import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailsResponseModelAssembler;
 import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgResponseModelAssembler;
-import com.example.cleaning_service.customers.dto.AccountAssociationRequest;
+import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRequest;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgUpdateRequest;
-import com.example.cleaning_service.customers.entities.AccountAssociation;
+import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
@@ -33,7 +33,7 @@ import java.util.UUID;
 public class NonProfitOrgService {
     private static final Logger log = LoggerFactory.getLogger(NonProfitOrgService.class);
     private final NonProfitOrgRepository nonProfitOrgRepository;
-    private final AccountAssociationService accountAssociationService;
+    private final AccountService accountService;
     private final OrganizationDetailsService organizationDetailsService;
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
@@ -46,7 +46,7 @@ public class NonProfitOrgService {
      * Constructs a NonProfitOrgService with required dependencies.
      *
      * @param nonProfitOrgRepository Repository for non-profit organization persistence operations.
-     * @param accountAssociationService Service for managing user-organization associations.
+     * @param accountService Service for managing user-organization associations.
      * @param organizationDetailsService Service for managing organization-specific operations.
      * @param abstractCustomerService Service for managing customer-related operations.
      * @param businessEntityService Service for managing business entity operations.
@@ -56,7 +56,7 @@ public class NonProfitOrgService {
      */
     public NonProfitOrgService(
             NonProfitOrgRepository nonProfitOrgRepository,
-            AccountAssociationService accountAssociationService,
+            AccountService accountService,
             OrganizationDetailsService organizationDetailsService,
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
@@ -65,7 +65,7 @@ public class NonProfitOrgService {
             NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.nonProfitOrgRepository = nonProfitOrgRepository;
-        this.accountAssociationService = accountAssociationService;
+        this.accountService = accountService;
         this.organizationDetailsService = organizationDetailsService;
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
@@ -100,7 +100,7 @@ public class NonProfitOrgService {
                 nonProfitOrgRepository::existsByEmail
         );
 
-        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
+        Account account = accountService.findByUser(user);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);
         NonProfitOrg savedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
@@ -109,12 +109,12 @@ public class NonProfitOrgService {
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedNonProfitOrg);
 
         // Create account association
-        AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
+        AccountRequest accountRequest = new AccountRequest(
                 savedNonProfitOrg, null, isPrimary, associationType
         );
-        AccountAssociation dbAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest, accountAssociation);
+        Account dbAccount = accountService.updateAccount(accountRequest, account);
 
-        if(!(dbAccountAssociation.getCustomer() instanceof NonProfitOrg accountNonProfitOrg)) {
+        if(!(dbAccount.getCustomer() instanceof NonProfitOrg accountNonProfitOrg)) {
             throw new IllegalStateException("Account association does not reference a valid non-profit org.");
         }
         return nonProfitOrgResponseModelAssembler.toModel(accountNonProfitOrg);
@@ -167,7 +167,7 @@ public class NonProfitOrgService {
     @Transactional
     NonProfitOrg getByIdAndUser(UUID id, User user) {
         NonProfitOrg nonProfitOrg = findById(id);
-        if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, nonProfitOrg)) {
+        if (accountService.isNotExistsAccountByUserAndCustomer(user, nonProfitOrg)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with a non-profit organization.");
         }
         return nonProfitOrg;
@@ -249,7 +249,7 @@ public class NonProfitOrgService {
     @Transactional
     public void deleteNonProfitOrgById(UUID id, User user) {
         NonProfitOrg nonProfitOrg = getByIdAndUser(id, user);
-        accountAssociationService.detachCustomerFromAssociation(nonProfitOrg);
+        accountService.detachCustomerFromAccount(nonProfitOrg);
         nonProfitOrgRepository.delete(nonProfitOrg);
     }
 }
