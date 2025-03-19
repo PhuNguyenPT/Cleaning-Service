@@ -1,6 +1,5 @@
 package com.example.cleaning_service.security.controllers;
 
-import com.example.cleaning_service.security.assemblers.UserResponseModelAssembler;
 import com.example.cleaning_service.security.dtos.user.UserRequest;
 import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import com.example.cleaning_service.security.services.IUserService;
