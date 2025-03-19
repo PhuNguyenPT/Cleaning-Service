@@ -17,7 +17,7 @@ import java.util.Set;
 @Table(name = "individual_customers", schema = "customer")
 @ValidTaxId
 @ValidRegistrationNumber
-public final class IndividualCustomer extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
+public non-sealed class IndividualCustomer extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
         IRegistrationNumberIdentifiable
 {
 
@@ -82,5 +82,28 @@ public final class IndividualCustomer extends AbstractCustomer implements IOrgan
     @Override
     public ECountryType country() {
         return this.getCountry();
+    }
+
+    @Override
+    public String toString() {
+        return "IndividualCustomer{" +
+                "organizationType=" + organizationType +
+                ", taxId='" + taxId + '\'' +
+                ", registrationNumber='" + registrationNumber + '\'' +
+                ", loyaltyType=" + loyaltyType +
+                ", billingAddress='" + billingAddress + '\'' +
+                ", paymentMethod=" + paymentMethod +
+                ", preferredDays=" + preferredDays +
+                ", id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                ", country=" + country +
+                ", notes='" + notes + '\'' +
+                '}';
     }
 }

@@ -16,21 +16,21 @@ import java.time.Instant;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Auditable {
 
-    private @Version Long version;
+    protected @Version Long version;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    protected Instant createdAt;
 
     @LastModifiedDate
-    private Instant updatedAt;
+    protected Instant updatedAt;
 
     @CreatedBy
     @Column(updatable = false)
-    private String createdBy;
+    protected String createdBy;
 
     @LastModifiedBy
-    private String updatedBy;
+    protected String updatedBy;
 
     public Long getVersion() {
         return version;
@@ -50,5 +50,16 @@ public abstract class Auditable {
 
     public String getUpdatedBy() {
         return updatedBy;
+    }
+
+    @Override
+    public String toString() {
+        return "Auditable{" +
+                "version=" + version +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", createdBy='" + createdBy + '\'' +
+                ", updatedBy='" + updatedBy + '\'' +
+                '}';
     }
 }

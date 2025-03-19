@@ -18,7 +18,7 @@ import java.util.Set;
 @Table(name = "non_profit_org", schema = "customer")
 @ValidTaxId
 @ValidRegistrationNumber
-public final class NonProfitOrg extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
+public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
         IRegistrationNumberIdentifiable
 {
 
@@ -84,5 +84,15 @@ public final class NonProfitOrg extends AbstractCustomer implements IOrganizatio
     @Override
     public ECountryType country() {
         return this.getCountry();
+    }
+
+    @Override
+    public String toString() {
+        return "NonProfitOrg{" +
+                "organizationType=" + organizationType +
+                ", taxId='" + taxId + '\'' +
+                ", registrationNumber='" + registrationNumber + '\'' +
+                super.toString() +
+                '}';
     }
 }

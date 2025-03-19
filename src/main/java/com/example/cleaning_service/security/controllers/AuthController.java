@@ -5,40 +5,30 @@ import com.example.cleaning_service.security.assemblers.AuthResponseProfileModel
 import com.example.cleaning_service.security.assemblers.AuthResponseRegisterModelAssembler;
 import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.user.User;
-import com.example.cleaning_service.security.services.IJwtService;
+import com.example.cleaning_service.security.services.IAuthService;
 import com.example.cleaning_service.security.services.IUserService;
-import com.example.cleaning_service.security.util.JwtUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.hateoas.Link;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.*;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private final JwtUtil jwtUtil;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+    private final IAuthService authService;
     private final IUserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final IJwtService jwtService;
-    private final AuthResponseModelAssembler authResponseModelAssembler;
     private final AuthResponseProfileModelAssembler authResponseProfileModelAssembler;
     private final AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler;
 
-    public AuthController(JwtUtil jwtUtil, IUserService userService, AuthenticationManager authenticationManager,
-                          IJwtService jwtService, AuthResponseModelAssembler authResponseModelAssembler,
+    public AuthController(IAuthService authService, IUserService userService,
                           AuthResponseProfileModelAssembler authResponseProfileModelAssembler, AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler) {
-        this.jwtUtil = jwtUtil;
+        this.authService = authService;
         this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.authResponseModelAssembler = authResponseModelAssembler;
         this.authResponseProfileModelAssembler = authResponseProfileModelAssembler;
         this.authResponseRegisterModelAssembler = authResponseRegisterModelAssembler;
     }
@@ -46,25 +36,14 @@ public class AuthController {
     @PostMapping(value = "/login", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public AuthResponseLoginModel login(@RequestBody @Valid AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password())
-        );
-
-        User user = (User) authentication.getPrincipal();
-        long expDurationMs = 86400000; // 24 hours in milliseconds
-        long expDurationSec = expDurationMs / 1000; // Convert to seconds
-
-        String token = jwtUtil.generateToken(user, expDurationMs);
-        jwtService.saveToken(token);
-
-        AuthResponse authResponse = new AuthResponse(user.getId(), token, expDurationSec);
-        return authResponseModelAssembler.toModel(authResponse);
+        return authService.login(authRequest);
     }
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping(value = "/me", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
     public AuthResponseProfileModel getAuthenticatedUser(@AuthenticationPrincipal User user) {
+        log.info("Assembling model for authenticated user {}", user);
         return authResponseProfileModelAssembler.toModel(user);
     }
 
@@ -72,6 +51,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponseRegisterModel register(@RequestBody @Valid AuthRequest authRequest) {
         User user = userService.register(authRequest);
+        log.info("Assembling model for registered user {}", user);
         return authResponseRegisterModelAssembler.toModel(user);
     }
 
@@ -80,16 +60,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     public AuthResponseLogoutModel logout(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-
-        token = token.substring(7); // Remove "Bearer " prefix
-        jwtService.logoutToken(token);
-
-        AuthResponseLogoutModel authResponseLogoutModel = new AuthResponseLogoutModel("Logout successful");
-
-        Link loginLink = linkTo(AuthController.class).slash("login").withRel("login");
-        authResponseLogoutModel.add(loginLink);
-
-        return authResponseLogoutModel;
+        return authService.logout(token);
     }
 
     // Uncomment if refresh token is needed

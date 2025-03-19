@@ -18,7 +18,7 @@ import java.util.Set;
 @Table(name = "governments", schema = "customer")
 @ValidTaxId
 @ValidRegistrationNumber
-public final class Government extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
+public non-sealed class Government extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
         IRegistrationNumberIdentifiable
 {
 
@@ -125,5 +125,19 @@ public final class Government extends AbstractCustomer implements IOrganization,
     @Override
     public ECountryType country() {
         return this.getCountry();
+    }
+
+    @Override
+    public String toString() {
+        return "Government{" +
+                "organizationType=" + organizationType +
+                ", taxId='" + taxId + '\'' +
+                ", registrationNumber='" + registrationNumber + '\'' +
+                ", contractorName='" + contractorName + '\'' +
+                ", departmentName='" + departmentName + '\'' +
+                ", isTaxExempt=" + isTaxExempt +
+                ", requiresEmergencyCleaning=" + requiresEmergencyCleaning +
+                super.toString() +
+                '}';
     }
 }

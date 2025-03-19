@@ -3,12 +3,12 @@ package com.example.cleaning_service.customers.services;
 import com.example.cleaning_service.commons.BusinessEntityService;
 import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsResponseModelAssembler;
 import com.example.cleaning_service.customers.assemblers.governments.GovernmentResponseModelAssembler;
-import com.example.cleaning_service.customers.dto.*;
+import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentUpdateRequest;
-import com.example.cleaning_service.customers.entities.AccountAssociation;
+import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
@@ -34,7 +34,7 @@ import java.util.UUID;
 public class GovernmentService {
     private static final Logger log = LoggerFactory.getLogger(GovernmentService.class);
     private final GovernmentRepository governmentRepository;
-    private final AccountAssociationService accountAssociationService;
+    private final AccountService accountService;
     private final BusinessEntityService businessEntityService;
     private final AbstractCustomerService abstractCustomerService;
     private final OrganizationDetailsService organizationDetailsService;
@@ -47,7 +47,7 @@ public class GovernmentService {
      * Constructs a GovernmentService with required dependencies.
      *
      * @param governmentRepository Repository for government entity persistence operations.
-     * @param accountAssociationService Service for managing user-government associations.
+     * @param accountService Service for managing user-government associations.
      * @param businessEntityService Service for managing business entity operations.
      * @param abstractCustomerService Service for managing customer-related operations.
      * @param organizationDetailsService Service for managing organization-specific operations.
@@ -57,7 +57,7 @@ public class GovernmentService {
      */
     public GovernmentService(
             GovernmentRepository governmentRepository,
-            AccountAssociationService accountAssociationService,
+            AccountService accountService,
             BusinessEntityService businessEntityService,
             AbstractCustomerService abstractCustomerService,
             OrganizationDetailsService organizationDetailsService,
@@ -66,7 +66,7 @@ public class GovernmentService {
             GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler, CustomerService customerService) {
 
         this.governmentRepository = governmentRepository;
-        this.accountAssociationService = accountAssociationService;
+        this.accountService = accountService;
         this.businessEntityService = businessEntityService;
         this.abstractCustomerService = abstractCustomerService;
         this.organizationDetailsService = organizationDetailsService;
@@ -100,7 +100,7 @@ public class GovernmentService {
                 governmentRepository::existsByRegistrationNumber,
                 governmentRepository::existsByEmail
         );
-        AccountAssociation accountAssociation = accountAssociationService.findByUser(user);
+        Account account = accountService.findByUser(user);
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government savedGovernment = saveGovernment(government);
@@ -109,12 +109,12 @@ public class GovernmentService {
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedGovernment);
 
         // Create account association
-        AccountAssociationRequest accountAssociationRequest = new AccountAssociationRequest(
+        AccountRequest accountRequest = new AccountRequest(
                 savedGovernment, null, isPrimary, associationType
         );
-        AccountAssociation dbAccountAssociation = accountAssociationService.updateAccountAssociation(accountAssociationRequest, accountAssociation);
+        Account dbAccount = accountService.updateAccount(accountRequest, account);
 
-        if (!(dbAccountAssociation.getCustomer() instanceof Government accountGovernment)) {
+        if (!(dbAccount.getCustomer() instanceof Government accountGovernment)) {
             throw new IllegalStateException("Account association does not reference a valid government.");
         }
 
@@ -171,7 +171,7 @@ public class GovernmentService {
     @Transactional
     Government getByIdAndUser(UUID id, User user) {
         Government government = findById(id);
-        if (accountAssociationService.isNotExistsAccountAssociationByUserAndCustomer(user, government)) {
+        if (accountService.isNotExistsAccountByUserAndCustomer(user, government)) {
             throw new IllegalStateException("User " + user.getUsername() + " is not associated with a government with id "
             + id);
         }
@@ -269,7 +269,7 @@ public class GovernmentService {
     @Transactional
     public void deleteGovernmentById(UUID id, User user) {
         Government dbGovernment = getByIdAndUser(id, user);
-        accountAssociationService.detachCustomerFromAssociation(dbGovernment);
+        accountService.detachCustomerFromAccount(dbGovernment);
         governmentRepository.delete(dbGovernment);
     }
 }

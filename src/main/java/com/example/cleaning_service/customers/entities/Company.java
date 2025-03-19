@@ -15,7 +15,7 @@ import java.util.Set;
 @Table(name = "companies", schema = "customer")
 @ValidTaxId
 @ValidRegistrationNumber
-public final class Company extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
+public non-sealed class Company extends AbstractCustomer implements IOrganization, ITaxIdentifiable,
         IRegistrationNumberIdentifiable
 {
 
@@ -100,5 +100,16 @@ public final class Company extends AbstractCustomer implements IOrganization, IT
     @Override
     public ECountryType country() {
         return this.getCountry();
+    }
+
+    @Override
+    public String toString() {
+        return "Company{" +
+                "organizationType=" + organizationType +
+                ", companyType=" + companyType +
+                ", taxId='" + taxId + '\'' +
+                ", registrationNumber='" + registrationNumber + '\'' +
+                super.toString() +
+                '}';
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
 
-public final class IndividualCustomerDetailsResponseModel extends RepresentationModel<IndividualCustomerDetailsResponseModel> {
+public class IndividualCustomerDetailsResponseModel extends RepresentationModel<IndividualCustomerDetailsResponseModel> {
     private final String taxId;
     private final String registrationNumber;
 

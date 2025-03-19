@@ -27,7 +27,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     @ElementCollection
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "customer_preferred_days", schema = "customer",
-            joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"))
+            joinColumns = @JoinColumn(name = "customer_id"))
     protected Set<EDay> preferredDays = new HashSet<>();
 
     public AbstractCustomer() {
@@ -79,5 +79,16 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
 
     public void setPreferredDays(Set<EDay> preferredDays) {
         this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractCustomer{" +
+                "loyaltyType=" + loyaltyType +
+                ", billingAddress='" + billingAddress + '\'' +
+                ", paymentMethod=" + paymentMethod +
+                ", preferredDays=" + preferredDays +
+                super.toString() +
+                '}';
     }
 }
