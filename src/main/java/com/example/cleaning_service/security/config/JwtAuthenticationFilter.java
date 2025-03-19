@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             token = authHeader.substring(7);
 
             // 🔹 Check if token exists in Redis (ensure it's valid and not revoked)
-            if (!jwtService.isTokenSaved(token)) {
+            if (!jwtService.existsTokenById(token)) {
                 logger.warn("Token not found in Redis (possible logout or expiration)");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
