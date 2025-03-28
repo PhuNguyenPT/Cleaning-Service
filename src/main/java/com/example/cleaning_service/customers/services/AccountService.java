@@ -15,7 +15,7 @@ import com.example.cleaning_service.security.events.UserDeletedEvent;
 import com.example.cleaning_service.security.events.UserRegisteredEvent;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -63,7 +63,7 @@ public class AccountService {
     }
 
     @Transactional
-    Account findById(@NotNull UUID id) {
+    Account findById(UUID id) {
         log.info("Start retrieving account details with id: {}", id);
         return accountRepository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
@@ -74,7 +74,7 @@ public class AccountService {
     }
 
     @Transactional
-    Account findAccountWithCustomerByUser(@NotNull User user) {
+    Account findAccountWithCustomerByUser(User user) {
         log.info("Attempting to find account for {}", user);
         return accountRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException("User " + user.getUsername() + "'s account not found"));
@@ -92,7 +92,7 @@ public class AccountService {
      * @return The created and persisted account association entity.
      */
     @Transactional
-    Account updateAccount(@NotNull AccountRequest accountRequest, Account account) {
+    Account updateAccount(@Valid AccountRequest accountRequest, Account account) {
         if (accountRequest.customer() != null) {
             account.setCustomer(accountRequest.customer());
         }
@@ -109,32 +109,32 @@ public class AccountService {
     }
 
     @Transactional
-    void detachCustomerFromAccount(@NotNull AbstractCustomer abstractCustomer) {
+    void detachCustomerFromAccount(AbstractCustomer abstractCustomer) {
         List<Account> accounts = findAllByCustomer(abstractCustomer);
         accounts.forEach(accountAssociation -> accountAssociation.setCustomer(null));
         accountRepository.saveAll(accounts);
     }
 
-    List<Account> findAllByCustomer(@NotNull AbstractCustomer abstractCustomer) {
+    List<Account> findAllByCustomer(AbstractCustomer abstractCustomer) {
         return accountRepository.findByCustomer(abstractCustomer);
     }
 
     @EventListener
     @Transactional
-    void createAccountOnUserRegisteredEvent(@NotNull UserRegisteredEvent event) {
+    void createAccountOnUserRegisteredEvent(UserRegisteredEvent event) {
         Account association = new Account(event.user(), null, null, true, EAssociationType.OWNER);
         saveAccount(association);
     }
 
     @EventListener
     @Transactional
-    void deleteAccountByUser(@NotNull UserDeletedEvent event) {
+    void deleteAccountByUser(UserDeletedEvent event) {
         accountRepository.deleteByUser(event.user());
         log.info("User with id {} 's account successfully deleted.", event.user().getId());
     }
 
     @Transactional
-    public AccountResponseModel getAccountResponseModelById(@NotNull User user) {
+    public AccountResponseModel getAccountResponseModelById(User user) {
         log.info("Start retrieving account details for {}", user);
         Account account = findAccountWithCustomerByUser(user);
         log.info("Retrieved account entity {}", account);
@@ -157,7 +157,7 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDetailsResponseModel getAccountDetailsResponseModelById(@NotNull UUID id, @NotNull User user) {
+    public AccountDetailsResponseModel getAccountDetailsResponseModelById(UUID id, User user) {
         Account account = findById(id);
         if (!account.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("User " + user.getUsername()  + " is not authorized to access this account with id " + id);
@@ -170,5 +170,10 @@ public class AccountService {
         accountDetailsResponseModel.add(accountDefaultLink);
 
         return accountDetailsResponseModel;
+    }
+
+    @Transactional
+    boolean isRepresentativeAssociationType(Account account) {
+        return account.getAssociationType().equals(EAssociationType.REPRESENTATIVE);
     }
 }

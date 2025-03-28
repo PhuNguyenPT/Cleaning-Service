@@ -5,11 +5,16 @@ import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgReq
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NonProfitOrgMapper {
+
+    private final CustomerPreferredDayMapper customerPreferredDayMapper;
+
+    public NonProfitOrgMapper(CustomerPreferredDayMapper customerPreferredDayMapper) {
+        this.customerPreferredDayMapper = customerPreferredDayMapper;
+    }
 
     public NonProfitOrg fromRequestToNonProfitOrg(@Valid NonProfitOrgRequest nonProfitOrgRequest) {
         return new NonProfitOrg(
@@ -17,7 +22,7 @@ public class NonProfitOrgMapper {
                 nonProfitOrgRequest.registrationNumber(),
                 nonProfitOrgRequest.billingAddress(),
                 nonProfitOrgRequest.paymentMethod(),
-                nonProfitOrgRequest.preferredDays(),
+                customerPreferredDayMapper.fromEDaysToCustomerPreferredDays(nonProfitOrgRequest.preferredDays()),
                 nonProfitOrgRequest.organizationName(),
                 nonProfitOrgRequest.address(),
                 nonProfitOrgRequest.phone(),
@@ -30,20 +35,20 @@ public class NonProfitOrgMapper {
         );
     }
 
-    public NonProfitOrgResponseModel fromNonProfitOrgToModel(@NotNull NonProfitOrg nonProfitOrg) {
+    public NonProfitOrgResponseModel fromNonProfitOrgToModel(NonProfitOrg nonProfitOrg) {
         return new NonProfitOrgResponseModel(
                 nonProfitOrg.getId(),
                 nonProfitOrg.getName()
         );
     }
 
-    public NonProfitOrgDetailsResponseModel fromNonProfitOrgToDetailsModel(@NotNull NonProfitOrg nonProfitOrg) {
+    public NonProfitOrgDetailsResponseModel fromNonProfitOrgToDetailsModel(NonProfitOrg nonProfitOrg) {
         return new NonProfitOrgDetailsResponseModel(
                 nonProfitOrg.getTaxId(),
                 nonProfitOrg.getRegistrationNumber(),
                 nonProfitOrg.getBillingAddress(),
                 nonProfitOrg.getPaymentMethod(),
-                nonProfitOrg.getPreferredDays(),
+                customerPreferredDayMapper.fromCustomerPreferredDaysToEDays(nonProfitOrg.getPreferredDays()),
                 nonProfitOrg.getName(),
                 nonProfitOrg.getAddress(),
                 nonProfitOrg.getPhone(),

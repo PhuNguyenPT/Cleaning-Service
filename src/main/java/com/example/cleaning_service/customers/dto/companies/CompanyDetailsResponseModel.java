@@ -1,5 +1,6 @@
 package com.example.cleaning_service.customers.dto.companies;
 
+import com.example.cleaning_service.customers.entities.CustomerPreferredDay;
 import com.example.cleaning_service.customers.enums.*;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -28,7 +29,12 @@ public class CompanyDetailsResponseModel extends RepresentationModel<CompanyDeta
     private final ECountryType country;
     private final String notes;
 
-    public CompanyDetailsResponseModel(UUID id, EOrganizationType organizationType, ECompanyType companyType, String taxId, String registrationNumber, ELoyaltyType loyaltyType, String billingAddress, EPaymentType paymentMethod, Set<EDay> preferredDays, String name, String address, String phone, String email, String city, String state, String zip, ECountryType country, String notes) {
+    public CompanyDetailsResponseModel(UUID id, EOrganizationType organizationType, ECompanyType companyType,
+                                       String taxId, String registrationNumber, ELoyaltyType loyaltyType,
+                                       String billingAddress, EPaymentType paymentMethod,
+                                       Set<EDay> preferredDays, String name, String address,
+                                       String phone, String email, String city, String state, String zip,
+                                       ECountryType country, String notes) {
         this.id = id;
         this.organizationType = organizationType;
         this.companyType = companyType;

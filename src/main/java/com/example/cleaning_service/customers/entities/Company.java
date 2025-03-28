@@ -19,21 +19,17 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
         IRegistrationNumberIdentifiable
 {
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private final EOrganizationType organizationType = EOrganizationType.COMPANY;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ECompanyType companyType;
 
-    @NotBlank
     @Column(nullable = false, unique = true)
     private String taxId;
 
-    @NotBlank
     @Column(nullable = false, unique = true)
     private String registrationNumber;
 
@@ -42,7 +38,7 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
     }
 
     public Company(ECompanyType companyType, String registrationNumber, String taxId,
-                   String billingAddress, EPaymentType paymentMethod, Set<EDay> preferredDays,
+                   String billingAddress, EPaymentType paymentMethod, Set<CustomerPreferredDay> preferredDays,
                    String name, String address, String phone, String email, String city, String state,
                    String zip, ECountryType country, String notes) {
 

@@ -42,9 +42,7 @@ public class BusinessEntity extends Auditable {
     protected String state;
     protected String zip;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     protected ECountryType country;
 
     protected String notes;

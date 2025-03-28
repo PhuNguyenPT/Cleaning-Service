@@ -17,7 +17,6 @@ import com.example.cleaning_service.customers.repositories.GovernmentRepository;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,42 +38,40 @@ public class GovernmentService {
     private final BusinessEntityService businessEntityService;
     private final AbstractCustomerService abstractCustomerService;
     private final OrganizationDetailsService organizationDetailsService;
-    private final GovernmentMapper governmentMapper;
-    private final GovernmentResponseModelAssembler governmentResponseModelAssembler;
-    private final GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler;
     private final CustomerService customerService;
 
-    /**
-     * Constructs a GovernmentService with required dependencies.
-     *
-     * @param governmentRepository Repository for government entity persistence operations.
-     * @param accountService Service for managing user-government associations.
-     * @param businessEntityService Service for managing business entity operations.
-     * @param abstractCustomerService Service for managing customer-related operations.
-     * @param organizationDetailsService Service for managing organization-specific operations.
-     * @param governmentMapper Mapper for converting between DTOs and government entities.
-     * @param governmentResponseModelAssembler Assembler for basic government response models.
-     * @param governmentDetailsResponseModelAssembler Assembler for detailed government response models.
-     */
+
+    private final GovernmentResponseModelAssembler governmentResponseModelAssembler;
+    private final GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler;
+
+    private final GovernmentMapper governmentMapper;
+
     public GovernmentService(
             GovernmentRepository governmentRepository,
             AccountService accountService,
             BusinessEntityService businessEntityService,
             AbstractCustomerService abstractCustomerService,
             OrganizationDetailsService organizationDetailsService,
-            GovernmentMapper governmentMapper,
+            CustomerService customerService,
+
             GovernmentResponseModelAssembler governmentResponseModelAssembler,
-            GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler, CustomerService customerService) {
+            GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler,
+
+            GovernmentMapper governmentMapper
+    ) {
 
         this.governmentRepository = governmentRepository;
+
         this.accountService = accountService;
         this.businessEntityService = businessEntityService;
         this.abstractCustomerService = abstractCustomerService;
         this.organizationDetailsService = organizationDetailsService;
-        this.governmentMapper = governmentMapper;
+        this.customerService = customerService;
+
         this.governmentResponseModelAssembler = governmentResponseModelAssembler;
         this.governmentDetailsResponseModelAssembler = governmentDetailsResponseModelAssembler;
-        this.customerService = customerService;
+
+        this.governmentMapper = governmentMapper;
     }
 
     /**
@@ -93,7 +90,7 @@ public class GovernmentService {
      * @throws IllegalStateException If the updated account association does not reference a valid government entity.
      */
     @Transactional
-    public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, @NotNull User user) {
+    public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, User user) {
         log.info("Check duplicated fields");
         customerService.checkDuplicatedFields(
                 governmentRequest,
@@ -105,6 +102,7 @@ public class GovernmentService {
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government savedGovernment = saveGovernment(government);
+        log.info("Government {} saved successfully with ID: {}", savedGovernment.getName(), savedGovernment.getId());
 
         EAssociationType associationType = organizationDetailsService.getEAssociationTypeByIOrganization(savedGovernment);
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedGovernment);
@@ -113,13 +111,16 @@ public class GovernmentService {
         AccountRequest accountRequest = new AccountRequest(
                 savedGovernment, null, isPrimary, associationType
         );
-        Account dbAccount = accountService.updateAccount(accountRequest, account);
+        Account updatedAccount = accountService.updateAccount(accountRequest, account);
 
-        if (!(dbAccount.getCustomer() instanceof Government accountGovernment)) {
+        if (isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), account.getCustomer())) {
             throw new IllegalStateException("Account association does not reference a valid government.");
         }
 
-        return governmentResponseModelAssembler.toModel(accountGovernment);
+        GovernmentResponseModel governmentResponseModel = governmentResponseModelAssembler.toModel((Government) updatedAccount.getCustomer());
+        log.info("Successfully created government response: {}", governmentResponseModel);
+
+        return governmentResponseModel;
     }
 
     /**
@@ -132,7 +133,7 @@ public class GovernmentService {
      * @return The saved government entity with updated metadata.
      */
     @Transactional
-    Government saveGovernment(Government government) {
+    protected Government saveGovernment(Government government) {
         return governmentRepository.save(government);
     }
 
@@ -150,7 +151,7 @@ public class GovernmentService {
      * @throws IllegalStateException If the government entity is not found or the user doesn't have access.
      */
     @Transactional
-    public GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, @NotNull User user) {
+    public GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, User user) {
         Government dbGovernment = getByIdAndUser(id, user);
         return governmentDetailsResponseModelAssembler.toModel(dbGovernment);
     }
@@ -170,9 +171,9 @@ public class GovernmentService {
      *                               the required association.
      */
     @Transactional
-    Government getByIdAndUser(UUID id, User user) {
+    protected Government getByIdAndUser(UUID id, User user) {
         AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
-        if (abstractCustomer == null || !abstractCustomer.getId().equals(id)) {
+        if (isNotValidReferenceAbstractCustomer(id, abstractCustomer)) {
             throw new AccessDeniedException("User " + user.getUsername() + " is not associated with a government with id "
             + id);
         }
@@ -196,10 +197,12 @@ public class GovernmentService {
      */
     @Transactional
     public GovernmentDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
-        Government government = getByIdAndUser(id, user);
-
+        log.info("Updating government details for ID: {} by user: {}", id, user);
+        Government government = findGovernmentToChange(id, user);
         updateGovernmentFields(government, updateRequest);
         Government updatedGovernment = saveGovernment(government);
+        log.info("Successfully updated company with ID: {}", updatedGovernment.getId());
+
         return governmentDetailsResponseModelAssembler.toModel(updatedGovernment);
     }
 
@@ -217,7 +220,7 @@ public class GovernmentService {
      * @param updateRequest The request containing fields to update.
      */
     @Transactional
-    void updateGovernmentFields(Government government, @Valid GovernmentUpdateRequest updateRequest) {
+    protected void updateGovernmentFields(Government government, @Valid GovernmentUpdateRequest updateRequest) {
         if (updateRequest.contractorName() != null) {
             government.setContractorName(updateRequest.contractorName());
         }
@@ -251,8 +254,29 @@ public class GovernmentService {
      */
     @Transactional
     public void deleteGovernmentById(UUID id, User user) {
-        Government dbGovernment = getByIdAndUser(id, user);
+        log.info("Deleting government details for ID: {} by user: {}", id, user);
+        Government dbGovernment = findGovernmentToChange(id, user);
         accountService.detachCustomerFromAccount(dbGovernment);
         governmentRepository.delete(dbGovernment);
+    }
+
+    @Transactional
+    protected Government findGovernmentToChange(UUID id, User user) {
+        Account account = accountService.findAccountWithCustomerByUser(user);
+
+        if (accountService.isRepresentativeAssociationType(account)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to update the " +
+                    "government with id " + id);
+        }
+
+        if (isNotValidReferenceAbstractCustomer(id, account.getCustomer())) {
+            throw new IllegalStateException("Account does not reference a valid government.");
+        }
+        return (Government) account.getCustomer();
+    }
+
+    @Transactional
+    protected boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
+        return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Government);
     }
 }

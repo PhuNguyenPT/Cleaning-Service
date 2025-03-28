@@ -21,7 +21,6 @@ public non-sealed class IndividualCustomer extends AbstractCustomer implements I
         IRegistrationNumberIdentifiable
 {
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private final EOrganizationType organizationType = EOrganizationType.INDIVIDUAL;
@@ -36,7 +35,7 @@ public non-sealed class IndividualCustomer extends AbstractCustomer implements I
     }
 
     public IndividualCustomer(String taxId, String registrationNumber, String billingAddress,
-                              EPaymentType paymentMethod, Set<EDay> preferredDays, String name, String address,
+                              EPaymentType paymentMethod, Set<CustomerPreferredDay> preferredDays, String name, String address,
                               String phone, String email, String city, String state, String zip, ECountryType country,
                               String notes) {
         super(billingAddress, paymentMethod, preferredDays, name, address, phone, email, city, state, zip, country, notes);
