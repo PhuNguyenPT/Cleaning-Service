@@ -39,7 +39,7 @@ public class GovernmentController {
         return governmentService.getGovernmentDetailsResponseModelById(id, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public GovernmentDetailsResponseModel updateGovernmentById(@PathVariable UUID id,
@@ -48,7 +48,7 @@ public class GovernmentController {
         return governmentService.updateCompanyDetailsById(id, updateRequest, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGovernmentById(@PathVariable UUID id, @AuthenticationPrincipal User user) {

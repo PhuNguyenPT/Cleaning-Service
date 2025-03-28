@@ -61,7 +61,7 @@ public class CompanyController {
      * @param user The authenticated user.
      * @return The updated company details.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel updateCompany(@PathVariable UUID id,
@@ -75,7 +75,7 @@ public class CompanyController {
      *
      * @param id The UUID of the company.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompany(@PathVariable UUID id,

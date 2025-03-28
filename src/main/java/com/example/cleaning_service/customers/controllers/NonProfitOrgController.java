@@ -39,7 +39,7 @@ public class NonProfitOrgController {
         return nonProfitOrgService.getNonProfitOrgDetailsResponseModelById(id, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     @ResponseStatus
     public NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(@PathVariable UUID id,
@@ -48,7 +48,7 @@ public class NonProfitOrgController {
         return nonProfitOrgService.updateNonProfitOrgDetailsById(id, updateRequest, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNonProfitOrgById(@PathVariable UUID id, User user) {
