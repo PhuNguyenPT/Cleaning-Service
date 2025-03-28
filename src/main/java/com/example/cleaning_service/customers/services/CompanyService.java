@@ -8,18 +8,19 @@ import com.example.cleaning_service.customers.dto.companies.CompanyDetailsRespon
 import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
 import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
+import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -102,7 +103,7 @@ public class CompanyService {
         );
 
         log.info("Attempting to create a company for user: {}", user.getUsername());
-        Account account = accountService.findByUser(user);
+        Account account = accountService.findAccountWithCustomerByUser(user);
 
         // Save the company
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
@@ -175,35 +176,19 @@ public class CompanyService {
      * @param id The UUID of the company to retrieve.
      * @param user The user requesting access to the company.
      * @return The company entity if found and accessible by the user.
-     * @throws IllegalStateException If the company is not found or if the user does not have
+     * @throws AccessDeniedException If the company is not found or if the user does not have
      *                               the required association.
      */
     @Transactional
     Company getByIdAndUser(UUID id, User user) {
         log.info("Fetching company with ID: {} for user: {}", id, user.getUsername());
-        Company company = findById(id);
-        if (accountService.isNotExistsAccountByUserAndCustomer(user, company)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with the company.");
+        AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        if (abstractCustomer == null || !abstractCustomer.getId().equals(id)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " is not associated with the company with id "
+                    + id);
         }
-        return company;
-    }
 
-    /**
-     * Finds a company by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Attempts to retrieve the company entity from the database using the provided ID.
-     * 2. If the company exists, it is returned.
-     * 3. If no company is found, an {@code IllegalStateException} is thrown.
-     * @param id The UUID of the company to find
-     * @return The company entity if found
-     * @throws EntityNotFoundException If no company exists with the given ID
-     */
-    @Transactional
-    Company findById(UUID id) {
-        log.info("Looking for company with ID: {}", id);
-        return companyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Company with id " + id + " not found."));
+        return (Company) abstractCustomer;
     }
 
     /**
@@ -261,9 +246,9 @@ public class CompanyService {
     }
 
     @Transactional
-    public void deleteCompanyById(UUID id) {
+    public void deleteCompanyById(UUID id, User user) {
         log.info("Attempting to delete company with ID: {}", id);
-        Company dbCompany = findById(id);
+        Company dbCompany = getByIdAndUser(id, user);
 
         log.info("Detaching company ID: {} from user associations", id);
         accountService.detachCustomerFromAccount(dbCompany);

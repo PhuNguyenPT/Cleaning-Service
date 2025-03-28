@@ -8,18 +8,19 @@ import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsR
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentUpdateRequest;
+import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
 import com.example.cleaning_service.customers.repositories.GovernmentRepository;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -100,7 +101,7 @@ public class GovernmentService {
                 governmentRepository::existsByRegistrationNumber,
                 governmentRepository::existsByEmail
         );
-        Account account = accountService.findByUser(user);
+        Account account = accountService.findAccountWithCustomerByUser(user);
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government savedGovernment = saveGovernment(government);
@@ -165,35 +166,17 @@ public class GovernmentService {
      * @param id The UUID of the government entity to retrieve.
      * @param user The user requesting access to the government entity.
      * @return The government entity if found and accessible by the user.
-     * @throws IllegalStateException If the government entity is not found or if the user does not have
+     * @throws AccessDeniedException If the government entity is not found or if the user does not have
      *                               the required association.
      */
     @Transactional
     Government getByIdAndUser(UUID id, User user) {
-        Government government = findById(id);
-        if (accountService.isNotExistsAccountByUserAndCustomer(user, government)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with a government with id "
+        AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        if (abstractCustomer == null || !abstractCustomer.getId().equals(id)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " is not associated with a government with id "
             + id);
         }
-        return government;
-    }
-
-    /**
-     * Finds a government entity by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Attempts to retrieve the government entity from the database using the provided ID.
-     * 2. If the government entity exists, it is returned.
-     * 3. If no government entity is found, an {@code IllegalStateException} is thrown.
-     *
-     * @param id The UUID of the government entity to find.
-     * @return The government entity if found.
-     * @throws EntityNotFoundException If no government entity exists with the given ID.
-     */
-    @Transactional
-    Government findById(UUID id) {
-        return governmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found."));
+        return (Government) abstractCustomer;
     }
 
     /**

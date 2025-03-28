@@ -78,7 +78,8 @@ public class CompanyController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCompany(@PathVariable UUID id) {
-        companyService.deleteCompanyById(id);
+    public void deleteCompany(@PathVariable UUID id,
+                              @AuthenticationPrincipal User user) {
+        companyService.deleteCompanyById(id, user);
     }
 }

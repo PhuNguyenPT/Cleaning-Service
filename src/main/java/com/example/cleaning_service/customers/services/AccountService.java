@@ -73,23 +73,8 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    /**
-     * Counts the number of account associations for a specific customer.
-     * <p>
-     * This method performs the following actions:
-     * 1. Queries the repository for the number of associations linked to the customer.
-     * 2. Returns the count as an integer.
-     *
-     * @param customer The customer entity to count associations for.
-     * @return The number of associations for the given customer.
-     */
     @Transactional
-    Integer countAccountsByCustomer(@NotNull AbstractCustomer customer) {
-        return accountRepository.countByCustomer(customer);
-    }
-
-    @Transactional
-    Account findByUser(@NotNull User user) {
+    Account findAccountWithCustomerByUser(@NotNull User user) {
         log.info("Attempting to find account for {}", user);
         return accountRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException("User " + user.getUsername() + "'s account not found"));
@@ -123,22 +108,6 @@ public class AccountService {
         return saveAccount(account);
     }
 
-    /**
-     * Checks if no association exists between a specific user and customer.
-     * <p>
-     * This method performs the following actions:
-     * 1. Queries the system to determine if an association exists between the given user and customer.
-     * 2. Returns {@code true} if no association is found, otherwise returns {@code false}.
-     *
-     * @param user The user to check for an association.
-     * @param customer The customer to check for an association with the user.
-     * @return {@code true} if no association exists between the user and customer, {@code false} otherwise.
-     */
-    @Transactional
-    boolean isNotExistsAccountByUserAndCustomer(@NotNull User user, @NotNull AbstractCustomer customer) {
-        return !accountRepository.existsAccountAssociationByUserAndCustomer(user, customer);
-    }
-
     @Transactional
     void detachCustomerFromAccount(@NotNull AbstractCustomer abstractCustomer) {
         List<Account> accounts = findAllByCustomer(abstractCustomer);
@@ -167,7 +136,7 @@ public class AccountService {
     @Transactional
     public AccountResponseModel getAccountResponseModelById(@NotNull User user) {
         log.info("Start retrieving account details for {}", user);
-        Account account = findByUser(user);
+        Account account = findAccountWithCustomerByUser(user);
         log.info("Retrieved account entity {}", account);
 
         AccountResponseModel accountResponseModel = accountResponseModelAssembler.toModel(account);

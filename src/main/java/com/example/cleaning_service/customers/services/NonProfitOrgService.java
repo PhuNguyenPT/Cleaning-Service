@@ -8,17 +8,18 @@ import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDet
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRequest;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgUpdateRequest;
+import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
 import com.example.cleaning_service.customers.repositories.NonProfitOrgRepository;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -100,7 +101,7 @@ public class NonProfitOrgService {
                 nonProfitOrgRepository::existsByEmail
         );
 
-        Account account = accountService.findByUser(user);
+        Account account = accountService.findAccountWithCustomerByUser(user);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);
         NonProfitOrg savedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
@@ -161,34 +162,17 @@ public class NonProfitOrgService {
      * @param id The UUID of the non-profit organization to retrieve.
      * @param user The user requesting access to the non-profit organization.
      * @return The non-profit organization entity if found and accessible by the user.
-     * @throws IllegalStateException If the non-profit organization is not found or if the user does not have
+     * @throws AccessDeniedException If the non-profit organization is not found or if the user does not have
      *                               the required association.
      */
     @Transactional
     NonProfitOrg getByIdAndUser(UUID id, User user) {
-        NonProfitOrg nonProfitOrg = findById(id);
-        if (accountService.isNotExistsAccountByUserAndCustomer(user, nonProfitOrg)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with a non-profit organization.");
+        AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        if (abstractCustomer == null || !abstractCustomer.getId().equals(id)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " is not associated with a non-profit " +
+                    "organization with id " + id);
         }
-        return nonProfitOrg;
-    }
-
-    /**
-     * Finds a non-profit organization by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Attempts to retrieve the non-profit organization entity from the database using the provided ID.
-     * 2. If the non-profit organization exists, it is returned.
-     * 3. If no non-profit organization is found, an {@code IllegalStateException} is thrown.
-     *
-     * @param id The UUID of the non-profit organization to find.
-     * @return The non-profit organization entity if found.
-     * @throws EntityNotFoundException If no non-profit organization exists with the given ID.
-     */
-    @Transactional
-    NonProfitOrg findById(UUID id) {
-        return nonProfitOrgRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Non-profit org " + id + "not found."));
+        return (NonProfitOrg) abstractCustomer;
     }
 
     /**

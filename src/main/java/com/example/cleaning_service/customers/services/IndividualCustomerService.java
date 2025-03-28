@@ -8,17 +8,18 @@ import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustome
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerUpdateRequest;
+import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
 import com.example.cleaning_service.customers.repositories.IndividualCustomerRepository;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -101,7 +102,7 @@ public class IndividualCustomerService {
                 individualCustomerRepository::existsByEmail
         );
         log.info("Attempting to create an individual customer for user: {}", user.getUsername());
-        Account account = accountService.findByUser(user);
+        Account account = accountService.findAccountWithCustomerByUser(user);
 
         IndividualCustomer individualCustomer = individualCustomerMapper.fromRequestToCustomer(individualCustomerRequest);
         IndividualCustomer savedIndividualCustomer = saveIndividualCustomer(individualCustomer);
@@ -173,33 +174,15 @@ public class IndividualCustomerService {
      * @param id The UUID of the individual customer to retrieve.
      * @param user The user requesting access to the individual customer.
      * @return The individual customer entity if found and accessible by the user.
-     * @throws IllegalStateException If the user does not have the required association.
+     * @throws AccessDeniedException If the user does not have the required association.
      */
     @Transactional
     IndividualCustomer getByIdAndUser(UUID id, User user) {
-        IndividualCustomer individualCustomer = findById(id);
-        if (accountService.isNotExistsAccountByUserAndCustomer(user, individualCustomer)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with an individual customer with id " + id);
+        AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        if (abstractCustomer == null || !abstractCustomer.getId().equals(id)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " is not associated with an individual customer with id " + id);
         }
-        return individualCustomer;
-    }
-
-    /**
-     * Finds an individual customer by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Attempts to retrieve the individual customer entity from the database using the provided ID.
-     * 2. If the individual customer exists, it is returned.
-     * 3. If no individual customer is found, an {@code IllegalStateException} is thrown.
-     *
-     * @param id The UUID of the individual customer to find.
-     * @return The individual customer entity if found.
-     * @throws EntityNotFoundException If no individual customer exists with the given ID.
-     */
-    @Transactional
-    IndividualCustomer findById(UUID id) {
-        return individualCustomerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Individual customer with id " + id + " does not exist."));
+        return (IndividualCustomer) abstractCustomer;
     }
 
     /**
