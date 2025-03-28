@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.dto.companies;
 
-import com.example.cleaning_service.customers.entities.CustomerPreferredDay;
 import com.example.cleaning_service.customers.enums.*;
 import org.springframework.hateoas.RepresentationModel;
 

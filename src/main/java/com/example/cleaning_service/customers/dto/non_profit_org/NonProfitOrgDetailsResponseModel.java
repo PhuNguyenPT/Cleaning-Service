@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.dto.non_profit_org;
 
-import com.example.cleaning_service.customers.entities.CustomerPreferredDay;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EPaymentType;

@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.dto.inidividuals;
 
-import com.example.cleaning_service.customers.entities.CustomerPreferredDay;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EPaymentType;

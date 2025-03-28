@@ -4,7 +4,6 @@ import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.UUID;

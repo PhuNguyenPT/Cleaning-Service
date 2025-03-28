@@ -2,7 +2,6 @@ package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.commons.BusinessEntity;
 import com.example.cleaning_service.customers.enums.ECountryType;
-import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
 import jakarta.persistence.*;
