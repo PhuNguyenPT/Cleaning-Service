@@ -33,7 +33,7 @@ public class RedisConfiguration {
         public void handleRedisKeyExpiredEvent(RedisKeyExpiredEvent<TokenEntity> event) {
             TokenEntity expiredToken = (TokenEntity) event.getValue();
             assert expiredToken != null;
-            log.info("Session with key={} has expired", expiredToken.getToken());
+            log.info("Session with key={} has expired", expiredToken.getToken().substring(0, 10));
         }
     }
 }
