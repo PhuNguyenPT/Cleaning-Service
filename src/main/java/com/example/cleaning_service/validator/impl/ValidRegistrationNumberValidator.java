@@ -62,6 +62,11 @@ public class ValidRegistrationNumberValidator implements ConstraintValidator<Val
         String registrationNumber = entity.registrationNumber();
         ECountryType country = entity.country();
 
+        if (registrationNumber == null && country == null) {
+            logger.warn("Validation skipped: registrationNumber is null and country is null.");
+            return true;
+        }
+
         if (registrationNumber == null || registrationNumber.isBlank()) {
             logger.warn("Validation failed: registration number is null or empty.");
             return false;
