@@ -88,6 +88,11 @@ public class ValidTaxIdValidator implements ConstraintValidator<ValidTaxId, ITax
         String taxId = taxIdentifiable.taxId();
         ECountryType country = taxIdentifiable.country();
 
+        if (taxId == null && country == null) {
+            logger.warn("Validation skipped: taxId is null and country is null.");
+            return true;
+        }
+
         if (taxId == null || taxId.isBlank()) {
             logger.warn("Validation failed: tax ID is null or empty.");
             return false;

@@ -2,7 +2,6 @@ package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
 import com.example.cleaning_service.exceptions.DuplicateFieldsException;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.function.Function;
 public class CustomerService {
 
     <T extends DuplicatedValidatable> void checkDuplicatedFields(
-            @NotNull T request,
+            T request,
             Function<String, Boolean> taxIdChecker,
             Function<String, Boolean> registrationNumberChecker,
             Function<String, Boolean> emailChecker) {

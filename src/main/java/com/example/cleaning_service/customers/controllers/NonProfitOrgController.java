@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/non-profit-orgs")
+@RequestMapping("/non-profit-organizations")
 public class NonProfitOrgController {
     private final NonProfitOrgService nonProfitOrgService;
 
@@ -39,7 +39,7 @@ public class NonProfitOrgController {
         return nonProfitOrgService.getNonProfitOrgDetailsResponseModelById(id, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     @ResponseStatus
     public NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(@PathVariable UUID id,
@@ -48,10 +48,10 @@ public class NonProfitOrgController {
         return nonProfitOrgService.updateNonProfitOrgDetailsById(id, updateRequest, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNonProfitOrgById(@PathVariable UUID id, User user) {
+    public void deleteNonProfitOrgById(@PathVariable UUID id, @AuthenticationPrincipal User user) {
         nonProfitOrgService.deleteNonProfitOrgById(id, user);
     }
 }

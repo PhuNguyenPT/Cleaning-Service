@@ -4,18 +4,23 @@ import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustome
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component 
 public class IndividualCustomerMapper {
-    public IndividualCustomer fromRequestToCustomer(@NotNull IndividualCustomerRequest individualCustomerRequest) {
+    private final CustomerPreferredDayMapper customerPreferredDayMapper;
+
+    public IndividualCustomerMapper(CustomerPreferredDayMapper customerPreferredDayMapper) {
+        this.customerPreferredDayMapper = customerPreferredDayMapper;
+    }
+
+    public IndividualCustomer fromRequestToCustomer(IndividualCustomerRequest individualCustomerRequest) {
         return new IndividualCustomer(
                 individualCustomerRequest.taxId(),
                 individualCustomerRequest.registrationNumber(),
                 individualCustomerRequest.billingAddress(),
                 individualCustomerRequest.paymentMethod(),
-                individualCustomerRequest.preferredDays(),
+                customerPreferredDayMapper.fromEDaysToCustomerPreferredDays(individualCustomerRequest.preferredDays()),
                 individualCustomerRequest.customerName(),
                 individualCustomerRequest.address(),
                 individualCustomerRequest.phone(),
@@ -28,20 +33,20 @@ public class IndividualCustomerMapper {
         );
     }
 
-    public IndividualCustomerResponseModel fromIndividualToResponseModel(@NotNull IndividualCustomer individualCustomer) {
+    public IndividualCustomerResponseModel fromIndividualToResponseModel(IndividualCustomer individualCustomer) {
         return new IndividualCustomerResponseModel(
                 individualCustomer.getId(),
                 individualCustomer.getName()
         );
     }
 
-    public IndividualCustomerDetailsResponseModel fromCustomerToDetailsResponseModel(@NotNull IndividualCustomer individualCustomer) {
+    public IndividualCustomerDetailsResponseModel fromCustomerToDetailsResponseModel(IndividualCustomer individualCustomer) {
         return new IndividualCustomerDetailsResponseModel(
                 individualCustomer.getTaxId(),
                 individualCustomer.getRegistrationNumber(),
                 individualCustomer.getBillingAddress(),
                 individualCustomer.getPaymentMethod(),
-                individualCustomer.getPreferredDays(),
+                customerPreferredDayMapper.fromCustomerPreferredDaysToEDays(individualCustomer.getPreferredDays()),
                 individualCustomer.getName(),
                 individualCustomer.getAddress(),
                 individualCustomer.getPhone(),

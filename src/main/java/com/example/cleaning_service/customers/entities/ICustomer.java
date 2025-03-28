@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.entities;
 
-import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
@@ -14,5 +13,5 @@ public interface ICustomer {
     ELoyaltyType getLoyaltyType();
     String getBillingAddress();
     EPaymentType getPaymentMethod();
-    Set<EDay> getPreferredDays();
+    Set<CustomerPreferredDay> getPreferredDays();
 }

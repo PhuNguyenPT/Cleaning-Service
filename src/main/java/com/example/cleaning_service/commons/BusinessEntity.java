@@ -4,7 +4,6 @@ import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.UUID;
@@ -42,9 +41,7 @@ public class BusinessEntity extends Auditable {
     protected String state;
     protected String zip;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     protected ECountryType country;
 
     protected String notes;

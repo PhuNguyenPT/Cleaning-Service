@@ -2,7 +2,6 @@ package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.commons.BusinessEntity;
 import com.example.cleaning_service.customers.enums.ECountryType;
-import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.ELoyaltyType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
 import jakarta.persistence.*;
@@ -24,17 +23,15 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     @Enumerated(EnumType.STRING)
     protected EPaymentType paymentMethod;
 
-    @ElementCollection
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "customer_preferred_days", schema = "customer",
-            joinColumns = @JoinColumn(name = "customer_id"))
-    protected Set<EDay> preferredDays = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "customer_id")
+    protected Set<CustomerPreferredDay> preferredDays = new HashSet<>();
 
     public AbstractCustomer() {
         super();
     }
 
-    public AbstractCustomer(String billingAddress, EPaymentType paymentMethod, Set<EDay> preferredDays,
+    public AbstractCustomer(String billingAddress, EPaymentType paymentMethod, Set<CustomerPreferredDay> preferredDays,
                             String name, String address, String phone, String email, String city, String state,
                             String zip, ECountryType country, String notes) {
 
@@ -73,11 +70,11 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
     }
 
     @Override
-    public Set<EDay> getPreferredDays() {
+    public Set<CustomerPreferredDay> getPreferredDays() {
         return preferredDays;
     }
 
-    public void setPreferredDays(Set<EDay> preferredDays) {
+    public void setPreferredDays(Set<CustomerPreferredDay> preferredDays) {
         this.preferredDays = preferredDays != null ? preferredDays : new HashSet<>();
     }
 

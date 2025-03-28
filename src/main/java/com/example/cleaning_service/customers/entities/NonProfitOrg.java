@@ -1,7 +1,6 @@
 package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.customers.enums.ECountryType;
-import com.example.cleaning_service.customers.enums.EDay;
 import com.example.cleaning_service.customers.enums.EOrganizationType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
@@ -9,8 +8,6 @@ import com.example.cleaning_service.validator.ITaxIdentifiable;
 import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.Set;
 
@@ -22,16 +19,13 @@ public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrgani
         IRegistrationNumberIdentifiable
 {
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private final EOrganizationType organizationType = EOrganizationType.NON_PROFIT;
 
-    @NotBlank
     @Column(nullable = false, unique = true)
     private String taxId;
 
-    @NotBlank
     @Column(nullable = false, unique = true)
     private String registrationNumber;
 
@@ -39,7 +33,7 @@ public non-sealed class NonProfitOrg extends AbstractCustomer implements IOrgani
     }
 
     public NonProfitOrg(String taxId, String registrationNumber, String billingAddress, EPaymentType paymentMethod,
-                        Set<EDay> preferredDays, String name, String address, String phone, String email, String city,
+                        Set<CustomerPreferredDay> preferredDays, String name, String address, String phone, String email, String city,
                         String state, String zip, ECountryType country, String notes) {
         super(billingAddress, paymentMethod, preferredDays, name, address, phone, email, city, state, zip, country, notes);
         this.taxId = taxId;

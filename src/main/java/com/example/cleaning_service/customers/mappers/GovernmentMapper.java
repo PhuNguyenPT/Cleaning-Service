@@ -5,12 +5,17 @@ import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.entities.Government;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GovernmentMapper {
-    public Government fromGovernmentRequestToGovernment(@NotNull @Valid GovernmentRequest governmentRequest) {
+    private final CustomerPreferredDayMapper customerPreferredDayMapper;
+
+    public GovernmentMapper(CustomerPreferredDayMapper customerPreferredDayMapper) {
+        this.customerPreferredDayMapper = customerPreferredDayMapper;
+    }
+
+    public Government fromGovernmentRequestToGovernment(@Valid GovernmentRequest governmentRequest) {
         return new Government(
                 governmentRequest.taxId(),
                 governmentRequest.registrationNumber(),
@@ -20,7 +25,7 @@ public class GovernmentMapper {
                 governmentRequest.requiresEmergencyCleaning(),
                 governmentRequest.billingAddress(),
                 governmentRequest.paymentMethod(),
-                governmentRequest.preferredDays(),
+                customerPreferredDayMapper.fromEDaysToCustomerPreferredDays(governmentRequest.preferredDays()),
                 governmentRequest.governmentName(),
                 governmentRequest.address(),
                 governmentRequest.phone(),
@@ -33,14 +38,14 @@ public class GovernmentMapper {
         );
     }
 
-    public GovernmentResponseModel fromGovernmentToGovernmentResponseModel(@NotNull Government government) {
+    public GovernmentResponseModel fromGovernmentToGovernmentResponseModel(Government government) {
         return new GovernmentResponseModel(
                 government.getId(),
                 government.getName()
         );
     }
 
-    public GovernmentDetailsResponseModel fromGovernmentToGovernmentDetailsResponseModel(@NotNull Government government) {
+    public GovernmentDetailsResponseModel fromGovernmentToGovernmentDetailsResponseModel(Government government) {
         return new GovernmentDetailsResponseModel(
                 government.getTaxId(),
                 government.getRegistrationNumber(),
@@ -50,7 +55,7 @@ public class GovernmentMapper {
                 government.isRequiresEmergencyCleaning(),
                 government.getBillingAddress(),
                 government.getPaymentMethod(),
-                government.getPreferredDays(),
+                customerPreferredDayMapper.fromCustomerPreferredDaysToEDays(government.getPreferredDays()),
                 government.getName(),
                 government.getAddress(),
                 government.getPhone(),

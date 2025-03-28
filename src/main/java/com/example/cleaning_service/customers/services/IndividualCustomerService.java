@@ -8,17 +8,18 @@ import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustome
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerUpdateRequest;
+import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
 import com.example.cleaning_service.customers.repositories.IndividualCustomerRepository;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -38,10 +39,10 @@ public class IndividualCustomerService {
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
     private final OrganizationDetailsService organizationDetailsService;
-    private final IndividualCustomerMapper individualCustomerMapper;
     private final IndividualCustomerResponseModelAssembler individualCustomerResponseModelAssembler;
     private final IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler;
     private final CustomerService customerService;
+    private final IndividualCustomerMapper individualCustomerMapper;
 
     /**
      * Constructs an IndividualCustomerService with required dependencies.
@@ -61,35 +62,37 @@ public class IndividualCustomerService {
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
             OrganizationDetailsService organizationDetailsService,
-            IndividualCustomerMapper individualCustomerMapper,
             IndividualCustomerResponseModelAssembler individualCustomerResponseModelAssembler,
-            IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler, CustomerService customerService) {
+            IndividualCustomerDetailsResponseModelAssembler individualCustomerDetailsResponseModelAssembler,
+            CustomerService customerService,
+            IndividualCustomerMapper individualCustomerMapper
+    ) {
 
         this.individualCustomerRepository = individualCustomerRepository;
         this.accountService = accountService;
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
         this.organizationDetailsService = organizationDetailsService;
-        this.individualCustomerMapper = individualCustomerMapper;
         this.individualCustomerResponseModelAssembler = individualCustomerResponseModelAssembler;
         this.individualCustomerDetailsResponseModelAssembler = individualCustomerDetailsResponseModelAssembler;
         this.customerService = customerService;
+        this.individualCustomerMapper = individualCustomerMapper;
     }
 
     /**
      * Creates a new individual customer and associates it with the specified user.
      * <p>
      * This method performs the following operations:
-     * 1. Retrieves the user's current account association.
+     * 1. Retrieves the user's current account.
      * 2. Creates and persists a new individual customer based on the provided request data.
      * 3. Determines the appropriate association type and primary status for the individual customer.
-     * 4. Updates the user's account association with the newly created individual customer.
-     * 5. Ensures that the updated account association references a valid individual customer.
+     * 4. Updates the user's account with the newly created individual customer.
+     * 5. Ensures that the updated account references a valid individual customer.
      *
      * @param individualCustomerRequest The request containing individual customer details.
      * @param user The user to associate with the individual customer.
      * @return A {@link IndividualCustomerResponseModel} containing details of the created individual customer.
-     * @throws IllegalStateException If the updated account association does not reference a valid individual customer.
+     * @throws IllegalStateException If the updated account does not reference a valid individual customer.
      */
     @Transactional
     public IndividualCustomerResponseModel createIndividualCustomer(@Valid IndividualCustomerRequest individualCustomerRequest, User user) {
@@ -101,27 +104,30 @@ public class IndividualCustomerService {
                 individualCustomerRepository::existsByEmail
         );
         log.info("Attempting to create an individual customer for user: {}", user.getUsername());
-        Account account = accountService.findByUser(user);
+        Account account = accountService.findAccountWithCustomerByUser(user);
 
         IndividualCustomer individualCustomer = individualCustomerMapper.fromRequestToCustomer(individualCustomerRequest);
         IndividualCustomer savedIndividualCustomer = saveIndividualCustomer(individualCustomer);
+
         log.info("Individual customer {} saved successfully with ID: {}", savedIndividualCustomer.getName(), savedIndividualCustomer.getId());
 
         EAssociationType associationType = organizationDetailsService.getEAssociationTypeByIOrganization(savedIndividualCustomer);
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedIndividualCustomer);
 
-        // Create account association
+        // Create account
         AccountRequest accountRequest = new AccountRequest(
                 savedIndividualCustomer, null, isPrimary, associationType
         );
-        Account dbAccount = accountService.updateAccount(accountRequest, account);
+        Account updatedAccount = accountService.updateAccount(accountRequest, account);
 
-        if (!(dbAccount.getCustomer() instanceof IndividualCustomer accountCustomer)) {
-            throw new IllegalStateException("Account association does not reference a valid individual.");
+        if (isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), updatedAccount.getCustomer())) {
+            throw new IllegalStateException("Account does not reference a valid individual.");
         }
 
-        IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerResponseModelAssembler.toModel(accountCustomer);
+        IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerResponseModelAssembler
+                .toModel((IndividualCustomer) updatedAccount.getCustomer());
         log.info("Successfully created individual customer response: {}", individualCustomerResponseModel);
+
         return individualCustomerResponseModel;
     }
 
@@ -135,7 +141,7 @@ public class IndividualCustomerService {
      * @return The saved individual customer entity with updated metadata.
      */
     @Transactional
-    IndividualCustomer saveIndividualCustomer(IndividualCustomer individualCustomer) {
+    protected IndividualCustomer saveIndividualCustomer(IndividualCustomer individualCustomer) {
         return individualCustomerRepository.save(individualCustomer);
     }
 
@@ -167,39 +173,21 @@ public class IndividualCustomerService {
      * <p>
      * This method performs the following operations:
      * 1. Retrieves the individual customer entity using the provided ID.
-     * 2. Checks if the user is associated with the individual customer through an account association.
+     * 2. Checks if the user is associated with the individual customer through an account.
      * 3. If the user lacks the required association, throws an {@code IllegalStateException}.
      *
      * @param id The UUID of the individual customer to retrieve.
      * @param user The user requesting access to the individual customer.
      * @return The individual customer entity if found and accessible by the user.
-     * @throws IllegalStateException If the user does not have the required association.
+     * @throws AccessDeniedException If the user does not have the required association.
      */
     @Transactional
-    IndividualCustomer getByIdAndUser(UUID id, User user) {
-        IndividualCustomer individualCustomer = findById(id);
-        if (accountService.isNotExistsAccountByUserAndCustomer(user, individualCustomer)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with an individual customer with id " + id);
+    protected IndividualCustomer getByIdAndUser(UUID id, User user) {
+        AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        if (isNotValidReferenceAbstractCustomer(id, abstractCustomer)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " is not associated with an individual customer with id " + id);
         }
-        return individualCustomer;
-    }
-
-    /**
-     * Finds an individual customer by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Attempts to retrieve the individual customer entity from the database using the provided ID.
-     * 2. If the individual customer exists, it is returned.
-     * 3. If no individual customer is found, an {@code IllegalStateException} is thrown.
-     *
-     * @param id The UUID of the individual customer to find.
-     * @return The individual customer entity if found.
-     * @throws EntityNotFoundException If no individual customer exists with the given ID.
-     */
-    @Transactional
-    IndividualCustomer findById(UUID id) {
-        return individualCustomerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Individual customer with id " + id + " does not exist."));
+        return (IndividualCustomer) abstractCustomer;
     }
 
     /**
@@ -219,10 +207,14 @@ public class IndividualCustomerService {
      */
     @Transactional
     public IndividualCustomerDetailsResponseModel updateIndividualCustomerDetailsById(UUID id, @Valid IndividualCustomerUpdateRequest updateRequest, User user) {
-        IndividualCustomer individualCustomer = getByIdAndUser(id, user);
+        log.info("Attempting to update individual customer details for ID: {} by user: {}", id, user.getUsername());
+        IndividualCustomer individualCustomer = findIndividualCustomerToChange(id, user);
 
         updateCustomerFields(individualCustomer, updateRequest);
+
         IndividualCustomer updatedIndividualCustomer = saveIndividualCustomer(individualCustomer);
+        log.info("Successfully updated company with ID: {}", updatedIndividualCustomer.getId());
+
         return individualCustomerDetailsResponseModelAssembler.toModel(updatedIndividualCustomer);
     }
 
@@ -238,7 +230,7 @@ public class IndividualCustomerService {
      * @param updateRequest The request containing fields to update.
      */
     @Transactional
-    void updateCustomerFields(IndividualCustomer individualCustomer, @Valid IndividualCustomerUpdateRequest updateRequest) {
+    protected void updateCustomerFields(IndividualCustomer individualCustomer, @Valid IndividualCustomerUpdateRequest updateRequest) {
         organizationDetailsService.updateOrganizationDetails(individualCustomer, updateRequest.organizationDetails());
 
         abstractCustomerService.updateAbstractCustomerDetails(individualCustomer, updateRequest.customerDetails());
@@ -251,7 +243,7 @@ public class IndividualCustomerService {
      * <p>
      * This method performs the following operations:
      * 1. Retrieves the individual customer by its ID and verifies that it is associated with the given user.
-     * 2. Detaches the individual customer from any account associations linked to the user.
+     * 2. Detaches the individual customer from any account linked to the user.
      * 3. Deletes the individual customer from the database.
      *
      * @param id   The unique identifier of the individual customer to be deleted. Must not be {@code null}.
@@ -259,8 +251,29 @@ public class IndividualCustomerService {
      */
     @Transactional
     public void deleteIndividualCustomerById(UUID id, User user) {
-        IndividualCustomer individualCustomer = getByIdAndUser(id, user);
+        log.info("Deleting individual customer details for ID: {} by user: {}", id, user.getUsername());
+        IndividualCustomer individualCustomer = findIndividualCustomerToChange(id, user);
         accountService.detachCustomerFromAccount(individualCustomer);
         individualCustomerRepository.delete(individualCustomer);
+    }
+
+    @Transactional
+    protected IndividualCustomer findIndividualCustomerToChange(UUID id, User user) {
+        Account account = accountService.findAccountWithCustomerByUser(user);
+
+        if (accountService.isRepresentativeAssociationType(account)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to update the " +
+                    "individual with id " + id);
+        }
+
+        if (isNotValidReferenceAbstractCustomer(id, account.getCustomer())) {
+            throw new IllegalStateException("Account does not reference a valid company.");
+        }
+        return (IndividualCustomer) account.getCustomer();
+    }
+
+    @Transactional
+    protected boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
+        return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof IndividualCustomer);
     }
 }

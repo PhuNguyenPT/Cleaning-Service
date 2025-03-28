@@ -1,4 +1,4 @@
-package com.example.cleaning_service.security.entities.tokens;
+package com.example.cleaning_service.security.entities.token;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;

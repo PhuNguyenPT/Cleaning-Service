@@ -8,17 +8,18 @@ import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDet
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRequest;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgUpdateRequest;
+import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
 import com.example.cleaning_service.customers.repositories.NonProfitOrgRepository;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -37,42 +38,38 @@ public class NonProfitOrgService {
     private final OrganizationDetailsService organizationDetailsService;
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
-    private final NonProfitOrgMapper nonProfitOrgMapper;
-    private final NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler;
-    private final NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler;
     private final CustomerService customerService;
 
-    /**
-     * Constructs a NonProfitOrgService with required dependencies.
-     *
-     * @param nonProfitOrgRepository Repository for non-profit organization persistence operations.
-     * @param accountService Service for managing user-organization associations.
-     * @param organizationDetailsService Service for managing organization-specific operations.
-     * @param abstractCustomerService Service for managing customer-related operations.
-     * @param businessEntityService Service for managing business entity operations.
-     * @param nonProfitOrgMapper Mapper for converting between DTOs and entities.
-     * @param nonProfitOrgResponseModelAssembler Assembler for basic non-profit organization response models.
-     * @param nonProfitOrgDetailsResponseModelAssembler Assembler for detailed non-profit organization response models.
-     */
+    private final NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler;
+    private final NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler;
+
+    private final NonProfitOrgMapper nonProfitOrgMapper;
+
     public NonProfitOrgService(
             NonProfitOrgRepository nonProfitOrgRepository,
             AccountService accountService,
             OrganizationDetailsService organizationDetailsService,
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
-            NonProfitOrgMapper nonProfitOrgMapper,
+            CustomerService customerService,
+
             NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler,
-            NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler, CustomerService customerService) {
+            NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler,
+
+            NonProfitOrgMapper nonProfitOrgMapper
+    ) {
 
         this.nonProfitOrgRepository = nonProfitOrgRepository;
         this.accountService = accountService;
         this.organizationDetailsService = organizationDetailsService;
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
-        this.nonProfitOrgMapper = nonProfitOrgMapper;
+        this.customerService = customerService;
+
         this.nonProfitOrgResponseModelAssembler = nonProfitOrgResponseModelAssembler;
         this.nonProfitOrgDetailsResponseModelAssembler = nonProfitOrgDetailsResponseModelAssembler;
-        this.customerService = customerService;
+
+        this.nonProfitOrgMapper = nonProfitOrgMapper;
     }
 
     /**
@@ -100,10 +97,11 @@ public class NonProfitOrgService {
                 nonProfitOrgRepository::existsByEmail
         );
 
-        Account account = accountService.findByUser(user);
+        Account account = accountService.findAccountWithCustomerByUser(user);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);
         NonProfitOrg savedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
+        log.info("Non-profit org {} saved successfully with ID: {}", savedNonProfitOrg.getName(), savedNonProfitOrg.getId());
 
         EAssociationType associationType = organizationDetailsService.getEAssociationTypeByIOrganization(savedNonProfitOrg);
         boolean isPrimary = organizationDetailsService.getIsPrimaryByIOrganization(savedNonProfitOrg);
@@ -112,12 +110,15 @@ public class NonProfitOrgService {
         AccountRequest accountRequest = new AccountRequest(
                 savedNonProfitOrg, null, isPrimary, associationType
         );
-        Account dbAccount = accountService.updateAccount(accountRequest, account);
+        Account updatedAccount = accountService.updateAccount(accountRequest, account);
 
-        if(!(dbAccount.getCustomer() instanceof NonProfitOrg accountNonProfitOrg)) {
+        if(isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), updatedAccount.getCustomer())) {
             throw new IllegalStateException("Account association does not reference a valid non-profit org.");
         }
-        return nonProfitOrgResponseModelAssembler.toModel(accountNonProfitOrg);
+        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgResponseModelAssembler.toModel((NonProfitOrg) updatedAccount.getCustomer());
+        log.info("Successfully created non-profit response: {}", nonProfitOrgResponseModel);
+
+        return nonProfitOrgResponseModel;
     }
 
     /**
@@ -127,7 +128,7 @@ public class NonProfitOrgService {
      * @return The saved non-profit organization entity with updated metadata.
      */
     @Transactional
-    NonProfitOrg saveNonProfitOrg(NonProfitOrg nonProfitOrg) {
+    protected NonProfitOrg saveNonProfitOrg(NonProfitOrg nonProfitOrg) {
         return nonProfitOrgRepository.save(nonProfitOrg);
     }
 
@@ -161,34 +162,17 @@ public class NonProfitOrgService {
      * @param id The UUID of the non-profit organization to retrieve.
      * @param user The user requesting access to the non-profit organization.
      * @return The non-profit organization entity if found and accessible by the user.
-     * @throws IllegalStateException If the non-profit organization is not found or if the user does not have
+     * @throws AccessDeniedException If the non-profit organization is not found or if the user does not have
      *                               the required association.
      */
     @Transactional
-    NonProfitOrg getByIdAndUser(UUID id, User user) {
-        NonProfitOrg nonProfitOrg = findById(id);
-        if (accountService.isNotExistsAccountByUserAndCustomer(user, nonProfitOrg)) {
-            throw new IllegalStateException("User " + user.getUsername() + " is not associated with a non-profit organization.");
+    protected NonProfitOrg getByIdAndUser(UUID id, User user) {
+        AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        if (isNotValidReferenceAbstractCustomer(id, abstractCustomer)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " is not associated with a non-profit " +
+                    "organization with id " + id);
         }
-        return nonProfitOrg;
-    }
-
-    /**
-     * Finds a non-profit organization by its ID.
-     * <p>
-     * This method performs the following operations:
-     * 1. Attempts to retrieve the non-profit organization entity from the database using the provided ID.
-     * 2. If the non-profit organization exists, it is returned.
-     * 3. If no non-profit organization is found, an {@code IllegalStateException} is thrown.
-     *
-     * @param id The UUID of the non-profit organization to find.
-     * @return The non-profit organization entity if found.
-     * @throws EntityNotFoundException If no non-profit organization exists with the given ID.
-     */
-    @Transactional
-    NonProfitOrg findById(UUID id) {
-        return nonProfitOrgRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Non-profit org " + id + "not found."));
+        return (NonProfitOrg) abstractCustomer;
     }
 
     /**
@@ -208,10 +192,14 @@ public class NonProfitOrgService {
      */
     @Transactional
     public NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(UUID id, @Valid NonProfitOrgUpdateRequest updateRequest, User user) {
-        NonProfitOrg nonProfitOrg = getByIdAndUser(id, user);
+        log.info("Updating non-profit org details for ID: {} by user: {}", id, user.getUsername());
+        NonProfitOrg nonProfitOrg = findNonProfitOrgToChange(id, user);
 
         updateNonProfitOrgDetails(nonProfitOrg, updateRequest);
+
         NonProfitOrg updatedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
+        log.info("Successfully updated company with ID: {}", updatedNonProfitOrg.getId());
+
         return nonProfitOrgDetailsResponseModelAssembler.toModel(updatedNonProfitOrg);
     }
 
@@ -227,7 +215,7 @@ public class NonProfitOrgService {
      * @param updateRequest The request containing fields to update.
      */
     @Transactional
-    void updateNonProfitOrgDetails(NonProfitOrg nonProfitOrg, @Valid NonProfitOrgUpdateRequest updateRequest) {
+    protected void updateNonProfitOrgDetails(NonProfitOrg nonProfitOrg, @Valid NonProfitOrgUpdateRequest updateRequest) {
         organizationDetailsService.updateOrganizationDetails(nonProfitOrg, updateRequest.organizationDetails());
 
         abstractCustomerService.updateAbstractCustomerDetails(nonProfitOrg, updateRequest.customerDetails());
@@ -248,8 +236,30 @@ public class NonProfitOrgService {
      */
     @Transactional
     public void deleteNonProfitOrgById(UUID id, User user) {
-        NonProfitOrg nonProfitOrg = getByIdAndUser(id, user);
+        log.info("Deleting non-profit org details for ID: {} by user: {}", id, user.getUsername());
+        NonProfitOrg nonProfitOrg = findNonProfitOrgToChange(id, user);
         accountService.detachCustomerFromAccount(nonProfitOrg);
         nonProfitOrgRepository.delete(nonProfitOrg);
+    }
+
+    @Transactional
+    protected NonProfitOrg findNonProfitOrgToChange(UUID id, User user) {
+        Account account = accountService.findAccountWithCustomerByUser(user);
+
+        if (accountService.isRepresentativeAssociationType(account)) {
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to delete the " +
+                    "non-profit org with id " + id);
+        }
+
+        if (isNotValidReferenceAbstractCustomer(id, account.getCustomer())) {
+            throw new IllegalStateException("Account does not reference a valid non-profit org.");
+        }
+
+        return (NonProfitOrg) account.getCustomer();
+    }
+
+    @Transactional
+    protected boolean isNotValidReferenceAbstractCustomer(UUID abstractCustomerId, AbstractCustomer abstractCustomer) {
+        return abstractCustomer == null || !abstractCustomer.getId().equals(abstractCustomerId) || !(abstractCustomer instanceof NonProfitOrg);
     }
 }

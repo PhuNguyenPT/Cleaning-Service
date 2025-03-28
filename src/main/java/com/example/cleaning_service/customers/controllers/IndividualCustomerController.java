@@ -50,7 +50,7 @@ public class IndividualCustomerController {
         return individualCustomerService.updateIndividualCustomerDetailsById(id, updateRequest, user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteIndividualCustomerById(@PathVariable UUID id, @AuthenticationPrincipal User user) {
