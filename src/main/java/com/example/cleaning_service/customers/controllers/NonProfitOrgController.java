@@ -51,7 +51,7 @@ public class NonProfitOrgController {
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteNonProfitOrgById(@PathVariable UUID id, User user) {
+    public void deleteNonProfitOrgById(@PathVariable UUID id, @AuthenticationPrincipal User user) {
         nonProfitOrgService.deleteNonProfitOrgById(id, user);
     }
 }
