@@ -1,6 +1,6 @@
 package com.example.cleaning_service.security.services.impl;
 
-import com.example.cleaning_service.security.entities.tokens.TokenEntity;
+import com.example.cleaning_service.security.entities.token.TokenEntity;
 import com.example.cleaning_service.security.repositories.TokenRepository;
 import com.example.cleaning_service.security.services.IJwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService implements IJwtService {
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+    private static final long BLACKLIST_TTL = 300; // 5 minutes for blacklisted tokens
+
     private final TokenRepository tokenRepository;
     private final JwtUtil jwtUtil;
 
@@ -27,28 +29,16 @@ public class JwtService implements IJwtService {
         String username = jwtUtil.extractUsername(token);
         Long expirationMillis = jwtUtil.extractExpirationTime(token);
         long timeToLive = expirationMillis - System.currentTimeMillis();
+
         if (timeToLive <= 0) {
             log.warn("Attempted to save expired token for user: {}", username);
+            return;
         }
 
-        log.debug("Token TTL: {} ms for user: {}", timeToLive, username);
+        log.info("Token TTL: {} ms for user: {}", timeToLive, username);
         TokenEntity tokenEntity = new TokenEntity(token, username, timeToLive);
         TokenEntity savedEntity = tokenRepository.save(tokenEntity);
         log.info("Token successfully saved: {}", savedEntity);
-    }
-
-    @Transactional
-    @Override
-    public boolean existsTokenById(String token) {
-        log.debug("Checking if token exists in repository");
-        boolean exists = tokenRepository.existsById(token);
-        if (!exists) {
-            log.debug("Token not found in repository");
-        }
-
-        tokenRepository.findById(token).ifPresent(tokenEntity ->
-                log.debug("Token found in repository: {}", tokenEntity));
-        return exists;
     }
 
     @Transactional
@@ -57,7 +47,11 @@ public class JwtService implements IJwtService {
         log.info("Processing logout for token");
         tokenRepository.findById(token).ifPresent(tokenEntity -> {
             log.debug("Found token: {}, marking as blacklisted", tokenEntity);
+
+            // Reduce TTL to a short duration for blacklisted tokens
             tokenEntity.setBlacklisted(true);
+            tokenEntity.setTimeToLive(BLACKLIST_TTL); // Set a short TTL for blacklisted tokens
+
             TokenEntity updatedEntity = tokenRepository.save(tokenEntity);
             log.info("Token successfully blacklisted: {}", updatedEntity);
         });
@@ -65,6 +59,20 @@ public class JwtService implements IJwtService {
         if (!tokenRepository.existsById(token)) {
             log.warn("Attempted to blacklist non-existent token");
         }
+    }
+
+    @Transactional
+    @Override
+    public boolean existsTokenById(String token) {
+        log.debug("Checking if token exists in repository");
+        boolean exists = tokenRepository.existsById(token);
+        if (!exists) {
+            log.debug("Token does not exist: {}...", token.substring(0, 10));
+        }
+
+        tokenRepository.findById(token).ifPresent(tokenEntity ->
+                log.debug("Token found in repository: {}", tokenEntity));
+        return exists;
     }
 
     @Transactional
@@ -78,7 +86,7 @@ public class JwtService implements IJwtService {
                     return isBlacklisted;
                 })
                 .orElseGet(() -> {
-                    log.debug("Token is blacklisted not found in repository");
+                    log.debug("Token not found in repository");
                     return false;
                 });
     }
