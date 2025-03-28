@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/non-profit-orgs")
+@RequestMapping("/non-profit-organizations")
 public class NonProfitOrgController {
     private final NonProfitOrgService nonProfitOrgService;
 
