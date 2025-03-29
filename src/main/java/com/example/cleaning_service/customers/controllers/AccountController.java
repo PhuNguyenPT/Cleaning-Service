@@ -4,6 +4,9 @@ import com.example.cleaning_service.customers.dto.accounts.AccountDetailsRespons
 import com.example.cleaning_service.customers.dto.accounts.AccountResponseModel;
 import com.example.cleaning_service.customers.services.AccountService;
 import com.example.cleaning_service.security.entities.user.User;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,5 +36,12 @@ public class AccountController {
     public AccountDetailsResponseModel getAccountDetailsById(@PathVariable UUID id,
                                                              @AuthenticationPrincipal User user) {
         return accountService.getAccountDetailsResponseModelById(id, user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(produces = {"application/hal+json"})
+    @ResponseStatus(HttpStatus.OK)
+    public PagedModel<AccountDetailsResponseModel> getAllAccountsByPage(@ParameterObject Pageable pageable) {
+        return accountService.getAllAccountsByPage(pageable);
     }
 }

@@ -7,8 +7,10 @@ import com.example.cleaning_service.customers.enums.EPaymentType;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class IndividualCustomerDetailsResponseModel extends RepresentationModel<IndividualCustomerDetailsResponseModel> {
+    private final UUID id;
     private final String taxId;
     private final String registrationNumber;
 
@@ -26,11 +28,12 @@ public class IndividualCustomerDetailsResponseModel extends RepresentationModel<
     private final ECountryType country;
     private final String notes;
 
-    public IndividualCustomerDetailsResponseModel(String taxId, String registrationNumber, String billingAddress,
+    public IndividualCustomerDetailsResponseModel(UUID id, String taxId, String registrationNumber, String billingAddress,
                                                   EPaymentType paymentMethod, Set<EDay> preferredDays,
                                                   String customerName, String address, String phone, String email,
                                                   String city, String state, String zip, ECountryType country,
                                                   String notes) {
+        this.id = id;
         this.taxId = taxId;
         this.registrationNumber = registrationNumber;
         this.billingAddress = billingAddress;
@@ -45,6 +48,10 @@ public class IndividualCustomerDetailsResponseModel extends RepresentationModel<
         this.zip = zip;
         this.country = country;
         this.notes = notes;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getTaxId() {

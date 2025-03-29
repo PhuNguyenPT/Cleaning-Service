@@ -42,6 +42,7 @@ public class IndividualCustomerMapper {
 
     public IndividualCustomerDetailsResponseModel fromCustomerToDetailsResponseModel(IndividualCustomer individualCustomer) {
         return new IndividualCustomerDetailsResponseModel(
+                individualCustomer.getId(),
                 individualCustomer.getTaxId(),
                 individualCustomer.getRegistrationNumber(),
                 individualCustomer.getBillingAddress(),

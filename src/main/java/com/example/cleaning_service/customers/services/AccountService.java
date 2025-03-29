@@ -19,7 +19,11 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +49,7 @@ public class AccountService {
     private final AccountDetailsResponseModelAssembler accountDetailsResponseModelAssembler;
     private final OrganizationDetailsService organizationDetailsService;
     private final AccountResponseModelAssembler accountResponseModelAssembler;
+    private final PagedResourcesAssembler<Account> pagedResourcesAssembler;
 
     /**
      * Constructs an `AccountService` with required dependencies.
@@ -55,11 +60,16 @@ public class AccountService {
      *
      * @param accountRepository Repository for account association persistence operations.
      */
-    public AccountService(AccountRepository accountRepository, AccountDetailsResponseModelAssembler accountDetailsResponseModelAssembler, OrganizationDetailsService organizationDetailsService, AccountResponseModelAssembler accountResponseModelAssembler) {
+    public AccountService(AccountRepository accountRepository,
+                          AccountDetailsResponseModelAssembler accountDetailsResponseModelAssembler,
+                          OrganizationDetailsService organizationDetailsService,
+                          AccountResponseModelAssembler accountResponseModelAssembler
+                          ) {
         this.accountRepository = accountRepository;
         this.accountDetailsResponseModelAssembler = accountDetailsResponseModelAssembler;
         this.organizationDetailsService = organizationDetailsService;
         this.accountResponseModelAssembler = accountResponseModelAssembler;
+        this.pagedResourcesAssembler = new PagedResourcesAssembler<>(null, null);
     }
 
     @Transactional
@@ -175,5 +185,17 @@ public class AccountService {
     @Transactional
     boolean isRepresentativeAssociationType(Account account) {
         return account.getAssociationType().equals(EAssociationType.REPRESENTATIVE);
+    }
+
+    @Transactional
+    public PagedModel<AccountDetailsResponseModel> getAllAccountsByPage(Pageable pageable) {
+        log.info("Attempting to get account page by pageable {}", pageable);
+        Page<Account> accountPage = accountRepository.findAll(pageable);
+        log.info("Retrieved account page {}", accountPage);
+        PagedModel<AccountDetailsResponseModel> accountDetailsResponseModelPagedModel = pagedResourcesAssembler.toModel(
+                accountPage, accountDetailsResponseModelAssembler
+        );
+        log.info("Retrieved account page model {}", accountDetailsResponseModelPagedModel);
+        return accountDetailsResponseModelPagedModel;
     }
 }
