@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/users")
 public class AccountController {
     private final AccountService accountService;
 
@@ -24,24 +23,31 @@ public class AccountController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping(path = "/me", produces = {"application/hal+json"})
+    @GetMapping(path = "/users/accounts/me", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
     public AccountResponseModel getAccountByUser(@AuthenticationPrincipal User user) {
         return accountService.getAccountResponseModelById(user);
     }
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping(path = "/{id}", produces = {"application/hal+json"})
+    @GetMapping(path = "/users/accounts/{id}", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
-    public AccountDetailsResponseModel getAccountDetailsById(@PathVariable UUID id,
-                                                             @AuthenticationPrincipal User user) {
+    public AccountDetailsResponseModel getAdminAccountDetailsById(@PathVariable UUID id,
+                                                                  @AuthenticationPrincipal User user) {
         return accountService.getAccountDetailsResponseModelById(id, user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(produces = {"application/hal+json"})
+    @GetMapping(path = "/admin/accounts", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
-    public PagedModel<AccountDetailsResponseModel> getAllAccountsByPage(@ParameterObject Pageable pageable) {
-        return accountService.getAllAccountsByPage(pageable);
+    public PagedModel<AccountResponseModel> getAllAccountDetailsPageModelByPage(@ParameterObject Pageable pageable) {
+        return accountService.getAccountDetailsPageModelByPageable(pageable);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/admin/accounts/{id}", produces = {"application/hal+json"})
+    @ResponseStatus(HttpStatus.OK)
+    public AccountDetailsResponseModel getAdminAccountDetailsById(@PathVariable UUID id) {
+        return accountService.getAccountDetailsResponseModelById(id);
     }
 }

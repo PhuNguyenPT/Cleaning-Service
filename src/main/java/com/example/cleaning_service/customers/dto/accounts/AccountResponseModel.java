@@ -1,5 +1,6 @@
 package com.example.cleaning_service.customers.dto.accounts;
 
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.lang.NonNull;
 
@@ -32,6 +33,10 @@ public class AccountResponseModel extends RepresentationModel<AccountResponseMod
 
     public String getCustomerName() {
         return customerName;
+    }
+
+    public void addSingleLink(Link link) {
+        this.add(link); // Ensures the correct method is used
     }
 
     @Override

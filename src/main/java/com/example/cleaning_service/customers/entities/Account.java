@@ -63,6 +63,12 @@ public class Account extends Auditable {
         this.customer = customer;
     }
 
+    public IOrganization getIOrganization() {
+        if (customer instanceof IOrganization) {
+            return (IOrganization) customer;
+        }
+        return null;
+    }
 
     public String getNotes() {
         return notes;

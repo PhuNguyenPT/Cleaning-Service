@@ -2,6 +2,8 @@ package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.customers.assemblers.accounts.AccountDetailsResponseModelAssembler;
 import com.example.cleaning_service.customers.assemblers.accounts.AccountResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountDetailsResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountResponseModelAssembler;
 import com.example.cleaning_service.customers.controllers.AccountController;
 import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
@@ -27,7 +29,9 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -50,6 +54,8 @@ public class AccountService {
     private final OrganizationDetailsService organizationDetailsService;
     private final AccountResponseModelAssembler accountResponseModelAssembler;
     private final PagedResourcesAssembler<Account> pagedResourcesAssembler;
+    private final AdminAccountDetailsResponseModelAssembler adminAccountDetailsResponseModelAssembler;
+    private final AdminAccountResponseModelAssembler adminAccountResponseModelAssembler;
 
     /**
      * Constructs an `AccountService` with required dependencies.
@@ -63,19 +69,22 @@ public class AccountService {
     public AccountService(AccountRepository accountRepository,
                           AccountDetailsResponseModelAssembler accountDetailsResponseModelAssembler,
                           OrganizationDetailsService organizationDetailsService,
-                          AccountResponseModelAssembler accountResponseModelAssembler
-                          ) {
+                          AccountResponseModelAssembler accountResponseModelAssembler,
+                          AdminAccountDetailsResponseModelAssembler adminAccountDetailsResponseModelAssembler, AdminAccountResponseModelAssembler adminAccountResponseModelAssembler) {
         this.accountRepository = accountRepository;
         this.accountDetailsResponseModelAssembler = accountDetailsResponseModelAssembler;
         this.organizationDetailsService = organizationDetailsService;
         this.accountResponseModelAssembler = accountResponseModelAssembler;
         this.pagedResourcesAssembler = new PagedResourcesAssembler<>(null, null);
+        this.adminAccountDetailsResponseModelAssembler = adminAccountDetailsResponseModelAssembler;
+        this.adminAccountResponseModelAssembler = adminAccountResponseModelAssembler;
     }
 
     @Transactional
     Account findById(UUID id) {
         log.info("Start retrieving account details with id: {}", id);
-        return accountRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        return accountRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     @Transactional
@@ -188,14 +197,36 @@ public class AccountService {
     }
 
     @Transactional
-    public PagedModel<AccountDetailsResponseModel> getAllAccountsByPage(Pageable pageable) {
+    public PagedModel<AccountResponseModel> getAccountDetailsPageModelByPageable(Pageable pageable) {
         log.info("Attempting to get account page by pageable {}", pageable);
         Page<Account> accountPage = accountRepository.findAll(pageable);
+
         log.info("Retrieved account page {}", accountPage);
-        PagedModel<AccountDetailsResponseModel> accountDetailsResponseModelPagedModel = pagedResourcesAssembler.toModel(
-                accountPage, accountDetailsResponseModelAssembler
+        PagedModel<AccountResponseModel> accountDetailsResponseModelPagedModel = pagedResourcesAssembler.toModel(
+                accountPage, adminAccountResponseModelAssembler
         );
         log.info("Retrieved account page model {}", accountDetailsResponseModelPagedModel);
+        Map<UUID, Link> uuidLinkMap = new HashMap<>();
+        organizationDetailsService.addLinksForIOrganization(
+                uuidLinkMap,
+                accountPage,
+                accountDetailsResponseModelPagedModel,
+                Account::getId,
+                AccountResponseModel::getId,
+                Account::getIOrganization,
+                organizationDetailsService::getAdminLinkByIOrganization,
+                AccountResponseModel::addSingleLink
+        );
+
         return accountDetailsResponseModelPagedModel;
+    }
+
+    @Transactional
+    public AccountDetailsResponseModel getAccountDetailsResponseModelById(UUID id) {
+        log.info("Attempting to get account details by id {}", id);
+        Account account = findById(id);
+        AccountDetailsResponseModel accountDetailsResponseModel = adminAccountDetailsResponseModelAssembler.toModel(account);
+        log.info("Retrieved admin finding: account details model {}", accountDetailsResponseModel);
+        return accountDetailsResponseModel;
     }
 }
