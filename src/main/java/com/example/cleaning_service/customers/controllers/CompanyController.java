@@ -6,6 +6,8 @@ import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel
 import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
 import com.example.cleaning_service.customers.services.CompanyService;
 import com.example.cleaning_service.security.entities.user.User;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/companies")
+@Tag(name = "User Companies", description = "Companies management APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class CompanyController {
     private final CompanyService companyService;
 

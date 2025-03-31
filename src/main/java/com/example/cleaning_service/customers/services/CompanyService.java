@@ -1,8 +1,9 @@
 package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsResponseModelAssembler;
-import com.example.cleaning_service.customers.assemblers.companies.CompanyResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.AdminCompanyDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.CompanyModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
@@ -15,6 +16,7 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -41,10 +43,11 @@ public class CompanyService {
     private final OrganizationDetailsService organizationDetailsService;
     private final CustomerService customerService;
 
-    private final CompanyResponseModelAssembler companyResponseModelAssembler;
-    private final CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler;
+    private final CompanyModelAssembler companyModelAssembler;
+    private final CompanyDetailsModelAssembler companyDetailsModelAssembler;
 
     private final CompanyMapper companyMapper;
+    private final AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler;
 
     public CompanyService(
             CompanyRepository companyRepository,
@@ -55,11 +58,11 @@ public class CompanyService {
             OrganizationDetailsService organizationDetailsService,
             CustomerService customerService,
 
-            CompanyResponseModelAssembler companyResponseModelAssembler,
-            CompanyDetailsResponseModelAssembler companyDetailsResponseModelAssembler,
+            CompanyModelAssembler companyModelAssembler,
+            CompanyDetailsModelAssembler companyDetailsModelAssembler,
 
-            CompanyMapper companyMapper
-    ) {
+            CompanyMapper companyMapper,
+            AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler) {
 
         this.companyRepository = companyRepository;
         this.accountService = accountService;
@@ -68,10 +71,11 @@ public class CompanyService {
         this.organizationDetailsService = organizationDetailsService;
         this.customerService = customerService;
 
-        this.companyResponseModelAssembler = companyResponseModelAssembler;
-        this.companyDetailsResponseModelAssembler = companyDetailsResponseModelAssembler;
+        this.companyModelAssembler = companyModelAssembler;
+        this.companyDetailsModelAssembler = companyDetailsModelAssembler;
 
         this.companyMapper = companyMapper;
+        this.adminCompanyDetailsModelAssembler = adminCompanyDetailsModelAssembler;
     }
 
     /**
@@ -101,6 +105,7 @@ public class CompanyService {
 
         log.info("Attempting to create a company for user: {}", user.getUsername());
         Account account = accountService.findAccountWithCustomerByUser(user);
+        accountService.checkAccountReferenceCustomer(account);
 
         // Save the company
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
@@ -121,7 +126,7 @@ public class CompanyService {
             throw new IllegalStateException("Account does not reference a valid company.");
         }
 
-        CompanyResponseModel companyResponseModel = companyResponseModelAssembler.toModel((Company) updatedAccount.getCustomer());
+        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel((Company) updatedAccount.getCustomer());
         log.info("Successfully created company response: {}", companyResponseModel);
 
         return companyResponseModel;
@@ -157,7 +162,7 @@ public class CompanyService {
     public CompanyDetailsResponseModel getCompanyDetailsResponseModelById(UUID id, User user) {
         log.info("Retrieving company details for ID: {} by user: {}", id, user.getUsername());
         Company dbCompany = getByIdAndUser(id, user);
-        CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsResponseModelAssembler.toModel(dbCompany);
+        CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsModelAssembler.toModel(dbCompany);
         log.info("Retrieved company details: {}", companyDetailsResponseModel);
         return companyDetailsResponseModel;
     }
@@ -210,7 +215,7 @@ public class CompanyService {
         Company updatedCompany = saveCompany(company);
         log.info("Successfully updated company with ID: {}", updatedCompany.getId());
 
-        return companyDetailsResponseModelAssembler.toModel(updatedCompany);
+        return companyDetailsModelAssembler.toModel(updatedCompany);
     }
 
     /**
@@ -271,5 +276,21 @@ public class CompanyService {
     @Transactional
     protected boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
         return !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Company);
+    }
+
+    @Transactional
+    Company findById(UUID id) {
+        return companyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Company with id " + id + " not found"));
+    }
+
+    @Transactional
+    public CompanyDetailsResponseModel getAdminCompanyDetailsResponseModelById(UUID id) {
+        log.info("Attempting to retrieve admin company details for ID: {}", id);
+        Company company = findById(id);
+        log.info("Retrieved admin company details: {}", company);
+        CompanyDetailsResponseModel companyDetailsResponseModel = adminCompanyDetailsModelAssembler.toModel(company);
+        log.info("Successfully retrieved admin company details response model: {}", companyDetailsResponseModel);
+        return companyDetailsResponseModel;
     }
 }

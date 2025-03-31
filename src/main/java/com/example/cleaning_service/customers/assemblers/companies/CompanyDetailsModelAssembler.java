@@ -4,17 +4,15 @@ import com.example.cleaning_service.customers.controllers.CompanyController;
 import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CompanyDetailsResponseModelAssembler extends RepresentationModelAssemblerSupport<Company, CompanyDetailsResponseModel> {
+public class CompanyDetailsModelAssembler extends RepresentationModelAssemblerSupport<Company, CompanyDetailsResponseModel> {
     private final CompanyMapper companyMapper;
 
-    public CompanyDetailsResponseModelAssembler(CompanyMapper companyMapper) {
+    public CompanyDetailsModelAssembler(CompanyMapper companyMapper) {
         super(CompanyController.class, CompanyDetailsResponseModel.class);
         this.companyMapper = companyMapper;
     }

@@ -44,6 +44,7 @@ public class NonProfitOrgMapper {
 
     public NonProfitOrgDetailsResponseModel fromNonProfitOrgToDetailsModel(NonProfitOrg nonProfitOrg) {
         return new NonProfitOrgDetailsResponseModel(
+                nonProfitOrg.getId(),
                 nonProfitOrg.getTaxId(),
                 nonProfitOrg.getRegistrationNumber(),
                 nonProfitOrg.getBillingAddress(),

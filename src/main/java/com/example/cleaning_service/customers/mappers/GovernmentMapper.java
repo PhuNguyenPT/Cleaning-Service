@@ -47,6 +47,7 @@ public class GovernmentMapper {
 
     public GovernmentDetailsResponseModel fromGovernmentToGovernmentDetailsResponseModel(Government government) {
         return new GovernmentDetailsResponseModel(
+                government.getId(),
                 government.getTaxId(),
                 government.getRegistrationNumber(),
                 government.getContractorName(),
