@@ -8,6 +8,7 @@ import com.example.cleaning_service.customers.controllers.AccountController;
 import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.accounts.AccountResponseModel;
+import com.example.cleaning_service.customers.dto.accounts.AccountUpdateRequest;
 import com.example.cleaning_service.customers.entities.*;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.repositories.AccountRepository;
@@ -84,7 +85,7 @@ public class AccountService {
     Account findById(UUID id) {
         log.info("Start retrieving account details with id: {}", id);
         return accountRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException("Account with id " + id + " not found"));
     }
 
     @Transactional
@@ -228,5 +229,36 @@ public class AccountService {
         AccountDetailsResponseModel accountDetailsResponseModel = adminAccountDetailsResponseModelAssembler.toModel(account);
         log.info("Retrieved admin finding: account details model {}", accountDetailsResponseModel);
         return accountDetailsResponseModel;
+    }
+
+    @Transactional
+    public AccountDetailsResponseModel patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest) {
+        log.info("Attempting to update account details by id {}", id);
+        Account account = findById(id);
+        log.info("Retrieved account details for patch {}", account);
+        Account patchedAccount = patchAccountFields(account, accountUpdateRequest);
+        log.info("Patched account details {}", patchedAccount);
+        AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsResponseModelAssembler.toModel(patchedAccount);
+        log.info("Patched account details model {}", accountDetailsResponseModel);
+        return accountDetailsResponseModel;
+    }
+
+    @Transactional
+    Account patchAccountFields(Account account, AccountUpdateRequest accountUpdateRequest) {
+        if (account == null || accountUpdateRequest == null) {
+            log.warn("Attempting to patch account fields with account: {}, \n " +
+                    "accountUpdateRequest: {}", account, accountUpdateRequest);
+            return null;
+        }
+        if (accountUpdateRequest.notes() != null)  {
+            account.setNotes(accountUpdateRequest.notes());
+        }
+        if (accountUpdateRequest.isPrimary() != null) {
+            account.setPrimary(accountUpdateRequest.isPrimary());
+        }
+        if (accountUpdateRequest.eAssociationType() != null) {
+            account.setAssociationType(accountUpdateRequest.eAssociationType());
+        }
+        return saveAccount(account);
     }
 }
