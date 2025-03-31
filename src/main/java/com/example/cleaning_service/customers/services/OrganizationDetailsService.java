@@ -71,13 +71,16 @@ public class OrganizationDetailsService {
     }
 
     @Transactional
-    Link getAdminLinkByIOrganization(IOrganization organization) {
+    Link getAdminCustomerLinkByIOrganization(IOrganization organization) {
         log.info("Attempting to retrieve admin link for {}", organization);
+        if (organization == null) {
+            return null;
+        }
         return switch (organization) {
-            case Company company -> linkTo(methodOn(CompanyController.class).getCompanyById(company.getId(), new User())).withRel("customer");
-            case IndividualCustomer customer -> linkTo(methodOn(IndividualCustomerController.class).getIndividualCustomerById(customer.getId(), new User())).withRel("customer");
-            case Government government -> linkTo(methodOn(GovernmentController.class).getGovernmentById(government.getId(), new User())).withRel("customer");
-            case NonProfitOrg nonProfitOrg -> linkTo(methodOn(NonProfitOrgController.class).getNonProfitOrgById(nonProfitOrg.getId(), new User())).withRel("customer");
+            case Company company -> linkTo(methodOn(AdminCustomerController.class).getAdminCompanyDetailsResponseModelById(company.getId())).withRel("customer");
+            case IndividualCustomer customer -> linkTo(methodOn(AdminCustomerController.class).getAdminIndividualCustomerDetailsResponseModelById(customer.getId())).withRel("customer");
+            case Government government -> linkTo(methodOn(AdminCustomerController.class).getAdminGovernmentDetailsResponseModelById(government.getId())).withRel("customer");
+            case NonProfitOrg nonProfitOrg -> linkTo(methodOn(AdminCustomerController.class).getAdminNonProfitOrgDetailsResponseModelById(nonProfitOrg.getId())).withRel("customer");
         };
     }
 

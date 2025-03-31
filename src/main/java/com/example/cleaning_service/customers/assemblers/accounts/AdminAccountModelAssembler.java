@@ -1,6 +1,6 @@
 package com.example.cleaning_service.customers.assemblers.accounts;
 
-import com.example.cleaning_service.customers.controllers.AccountController;
+import com.example.cleaning_service.customers.controllers.AdminCustomerController;
 import com.example.cleaning_service.customers.dto.accounts.AccountResponseModel;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.mappers.AccountMapper;
@@ -13,12 +13,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class AdminAccountResponseModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountResponseModel> {
+public class AdminAccountModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountResponseModel> {
 
     private final AccountMapper accountMapper;
 
-    public AdminAccountResponseModelAssembler(AccountMapper accountMapper) {
-        super(AccountController.class, AccountResponseModel.class);
+    public AdminAccountModelAssembler(AccountMapper accountMapper) {
+        super(AdminCustomerController.class, AccountResponseModel.class);
         this.accountMapper = accountMapper;
     }
 
@@ -30,11 +30,9 @@ public class AdminAccountResponseModelAssembler extends RepresentationModelAssem
     @Override
     public @NonNull AccountResponseModel toModel(@NonNull Account account) {
         AccountResponseModel accountResponseModel = instantiateModel(account);
-
-        Link adminLink = linkTo(methodOn(AccountController.class).getAdminAccountDetailsById(account.getId()))
-                .withSelfRel();
-        accountResponseModel.add(adminLink);
-
+        Link selfLink = linkTo(methodOn(AdminCustomerController.class)
+                .getAdminAccountDetailsResponseModelById(account.getId())).withSelfRel();
+        accountResponseModel.add(selfLink);
         return accountResponseModel;
     }
 }

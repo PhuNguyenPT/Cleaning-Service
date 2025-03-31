@@ -4,6 +4,7 @@ import com.example.cleaning_service.security.dtos.user.UserRequest;
 import com.example.cleaning_service.security.dtos.user.UserResponseModel;
 import com.example.cleaning_service.security.services.IUserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/admin")
+@Tag(name = "Admin Users", description = "Users management APIs")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")  // Default rule for all methods
 public class AdminController {

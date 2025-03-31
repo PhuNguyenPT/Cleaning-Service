@@ -9,10 +9,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountDetailsResponseModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountDetailsResponseModel> {
+public class AccountDetailsModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountDetailsResponseModel> {
     private final AccountMapper accountMapper;
 
-    public AccountDetailsResponseModelAssembler(AccountMapper accountMapper) {
+    public AccountDetailsModelAssembler(AccountMapper accountMapper) {
         super(AccountController.class, AccountDetailsResponseModel.class);
         this.accountMapper = accountMapper;
     }
@@ -24,6 +24,6 @@ public class AccountDetailsResponseModelAssembler extends RepresentationModelAss
 
     @Override
     public @NonNull AccountDetailsResponseModel toModel(@NonNull Account account) {
-        return instantiateModel(account);
+        return createModelWithId(account.getId(), account);
     }
 }

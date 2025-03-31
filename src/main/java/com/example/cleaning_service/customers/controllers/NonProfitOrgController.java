@@ -6,6 +6,8 @@ import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRes
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgUpdateRequest;
 import com.example.cleaning_service.customers.services.NonProfitOrgService;
 import com.example.cleaning_service.security.entities.user.User;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/non-profit-organizations")
+@Tag(name = "User Non-profit Organizations", description = "Non-profit Organizations management APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class NonProfitOrgController {
     private final NonProfitOrgService nonProfitOrgService;
 

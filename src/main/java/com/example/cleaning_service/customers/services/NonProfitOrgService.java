@@ -1,8 +1,9 @@
 package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailsResponseModelAssembler;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.AdminNonProfitOrgDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRequest;
@@ -15,6 +16,7 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
 import com.example.cleaning_service.customers.repositories.NonProfitOrgRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -40,10 +42,11 @@ public class NonProfitOrgService {
     private final BusinessEntityService businessEntityService;
     private final CustomerService customerService;
 
-    private final NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler;
-    private final NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler;
+    private final NonProfitOrgModelAssembler nonProfitOrgModelAssembler;
+    private final NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler;
 
     private final NonProfitOrgMapper nonProfitOrgMapper;
+    private final AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler;
 
     public NonProfitOrgService(
             NonProfitOrgRepository nonProfitOrgRepository,
@@ -53,11 +56,11 @@ public class NonProfitOrgService {
             BusinessEntityService businessEntityService,
             CustomerService customerService,
 
-            NonProfitOrgResponseModelAssembler nonProfitOrgResponseModelAssembler,
-            NonProfitOrgDetailsResponseModelAssembler nonProfitOrgDetailsResponseModelAssembler,
+            NonProfitOrgModelAssembler nonProfitOrgModelAssembler,
+            NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler,
 
-            NonProfitOrgMapper nonProfitOrgMapper
-    ) {
+            NonProfitOrgMapper nonProfitOrgMapper,
+            AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler) {
 
         this.nonProfitOrgRepository = nonProfitOrgRepository;
         this.accountService = accountService;
@@ -66,10 +69,11 @@ public class NonProfitOrgService {
         this.businessEntityService = businessEntityService;
         this.customerService = customerService;
 
-        this.nonProfitOrgResponseModelAssembler = nonProfitOrgResponseModelAssembler;
-        this.nonProfitOrgDetailsResponseModelAssembler = nonProfitOrgDetailsResponseModelAssembler;
+        this.nonProfitOrgModelAssembler = nonProfitOrgModelAssembler;
+        this.nonProfitOrgDetailModelAssembler = nonProfitOrgDetailModelAssembler;
 
         this.nonProfitOrgMapper = nonProfitOrgMapper;
+        this.adminNonProfitOrgDetailsModelAssembler = adminNonProfitOrgDetailsModelAssembler;
     }
 
     /**
@@ -97,7 +101,9 @@ public class NonProfitOrgService {
                 nonProfitOrgRepository::existsByEmail
         );
 
+        log.info("Attempting to create a non-profit org for user: {}", user.getUsername());
         Account account = accountService.findAccountWithCustomerByUser(user);
+        accountService.checkAccountReferenceCustomer(account);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);
         NonProfitOrg savedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
@@ -115,7 +121,7 @@ public class NonProfitOrgService {
         if(isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), updatedAccount.getCustomer())) {
             throw new IllegalStateException("Account association does not reference a valid non-profit org.");
         }
-        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgResponseModelAssembler.toModel((NonProfitOrg) updatedAccount.getCustomer());
+        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel((NonProfitOrg) updatedAccount.getCustomer());
         log.info("Successfully created non-profit response: {}", nonProfitOrgResponseModel);
 
         return nonProfitOrgResponseModel;
@@ -148,7 +154,7 @@ public class NonProfitOrgService {
     @Transactional
     public NonProfitOrgDetailsResponseModel getNonProfitOrgDetailsResponseModelById(UUID id, User user) {
         NonProfitOrg nonProfitOrg = getByIdAndUser(id, user);
-        return nonProfitOrgDetailsResponseModelAssembler.toModel(nonProfitOrg);
+        return nonProfitOrgDetailModelAssembler.toModel(nonProfitOrg);
     }
 
     /**
@@ -200,7 +206,7 @@ public class NonProfitOrgService {
         NonProfitOrg updatedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
         log.info("Successfully updated company with ID: {}", updatedNonProfitOrg.getId());
 
-        return nonProfitOrgDetailsResponseModelAssembler.toModel(updatedNonProfitOrg);
+        return nonProfitOrgDetailModelAssembler.toModel(updatedNonProfitOrg);
     }
 
     /**
@@ -261,5 +267,22 @@ public class NonProfitOrgService {
     @Transactional
     protected boolean isNotValidReferenceAbstractCustomer(UUID abstractCustomerId, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(abstractCustomerId) || !(abstractCustomer instanceof NonProfitOrg);
+    }
+
+    @Transactional
+    public NonProfitOrgDetailsResponseModel getAdminNonProfitOrgDetailsResponseModelById(UUID id) {
+        log.info("Attempting to retrieve admin non-profit organization details for ID: {}", id);
+        NonProfitOrg nonProfitOrg = findById(id);
+        log.info("Retrieved admin non-profit organization details: {}", nonProfitOrg);
+        NonProfitOrgDetailsResponseModel nonProfitOrgDetailsResponseModel =
+                adminNonProfitOrgDetailsModelAssembler.toModel(nonProfitOrg);
+        log.info("Successfully retrieved admin non-profit organization details response model: {}", nonProfitOrgDetailsResponseModel);
+        return nonProfitOrgDetailsResponseModel;
+    }
+
+    @Transactional
+    NonProfitOrg findById(UUID id) {
+        return nonProfitOrgRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Non-profit organization with ID: " + id + " not found"));
     }
 }

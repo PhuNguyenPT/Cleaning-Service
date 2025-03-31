@@ -6,6 +6,8 @@ import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustome
 import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerUpdateRequest;
 import com.example.cleaning_service.customers.services.IndividualCustomerService;
 import com.example.cleaning_service.security.entities.user.User;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/individuals")
+@Tag(name = "User Individual Customers", description = "Individual Customers management APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class IndividualCustomerController {
     private final IndividualCustomerService individualCustomerService;
 

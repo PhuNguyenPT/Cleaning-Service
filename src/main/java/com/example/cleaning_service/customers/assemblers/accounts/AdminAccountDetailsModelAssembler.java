@@ -1,6 +1,6 @@
 package com.example.cleaning_service.customers.assemblers.accounts;
 
-import com.example.cleaning_service.customers.controllers.AccountController;
+import com.example.cleaning_service.customers.controllers.AdminCustomerController;
 import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.mappers.AccountMapper;
@@ -13,11 +13,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class AdminAccountDetailsResponseModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountDetailsResponseModel> {
+public class AdminAccountDetailsModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountDetailsResponseModel> {
     private final AccountMapper accountMapper;
 
-    public AdminAccountDetailsResponseModelAssembler(AccountMapper accountMapper) {
-        super(AccountController.class, AccountDetailsResponseModel.class);
+    public AdminAccountDetailsModelAssembler(AccountMapper accountMapper) {
+        super(AdminCustomerController.class, AccountDetailsResponseModel.class);
         this.accountMapper = accountMapper;
     }
 
@@ -28,13 +28,10 @@ public class AdminAccountDetailsResponseModelAssembler extends RepresentationMod
 
     @Override
     public @NonNull AccountDetailsResponseModel toModel(@NonNull Account account) {
-        AccountDetailsResponseModel model = instantiateModel(account);
-
-        Link adminLink = linkTo(methodOn(AccountController.class).getAdminAccountDetailsById(account.getId()))
-                .withSelfRel();
-        // Use methodOn to create a link based on the controller method
-        model.add(adminLink);
-
-        return model;
+        AccountDetailsResponseModel accountDetailsResponseModel = instantiateModel(account);
+        Link selfLink = linkTo(methodOn(AdminCustomerController.class)
+                .getAdminAccountDetailsResponseModelById(account.getId())).withSelfRel();
+        accountDetailsResponseModel.add(selfLink);
+        return accountDetailsResponseModel;
     }
 }

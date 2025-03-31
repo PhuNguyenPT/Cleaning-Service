@@ -4,6 +4,7 @@ import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.services.IAuthService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.Link;
@@ -17,6 +18,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Users Authentication", description = "Authentication management APIs")
 public class AuthController {
     private final IAuthService authService;
 

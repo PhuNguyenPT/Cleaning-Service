@@ -100,7 +100,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JOSEException.class)
     public ResponseEntity<Map<String, String>> handleJOSEException(JOSEException ex) {
-        logger.warn("JWT processing error: {}", ex.getMessage(), ex);
+        logger.warn("JWT processing error: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", "Invalid or tampered JWT signature"));
     }
@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        logger.warn("Database integrity violation: {}", ex.getMessage(), ex);
+        logger.warn("Database integrity violation: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", "A database constraint was violated"));
     }
@@ -122,7 +122,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateFieldsException.class)
     public ResponseEntity<Map<String, String>> handleDuplicateFieldsException(
             DuplicateFieldsException ex) {
-        logger.warn("Duplicate fields detected: {}", ex.getMessage(), ex);
+        logger.warn("Duplicate fields detected: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getDuplicateFields());
     }
 
@@ -131,5 +131,21 @@ public class GlobalExceptionHandler {
         logger.warn("Access denied: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException ex) {
+        logger.warn("Illegal state: {}", ex.getMessage(), ex);
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Invalid Operation");
+        errorResponse.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleException(Exception ex) {
+        logger.warn("Unexpected exception: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", ex.getMessage()));
     }
 }

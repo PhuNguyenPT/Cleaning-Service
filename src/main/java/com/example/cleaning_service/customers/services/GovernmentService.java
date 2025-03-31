@@ -1,8 +1,9 @@
 package com.example.cleaning_service.customers.services;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsResponseModelAssembler;
-import com.example.cleaning_service.customers.assemblers.governments.GovernmentResponseModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.AdminGovernmentDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.GovernmentModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
@@ -15,6 +16,7 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
 import com.example.cleaning_service.customers.repositories.GovernmentRepository;
 import com.example.cleaning_service.security.entities.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -41,10 +43,11 @@ public class GovernmentService {
     private final CustomerService customerService;
 
 
-    private final GovernmentResponseModelAssembler governmentResponseModelAssembler;
-    private final GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler;
+    private final GovernmentModelAssembler governmentModelAssembler;
+    private final GovernmentDetailsModelAssembler governmentDetailsModelAssembler;
 
     private final GovernmentMapper governmentMapper;
+    private final AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
 
     public GovernmentService(
             GovernmentRepository governmentRepository,
@@ -54,11 +57,11 @@ public class GovernmentService {
             OrganizationDetailsService organizationDetailsService,
             CustomerService customerService,
 
-            GovernmentResponseModelAssembler governmentResponseModelAssembler,
-            GovernmentDetailsResponseModelAssembler governmentDetailsResponseModelAssembler,
+            GovernmentModelAssembler governmentModelAssembler,
+            GovernmentDetailsModelAssembler governmentDetailsModelAssembler,
 
-            GovernmentMapper governmentMapper
-    ) {
+            GovernmentMapper governmentMapper,
+            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler) {
 
         this.governmentRepository = governmentRepository;
 
@@ -68,10 +71,11 @@ public class GovernmentService {
         this.organizationDetailsService = organizationDetailsService;
         this.customerService = customerService;
 
-        this.governmentResponseModelAssembler = governmentResponseModelAssembler;
-        this.governmentDetailsResponseModelAssembler = governmentDetailsResponseModelAssembler;
+        this.governmentModelAssembler = governmentModelAssembler;
+        this.governmentDetailsModelAssembler = governmentDetailsModelAssembler;
 
         this.governmentMapper = governmentMapper;
+        this.adminGovernmentDetailsModelAssembler = adminGovernmentDetailsModelAssembler;
     }
 
     /**
@@ -98,7 +102,10 @@ public class GovernmentService {
                 governmentRepository::existsByRegistrationNumber,
                 governmentRepository::existsByEmail
         );
+
+        log.info("Attempting to create a government for user: {}", user.getUsername());
         Account account = accountService.findAccountWithCustomerByUser(user);
+        accountService.checkAccountReferenceCustomer(account);
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government savedGovernment = saveGovernment(government);
@@ -117,7 +124,7 @@ public class GovernmentService {
             throw new IllegalStateException("Account association does not reference a valid government.");
         }
 
-        GovernmentResponseModel governmentResponseModel = governmentResponseModelAssembler.toModel((Government) updatedAccount.getCustomer());
+        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) updatedAccount.getCustomer());
         log.info("Successfully created government response: {}", governmentResponseModel);
 
         return governmentResponseModel;
@@ -153,7 +160,7 @@ public class GovernmentService {
     @Transactional
     public GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, User user) {
         Government dbGovernment = getByIdAndUser(id, user);
-        return governmentDetailsResponseModelAssembler.toModel(dbGovernment);
+        return governmentDetailsModelAssembler.toModel(dbGovernment);
     }
 
     /**
@@ -203,7 +210,7 @@ public class GovernmentService {
         Government updatedGovernment = saveGovernment(government);
         log.info("Successfully updated company with ID: {}", updatedGovernment.getId());
 
-        return governmentDetailsResponseModelAssembler.toModel(updatedGovernment);
+        return governmentDetailsModelAssembler.toModel(updatedGovernment);
     }
 
     /**
@@ -278,5 +285,21 @@ public class GovernmentService {
     @Transactional
     protected boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Government);
+    }
+
+    @Transactional
+    public GovernmentDetailsResponseModel getAdminGovernmentDetailsResponseModelById(UUID id) {
+        log.info("Attempting to retrieve admin government with ID: {}", id);
+        Government government = findById(id);
+        log.info("Retrieved government with ID: {}", id);
+        GovernmentDetailsResponseModel governmentDetailsResponseModel = adminGovernmentDetailsModelAssembler.toModel(government);
+        log.info("Successfully retrieved admin government details response model: {}", governmentDetailsResponseModel);
+        return governmentDetailsResponseModel;
+    }
+
+    @Transactional
+    Government findById(UUID id) {
+        return governmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found"));
     }
 }

@@ -9,10 +9,10 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component;
 
 @Component
-public class IndividualCustomerResponseModelAssembler extends RepresentationModelAssemblerSupport<IndividualCustomer, IndividualCustomerResponseModel> {
+public class IndividualCustomerModelAssembler extends RepresentationModelAssemblerSupport<IndividualCustomer, IndividualCustomerResponseModel> {
     private final IndividualCustomerMapper individualCustomerMapper;
 
-    public IndividualCustomerResponseModelAssembler(IndividualCustomerMapper individualCustomerMapper) {
+    public IndividualCustomerModelAssembler(IndividualCustomerMapper individualCustomerMapper) {
         super(IndividualCustomerController.class, IndividualCustomerResponseModel.class);
         this.individualCustomerMapper = individualCustomerMapper;
     }
