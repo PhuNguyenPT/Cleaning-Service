@@ -64,7 +64,7 @@ public class AccountController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping(path = "/users/accounts/{id}", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
-    public AccountDetailsResponseModel getAdminAccountDetailsById(
+    public AccountDetailsResponseModel getAccountDetailsById(
             @Parameter(description = "Account ID", required = true) @PathVariable UUID id,
             @AuthenticationPrincipal User user
     ) {

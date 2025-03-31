@@ -162,6 +162,10 @@ public class AccountService {
         AccountResponseModel accountResponseModel = accountResponseModelAssembler.toModel(account);
         log.info("Retrieved account model {}", accountResponseModel);
 
+        Link selfLink = linkTo(methodOn(AccountController.class).getAccountDetailsById(
+                accountResponseModel.getId(), new User())).withSelfRel();
+        accountResponseModel.add(selfLink);
+
         if (account.getCustomer() != null) {
             Link customerLink = organizationDetailsService.getLinkByIOrganization((IOrganization) account.getCustomer());
             log.info("Retrieved customer link {}", customerLink);
@@ -185,9 +189,10 @@ public class AccountService {
         AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsResponseModelAssembler.toModel(account);
         log.info("Retrieved account details model {}", accountDetailsResponseModel);
 
+        Link selfLink = linkTo(methodOn(AccountController.class).getAccountDetailsById(account.getId(), new User())).withSelfRel();
         Link accountDefaultLink = linkTo(methodOn(AccountController.class).getAccountByUser(user)).withRel("me");
-        log.info("Retrieved account link {}", accountDefaultLink);
-        accountDetailsResponseModel.add(accountDefaultLink);
+        log.info("Retrieved account link {}, {}", selfLink, accountDefaultLink);
+        accountDetailsResponseModel.add(selfLink, accountDefaultLink);
 
         return accountDetailsResponseModel;
     }

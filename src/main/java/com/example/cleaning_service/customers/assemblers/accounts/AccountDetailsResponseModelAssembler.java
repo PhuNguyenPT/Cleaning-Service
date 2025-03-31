@@ -24,6 +24,6 @@ public class AccountDetailsResponseModelAssembler extends RepresentationModelAss
 
     @Override
     public @NonNull AccountDetailsResponseModel toModel(@NonNull Account account) {
-        return createModelWithId(account.getId(), account);
+        return instantiateModel(account);
     }
 }
