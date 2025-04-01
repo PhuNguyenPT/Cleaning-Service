@@ -6,6 +6,9 @@ import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel
 import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
 import com.example.cleaning_service.customers.services.CompanyService;
 import com.example.cleaning_service.security.entities.user.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,13 +30,12 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-    /**
-     * Creates a new company and associates it with the authenticated user.
-     *
-     * @param companyRequest The request body containing company details.
-     * @param user The authenticated user.
-     * @return The created company response model.
-     */
+    @Operation(summary = "Create a company", description = "Creates a new company and associates it with the authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Company created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PreAuthorize("hasRole('USER')")
     @PostMapping(produces = "application/hal+json")
     @ResponseStatus(HttpStatus.CREATED)
@@ -42,13 +44,12 @@ public class CompanyController {
         return companyService.createCompany(companyRequest, user);
     }
 
-    /**
-     * Retrieves company details by ID for the authenticated user.
-     *
-     * @param id The UUID of the company.
-     * @param user The authenticated user.
-     * @return The company details response model.
-     */
+    @Operation(summary = "Get company by ID", description = "Retrieves company details by its ID for the authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Company details retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PreAuthorize("hasRole('USER')")
     @GetMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
@@ -57,14 +58,14 @@ public class CompanyController {
         return companyService.getCompanyDetailsResponseModelById(id, user);
     }
 
-    /**
-     * Updates company details. Only non-null fields are updated.
-     *
-     * @param id The UUID of the company to update.
-     * @param updateRequest The request body containing fields to update.
-     * @param user The authenticated user.
-     * @return The updated company details.
-     */
+    @Operation(summary = "Update company details", description = "Updates a company's details. Only non-null fields are updated.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Company updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "403", description = "User not authorized to update this company"),
+            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PreAuthorize("hasRole('USER')")
     @PutMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
@@ -74,11 +75,13 @@ public class CompanyController {
         return companyService.updateCompanyDetailsById(id, updateRequest, user);
     }
 
-    /**
-     * Deletes a company by ID for the authenticated user.
-     *
-     * @param id The UUID of the company.
-     */
+    @Operation(summary = "Delete a company", description = "Deletes a company by ID for the authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Company deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "User not authorized to delete this company"),
+            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
