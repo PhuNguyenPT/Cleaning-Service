@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "account", schema = "sale")
+@Table(name = "customer_account", schema = "sale")
 public class Account extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

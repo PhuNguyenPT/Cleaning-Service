@@ -35,7 +35,13 @@ public class AdminCustomerController {
     private final IndividualCustomerService individualCustomerService;
     private final NonProfitOrgService nonProfitOrgService;
 
-    public AdminCustomerController(AccountService accountService, CompanyService companyService, GovernmentService governmentService, IndividualCustomerService individualCustomerService, NonProfitOrgService nonProfitOrgService) {
+    public AdminCustomerController(
+            AccountService accountService,
+            CompanyService companyService,
+            GovernmentService governmentService,
+            IndividualCustomerService individualCustomerService,
+            NonProfitOrgService nonProfitOrgService
+    ) {
         this.accountService = accountService;
         this.companyService = companyService;
         this.governmentService = governmentService;

@@ -48,18 +48,19 @@ public class UserService implements IUserService {
     private final PagedResourcesAssembler<User> pagedResourcesAssembler;
     private final UserResponseModelAssembler userResponseModelAssembler;
 
-    public UserService(UserRepository userRepository, IRoleService roleService, BCryptPasswordEncoder passwordEncoder,
-                       ApplicationEventPublisher applicationEventPublisher,
-                       UserResponseModelAssembler userResponseModelAssembler) {
-        this.userRepository = userRepository;
-        this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.pagedResourcesAssembler = new PagedResourcesAssembler<>(null, null);
-        this.userResponseModelAssembler = userResponseModelAssembler;
-    }
-
-
+        public UserService(UserRepository userRepository,
+                           IRoleService roleService,
+                           BCryptPasswordEncoder passwordEncoder,
+                           ApplicationEventPublisher applicationEventPublisher,
+                           UserResponseModelAssembler userResponseModelAssembler,
+                           PagedResourcesAssembler<User> pagedResourcesAssembler) {
+            this.userRepository = userRepository;
+            this.roleService = roleService;
+            this.passwordEncoder = passwordEncoder;
+            this.applicationEventPublisher = applicationEventPublisher;
+            this.pagedResourcesAssembler = pagedResourcesAssembler; // Injected, not new
+            this.userResponseModelAssembler = userResponseModelAssembler;
+        }
 
     @Override
     @Transactional
