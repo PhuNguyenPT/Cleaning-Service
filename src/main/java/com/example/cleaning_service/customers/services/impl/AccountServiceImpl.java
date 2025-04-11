@@ -66,12 +66,13 @@ class AccountServiceImpl implements AccountService {
                        OrganizationDetailsService organizationDetailsService,
                        AccountModelAssembler accountModelAssembler,
                        AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler,
-                       AdminAccountModelAssembler adminAccountModelAssembler) {
+                       AdminAccountModelAssembler adminAccountModelAssembler,
+                       PagedResourcesAssembler<Account> pagedResourcesAssembler) {
         this.accountRepository = accountRepository;
         this.accountDetailsModelAssembler = accountDetailsModelAssembler;
         this.organizationDetailsService = organizationDetailsService;
         this.accountModelAssembler = accountModelAssembler;
-        this.pagedResourcesAssembler = new PagedResourcesAssembler<>(null, null);
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.adminAccountDetailsModelAssembler = adminAccountDetailsModelAssembler;
         this.adminAccountModelAssembler = adminAccountModelAssembler;
     }
