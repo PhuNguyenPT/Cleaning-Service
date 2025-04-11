@@ -275,6 +275,12 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
         return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof IndividualCustomer);
     }
 
+    @Transactional
+    IndividualCustomer findById(UUID id) {
+        return individualCustomerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
+    }
+
     @Override
     @Transactional
     public IndividualCustomerDetailsResponseModel getAdminIndividualCustomerDetailsResponseModelById(UUID id) {
@@ -285,11 +291,5 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
                 adminIndividualCustomerDetailsModelAssembler.toModel(individualCustomer);
         log.info("Successfully retrieved admin individual customer details response model: {}", individualCustomerDetailsResponseModel);
         return individualCustomerDetailsResponseModel;
-    }
-
-    @Transactional
-    IndividualCustomer findById(UUID id) {
-        return individualCustomerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
     }
 }

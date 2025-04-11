@@ -79,21 +79,6 @@ public class GovernmentServiceImpl implements GovernmentService {
         this.adminGovernmentDetailsModelAssembler = adminGovernmentDetailsModelAssembler;
     }
 
-    /**
-     * Creates a new government entity and associates it with the specified user.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the user's current account association.
-     * 2. Creates and persists a new government entity based on the provided request data.
-     * 3. Determines the appropriate association type and primary status for the government.
-     * 4. Updates the user's account association with the newly created government.
-     * 5. Ensures that the updated account association references a valid government.
-     *
-     * @param governmentRequest The request containing government entity details.
-     * @param user The user to associate with the government entity.
-     * @return A {@link GovernmentResponseModel} containing details of the created government entity.
-     * @throws IllegalStateException If the updated account association does not reference a valid government entity.
-     */
     @Override
     @Transactional
     public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, User user) {
@@ -139,26 +124,13 @@ public class GovernmentServiceImpl implements GovernmentService {
      * or new records are stored with updated metadata.
      *
      * @param government The government entity to persist.
-     * @return The saved government entity with updated metadata.
+     * @return The saved {@link Government} entity with updated metadata.
      */
     @Transactional
     Government saveGovernment(Government government) {
         return governmentRepository.save(government);
     }
 
-    /**
-     * Retrieves detailed government entity information by ID for a specific user.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the government entity using the provided ID.
-     * 2. Verifies if the user is associated with the government entity.
-     * 3. Converts the government entity into a detailed response model.
-     *
-     * @param id The UUID of the government entity to retrieve.
-     * @param user The user requesting the government entity details.
-     * @return A detailed response model containing government entity information.
-     * @throws IllegalStateException If the government entity is not found or the user doesn't have access.
-     */
     @Override
     @Transactional
     public GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, User user) {
@@ -176,7 +148,7 @@ public class GovernmentServiceImpl implements GovernmentService {
      *
      * @param id The UUID of the government entity to retrieve.
      * @param user The user requesting access to the government entity.
-     * @return The government entity if found and accessible by the user.
+     * @return The {@link Government} entity if found and accessible by the user.
      * @throws AccessDeniedException If the government entity is not found or if the user does not have
      *                               the required association.
      */
@@ -190,21 +162,6 @@ public class GovernmentServiceImpl implements GovernmentService {
         return (Government) abstractCustomer;
     }
 
-    /**
-     * Updates government details based on the provided request.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the government entity by its ID while ensuring the requesting user has access.
-     * 2. Updates the government's fields based on the provided update request.
-     * 3. Persists the updated government entity to the database.
-     * 4. Converts the updated entity into a response model and returns it.
-     *
-     * @param id The UUID of the government entity to update.
-     * @param updateRequest The request containing fields to update.
-     * @param user The user requesting the update.
-     * @return A detailed response model containing the updated government information.
-     * @throws IllegalStateException If the government entity is not found or the user doesn't have access.
-     */
     @Override
     @Transactional
     public GovernmentDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
@@ -221,11 +178,13 @@ public class GovernmentServiceImpl implements GovernmentService {
      * Updates only the non-null fields of the government entity.
      * <p>
      * This method performs the following operations:
-     * 1. Checks if specific government attributes (e.g., contractor name, department name, tax exemption status)
-     *    are provided in the request and updates them accordingly.
-     * 2. Delegates the update of organization-specific details to {@code OrganizationDetailsService}.
-     * 3. Delegates the update of customer-related details to {@code AbstractCustomerService}.
-     * 4. Delegates the update of business entity-specific details to {@code BusinessEntityService}.
+     * <ol>
+     * <li>Checks if specific government attributes (e.g., contractor name, department name, tax exemption status)
+     *  are provided in the request and updates them accordingly</li>
+     * <li> Delegates the update of organization-specific details to {@code OrganizationDetailsService}</li>
+     * <li>Delegates the update of customer-related details to {@code AbstractCustomerService}</li>
+     * <li> Delegates the update of business entity-specific details to {@code BusinessEntityService}</li>
+     * </ol>
      *
      * @param government The government entity to update.
      * @param updateRequest The request containing fields to update.
@@ -252,17 +211,6 @@ public class GovernmentServiceImpl implements GovernmentService {
         businessEntityService.updateBusinessEntityFields(government, updateRequest.businessEntityDetails());
     }
 
-    /**
-     * Deletes a government entity by its ID and ensures it is associated with the specified user.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the government entity by its ID and verifies that it is associated with the given user.
-     * 2. Detaches the government entity from any account associations linked to the user.
-     * 3. Deletes the government entity from the database.
-     *
-     * @param id   The unique identifier of the government entity to be deleted. Must not be {@code null}.
-     * @param user The user requesting the deletion. Must not be {@code null}.
-     */
     @Override
     @Transactional
     public void deleteGovernmentById(UUID id, User user) {
@@ -287,6 +235,34 @@ public class GovernmentServiceImpl implements GovernmentService {
         return (Government) account.getCustomer();
     }
 
+    /**
+     * Retrieves a company by its ID.
+     * <p>
+     * This method performs a direct database lookup for a government entity.
+     *
+     * @param id The UUID of the government to retrieve
+     * @return The {@link Government} entity if found
+     * @throws EntityNotFoundException If no government exists with the given ID
+     */
+    @Transactional
+    Government findById(UUID id) {
+        return governmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found"));
+    }
+
+    /**
+     * Checks if the provided customer is not a valid reference to the government with the given ID.
+     * <p>
+     * This method verifies that:
+     * <ol>
+     * <li>The customer's ID matches the provided ID</li>
+     * <li>The customer is an instance of Government</li>
+     * </ol>
+     *
+     * @param id The UUID to compare against the customer's ID
+     * @param abstractCustomer The customer to validate
+     * @return {@code true} if the customer is not a valid reference to the government, {@code false} otherwise
+     */
     @Transactional
     boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Government);
@@ -301,11 +277,5 @@ public class GovernmentServiceImpl implements GovernmentService {
         GovernmentDetailsResponseModel governmentDetailsResponseModel = adminGovernmentDetailsModelAssembler.toModel(government);
         log.info("Successfully retrieved admin government details response model: {}", governmentDetailsResponseModel);
         return governmentDetailsResponseModel;
-    }
-
-    @Transactional
-    Government findById(UUID id) {
-        return governmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found"));
     }
 }

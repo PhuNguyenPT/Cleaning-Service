@@ -274,6 +274,12 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
         return abstractCustomer == null || !abstractCustomer.getId().equals(abstractCustomerId) || !(abstractCustomer instanceof NonProfitOrg);
     }
 
+    @Transactional
+    NonProfitOrg findById(UUID id) {
+        return nonProfitOrgRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Non-profit organization with ID: " + id + " not found"));
+    }
+
     @Override
     @Transactional
     public NonProfitOrgDetailsResponseModel getAdminNonProfitOrgDetailsResponseModelById(UUID id) {
@@ -284,11 +290,5 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
                 adminNonProfitOrgDetailsModelAssembler.toModel(nonProfitOrg);
         log.info("Successfully retrieved admin non-profit organization details response model: {}", nonProfitOrgDetailsResponseModel);
         return nonProfitOrgDetailsResponseModel;
-    }
-
-    @Transactional
-    NonProfitOrg findById(UUID id) {
-        return nonProfitOrgRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Non-profit organization with ID: " + id + " not found"));
     }
 }

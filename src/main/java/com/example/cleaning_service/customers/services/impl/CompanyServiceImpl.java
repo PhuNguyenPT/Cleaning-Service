@@ -28,10 +28,12 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Service class responsible for managing Company entities.
+ * Implementation of the CompanyService interface for managing Company entities.
  * <p>
- * This service provides operations for creating, retrieving, updating, and deleting
- * company information, ensuring data integrity and coordinating with related services.
+ * This service handles the core business logic for company-related operations including
+ * creation, retrieval, update, and deletion of company records. It coordinates with various
+ * other services to ensure data integrity and proper association between companies, accounts,
+ * and users within the cleaning service system.
  */
 @Service
 public class CompanyServiceImpl implements CompanyService {
@@ -50,18 +52,29 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyMapper companyMapper;
     private final AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler;
 
+    /**
+     * Constructs a new CompanyServiceImpl with all required dependencies.
+     *
+     * @param companyRepository Repository for company data access
+     * @param accountService Service for account management
+     * @param businessEntityService Service for business entity operations
+     * @param abstractCustomerService Service for customer operations
+     * @param organizationDetailsService Service for organization details
+     * @param customerService Service for general customer operations
+     * @param companyModelAssembler Assembler for basic company models
+     * @param companyDetailsModelAssembler Assembler for detailed company models
+     * @param companyMapper Mapper for company entities and DTOs
+     * @param adminCompanyDetailsModelAssembler Assembler for administrative company details
+     */
     public CompanyServiceImpl(
             CompanyRepository companyRepository,
-
             AccountService accountService,
             BusinessEntityService businessEntityService,
             AbstractCustomerService abstractCustomerService,
             OrganizationDetailsService organizationDetailsService,
             CustomerService customerService,
-
             CompanyModelAssembler companyModelAssembler,
             CompanyDetailsModelAssembler companyDetailsModelAssembler,
-
             CompanyMapper companyMapper,
             AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler) {
 
@@ -71,29 +84,12 @@ public class CompanyServiceImpl implements CompanyService {
         this.abstractCustomerService = abstractCustomerService;
         this.organizationDetailsService = organizationDetailsService;
         this.customerService = customerService;
-
         this.companyModelAssembler = companyModelAssembler;
         this.companyDetailsModelAssembler = companyDetailsModelAssembler;
-
         this.companyMapper = companyMapper;
         this.adminCompanyDetailsModelAssembler = adminCompanyDetailsModelAssembler;
     }
 
-    /**
-     * Creates a new company and associates it with the specified user.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the user's current account.
-     * 2. Creates and persists a new company based on the provided request data.
-     * 3. Determines the appropriate association type and primary status for the company.
-     * 4. Updates the user's account with the newly created company.
-     * 5. Ensures that the updated account references a valid company.
-     *
-     * @param companyRequest The request containing company details.
-     * @param user The user to associate with the company.
-     * @return A {@link CompanyResponseModel} containing details of the created company.
-     * @throws IllegalStateException If the updated account does not reference a valid company.
-     */
     @Override
     @Transactional
     public CompanyResponseModel createCompany(@Valid CompanyRequest companyRequest, User user) {
@@ -135,10 +131,13 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     /**
-     * Saves a company entity to the database.
+     * Persists a company entity to the database.
+     * <p>
+     * This method handles the actual database operation for saving a company entity,
+     * generating appropriate log entries for tracking the operation.
      *
-     * @param company The company entity to persist.
-     * @return The saved company entity with updated metadata.
+     * @param company The company entity to persist
+     * @return The saved {@link Company} entity with generated ID and metadata
      */
     @Transactional
     Company saveCompany(Company company) {
@@ -148,18 +147,6 @@ public class CompanyServiceImpl implements CompanyService {
         return savedCompany;
     }
 
-    /**
-     * Retrieves detailed company information by ID for a specific user.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the company entity using the provided ID.
-     * 2. Verifies if the user is associated with the company.
-     * 3. Converts the company entity into a detailed response model.
-     * @param id The UUID of the company to retrieve
-     * @param user The user requesting the company details
-     * @return A detailed response model containing company information
-     * @throws IllegalStateException If the company is not found or the user doesn't have access
-     */
     @Override
     @Transactional
     public CompanyDetailsResponseModel getCompanyDetailsResponseModelById(UUID id, User user) {
@@ -174,15 +161,16 @@ public class CompanyServiceImpl implements CompanyService {
      * Retrieves a company by its ID while verifying that the requesting user has access to it.
      * <p>
      * This method performs the following operations:
-     * 1. Retrieves the company entity using the provided ID.
-     * 2. Check if the user is associated with the company through an account.
-     * 3. If the user lacks the required association, throw an {@code IllegalStateException}.
+     * <ol>
+     * <li>Retrieves the user's account and associated customer</li>
+     * <li>Checks if the user is associated with the requested company through their account</li>
+     * <li>Returns the company if the user has proper access</li>
+     * </ol>
      *
-     * @param id The UUID of the company to retrieve.
-     * @param user The user requesting access to the company.
-     * @return The company entity if found and accessible by the user.
-     * @throws AccessDeniedException If the company is not found or if the user does not have
-     *                               the required association.
+     * @param id The UUID of the company to retrieve
+     * @param user The user requesting access to the company
+     * @return The {@link Company} entity if found and accessible by the user
+     * @throws AccessDeniedException If the user is not associated with the requested company
      */
     @Transactional
     Company getByIdAndUser(UUID id, User user) {
@@ -196,20 +184,6 @@ public class CompanyServiceImpl implements CompanyService {
         return (Company) abstractCustomer;
     }
 
-    /**
-     * Updates company details based on the provided request.
-     * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the company entity by its ID while ensuring the requesting user has access.
-     * 2. Updates the company's fields based on the provided update request.
-     * 3. Persists the updated company entity to the database.
-     * 4. Converts the updated entity into a response model and returns it.
-     * @param id The UUID of the company to update
-     * @param updateRequest The request containing fields to update
-     * @param user The user requesting the update
-     * @return A detailed response model containing the updated company information
-     * @throws IllegalStateException If the company is not found or user doesn't have access
-     */
     @Override
     @Transactional
     public CompanyDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid CompanyUpdateRequest updateRequest, User user) {
@@ -223,16 +197,18 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     /**
-     * Updates only the non-null fields of the company entity.
+     * Updates the non-null fields of a company entity based on the provided request.
      * <p>
      * This method performs the following operations:
-     * 1. Checks if the company type is provided in the request and updates it if present.
-     * 2. Delegates the update of organization-specific details to {@code OrganizationDetailsService}.
-     * 3. Delegates the update of customer-related details to {@code AbstractCustomerService}.
-     * 4. Delegates the update of business entity-specific details to {@code BusinessEntityService}.
+     * <ol>
+     * <li>Updates the company type if provided in the request</li>
+     * <li> Delegates the update of organization-specific details to {@code OrganizationDetailsService}</li>
+     * <li>Delegates the update of customer-related details to {@code AbstractCustomerService}</li>
+     * <li> Delegates the update of business entity-specific details to {@code BusinessEntityService}</li>
+     * </ol>
      *
-     * @param company The company entity to update.
-     * @param companyRequest The request containing fields to update.
+     * @param company The company entity to update
+     * @param companyRequest The request containing fields to update
      */
     @Transactional
     void updateCompanyFields(Company company, @Valid CompanyUpdateRequest companyRequest) {
@@ -250,6 +226,7 @@ public class CompanyServiceImpl implements CompanyService {
         log.info("Successfully updated fields for company ID: {}", company.getId());
     }
 
+
     @Override
     @Transactional
     public void deleteCompanyById(UUID id, User user) {
@@ -263,6 +240,22 @@ public class CompanyServiceImpl implements CompanyService {
         log.info("Successfully deleted company with ID: {}", id);
     }
 
+    /**
+     * Locates a company that the user has permission to modify.
+     * <p>
+     * This method performs the following operations:
+     * <ol>
+     * <li>Retrieves the user's account and associated customer</li>
+     * <li>Verifies if the user has the required permission level</li>
+     * <li>Checks if the user's account is properly associated with the requested company</li>
+     * </ol>
+     *
+     * @param id The UUID of the company to modify
+     * @param user The user requesting the modification
+     * @return The {@link Company} entity if found and modifiable by the user
+     * @throws AccessDeniedException If the user lacks permission to modify the company
+     * @throws IllegalStateException If the company is not associated with the user's account
+     */
     @Transactional
     Company findCompanyToChange(UUID id, User user) {
         Account account = accountService.findAccountWithCustomerByUser(user);
@@ -278,16 +271,39 @@ public class CompanyServiceImpl implements CompanyService {
         return (Company) account.getCustomer();
     }
 
+    /**
+     * Checks if the provided customer is not a valid reference to the company with the given ID.
+     * <p>
+     * This method verifies that:
+     * <ol>
+     * <li>The customer's ID matches the provided ID</li>
+     * <li>The customer is an instance of Company</li>
+     * </ol>
+     *
+     * @param id The UUID to compare against the customer's ID
+     * @param abstractCustomer The customer to validate
+     * @return {@code true} if the customer is not a valid reference to the company, {@code false} otherwise
+     */
     @Transactional
     boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
-        return !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Company);
+        return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Company);
     }
 
+    /**
+     * Retrieves a company by its ID.
+     * <p>
+     * This method performs a direct database lookup for a company entity.
+     *
+     * @param id The UUID of the company to retrieve
+     * @return The {@link Company} entity if found
+     * @throws EntityNotFoundException If no company exists with the given ID
+     */
     @Transactional
     Company findById(UUID id) {
         return companyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Company with id " + id + " not found"));
     }
+
 
     @Override
     @Transactional
