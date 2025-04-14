@@ -104,8 +104,7 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
         );
 
         log.info("Attempting to create a non-profit org for user: {}", user.getUsername());
-        Account account = accountService.findAccountWithCustomerByUser(user);
-        accountService.checkAccountReferenceCustomer(account);
+        accountService.checkAccountReferenceCustomer(user);
 
         NonProfitOrg nonProfitOrg = nonProfitOrgMapper.fromRequestToNonProfitOrg(nonProfitOrgRequest);
         NonProfitOrg savedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
@@ -116,14 +115,14 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
 
         // Create account association
         AccountRequest accountRequest = new AccountRequest(
-                savedNonProfitOrg, null, isPrimary, associationType
+                user, savedNonProfitOrg, null, isPrimary, associationType
         );
-        Account updatedAccount = accountService.updateAccount(accountRequest, account);
+        Account account = accountService.handleCustomerCreation(accountRequest);
 
-        if(isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), updatedAccount.getCustomer())) {
+        if(isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
             throw new IllegalStateException("Account association does not reference a valid non-profit org.");
         }
-        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel((NonProfitOrg) updatedAccount.getCustomer());
+        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel((NonProfitOrg) account.getCustomer());
         log.info("Successfully created non-profit response: {}", nonProfitOrgResponseModel);
 
         return nonProfitOrgResponseModel;

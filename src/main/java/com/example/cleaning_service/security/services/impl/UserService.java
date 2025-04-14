@@ -10,7 +10,6 @@ import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.events.UserDeletedEvent;
-import com.example.cleaning_service.security.events.UserRegisteredEvent;
 import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.repositories.UserRepository;
 import com.example.cleaning_service.security.services.IRoleService;
@@ -141,9 +140,6 @@ public class UserService implements IUserService {
 
         User savedUser = userRepository.save(user);
         log.info("User '{}' registered successfully with ID: {}", savedUser.getUsername(), savedUser.getId());
-
-        applicationEventPublisher.publishEvent(new UserRegisteredEvent(savedUser));
-        log.info("UserRegisteredEvent published for user ID: {}", savedUser.getId());
 
         // 🔹 Save user in the database
         return savedUser;
