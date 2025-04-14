@@ -102,8 +102,7 @@ public class CompanyServiceImpl implements CompanyService {
         );
 
         log.info("Attempting to create a company for user: {}", user.getUsername());
-        Account account = accountService.findAccountWithCustomerByUser(user);
-        accountService.checkAccountReferenceCustomer(account);
+        accountService.checkAccountReferenceCustomer(user);
 
         // Save the company
         Company company = companyMapper.fromCompanyRequestToCompany(companyRequest);
@@ -115,16 +114,16 @@ public class CompanyServiceImpl implements CompanyService {
 
         // Update account
         AccountRequest accountRequest = new AccountRequest(
-                savedCompany, null, isPrimary, associationType
+                user, savedCompany, null, isPrimary, associationType
         );
-        Account updatedAccount = accountService.updateAccount(accountRequest, account);
+        Account account = accountService.handleCustomerCreation(accountRequest);
 
         // Ensure the account correctly references a company
-        if (isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), updatedAccount.getCustomer())) {
+        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
             throw new IllegalStateException("Account does not reference a valid company.");
         }
 
-        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel((Company) updatedAccount.getCustomer());
+        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel((Company) account.getCustomer());
         log.info("Successfully created company response: {}", companyResponseModel);
 
         return companyResponseModel;
@@ -261,7 +260,7 @@ public class CompanyServiceImpl implements CompanyService {
         Account account = accountService.findAccountWithCustomerByUser(user);
 
         if (accountService.isRepresentativeAssociationType(account)) {
-            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to update the " +
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to the " +
                     "company with id " + id);
         }
 

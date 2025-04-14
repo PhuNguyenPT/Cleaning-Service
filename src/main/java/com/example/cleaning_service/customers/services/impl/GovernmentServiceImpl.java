@@ -91,8 +91,7 @@ public class GovernmentServiceImpl implements GovernmentService {
         );
 
         log.info("Attempting to create a government for user: {}", user.getUsername());
-        Account account = accountService.findAccountWithCustomerByUser(user);
-        accountService.checkAccountReferenceCustomer(account);
+        accountService.checkAccountReferenceCustomer(user);
 
         Government government = governmentMapper.fromGovernmentRequestToGovernment(governmentRequest);
         Government savedGovernment = saveGovernment(government);
@@ -103,15 +102,15 @@ public class GovernmentServiceImpl implements GovernmentService {
 
         // Create account association
         AccountRequest accountRequest = new AccountRequest(
-                savedGovernment, null, isPrimary, associationType
+                user, savedGovernment, null, isPrimary, associationType
         );
-        Account updatedAccount = accountService.updateAccount(accountRequest, account);
+        Account account = accountService.handleCustomerCreation(accountRequest);
 
-        if (isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), account.getCustomer())) {
+        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
             throw new IllegalStateException("Account association does not reference a valid government.");
         }
 
-        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) updatedAccount.getCustomer());
+        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) account.getCustomer());
         log.info("Successfully created government response: {}", governmentResponseModel);
 
         return governmentResponseModel;
@@ -225,7 +224,7 @@ public class GovernmentServiceImpl implements GovernmentService {
         Account account = accountService.findAccountWithCustomerByUser(user);
 
         if (accountService.isRepresentativeAssociationType(account)) {
-            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to update the " +
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to the " +
                     "government with id " + id);
         }
 

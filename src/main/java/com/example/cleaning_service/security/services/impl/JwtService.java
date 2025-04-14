@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class JwtService implements IJwtService {
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
@@ -28,7 +30,17 @@ public class JwtService implements IJwtService {
         log.info("Saving token for authentication");
         String username = jwtUtil.extractUsername(token);
         Long expirationMillis = jwtUtil.extractExpirationTime(token);
-        long timeToLive = expirationMillis - System.currentTimeMillis();
+
+        // Debug info
+        Date expirationDate = new Date(expirationMillis);
+        log.info("JWT expiration timestamp: {}, which is date: {}", expirationMillis, expirationDate);
+
+        // Calculate remaining time until expiration
+        long currentTimeMillis = System.currentTimeMillis();
+        log.info("Current timestamp: {}, which is date: {}", currentTimeMillis, new Date(currentTimeMillis));
+
+        long timeToLive = expirationMillis - currentTimeMillis;
+        log.info("Calculated TTL: {} ms", timeToLive);
 
         if (timeToLive <= 0) {
             log.warn("Attempted to save expired token for user: {}", username);
