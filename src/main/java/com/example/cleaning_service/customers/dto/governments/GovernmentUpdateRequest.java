@@ -3,7 +3,6 @@ package com.example.cleaning_service.customers.dto.governments;
 import com.example.cleaning_service.commons.BusinessEntityRequest;
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;
 import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
-import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
 import com.example.cleaning_service.validator.ITaxIdentifiable;
@@ -21,11 +20,9 @@ import jakarta.validation.constraints.Size;
           "departmentName": "Transportation",
           "isTaxExempt": true,
           "requiresEmergencyCleaning": false,
-          "organizationDetails": {
-            "taxId": "12-3456789",
-            "registrationNumber": "12-3456789"
-          },
           "customerDetails": {
+            "taxId": "12-3456789",
+            "registrationNumber": "12-3456789",
             "billingAddress": "1200 New Jersey Ave SE, Washington, DC 20590, US",
             "paymentMethod": "BANK_TRANSFER",
             "preferredDays": ["MONDAY", "WEDNESDAY"]
@@ -58,8 +55,6 @@ public record GovernmentUpdateRequest (
         Boolean isTaxExempt,
         Boolean requiresEmergencyCleaning,
 
-        OrganizationDetailsRequest organizationDetails,
-
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
@@ -68,7 +63,7 @@ public record GovernmentUpdateRequest (
     @Schema(hidden = true)
     @Override
     public String registrationNumber() {
-        return organizationDetails.registrationNumber();
+        return customerDetails.registrationNumber();
     }
 
     @Override
@@ -79,7 +74,7 @@ public record GovernmentUpdateRequest (
     @Schema(hidden = true)
     @Override
     public String taxId() {
-        return organizationDetails.taxId();
+        return customerDetails.taxId();
     }
 
     @Schema(hidden = true)

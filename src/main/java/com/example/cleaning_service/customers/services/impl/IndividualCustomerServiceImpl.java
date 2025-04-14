@@ -227,8 +227,6 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
      */
     @Transactional
     void updateCustomerFields(IndividualCustomer individualCustomer, @Valid IndividualCustomerUpdateRequest updateRequest) {
-        organizationDetailsService.updateOrganizationDetails(individualCustomer, updateRequest.organizationDetails());
-
         abstractCustomerService.updateAbstractCustomerDetails(individualCustomer, updateRequest.customerDetails());
 
         businessEntityService.updateBusinessEntityFields(individualCustomer, updateRequest.businessEntityDetails());

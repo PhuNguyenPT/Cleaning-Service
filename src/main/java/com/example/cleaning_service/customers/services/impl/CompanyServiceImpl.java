@@ -218,7 +218,6 @@ public class CompanyServiceImpl implements CompanyService {
             company.setCompanyType(companyRequest.companyType());
         }
 
-        organizationDetailsService.updateOrganizationDetails(company, companyRequest.organizationDetails());
         abstractCustomerService.updateAbstractCustomerDetails(company, companyRequest.customerDetails());
         businessEntityService.updateBusinessEntityFields(company, companyRequest.businessEntityDetails());
 

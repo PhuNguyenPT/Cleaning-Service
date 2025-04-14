@@ -225,8 +225,6 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
      */
     @Transactional
     void updateNonProfitOrgDetails(NonProfitOrg nonProfitOrg, @Valid NonProfitOrgUpdateRequest updateRequest) {
-        organizationDetailsService.updateOrganizationDetails(nonProfitOrg, updateRequest.organizationDetails());
-
         abstractCustomerService.updateAbstractCustomerDetails(nonProfitOrg, updateRequest.customerDetails());
 
         businessEntityService.updateBusinessEntityFields(nonProfitOrg, updateRequest.businessEntityDetails());

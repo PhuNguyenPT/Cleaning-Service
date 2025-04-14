@@ -203,8 +203,6 @@ public class GovernmentServiceImpl implements GovernmentService {
             government.setRequiresEmergencyCleaning(updateRequest.requiresEmergencyCleaning());
         }
 
-        organizationDetailsService.updateOrganizationDetails(government, updateRequest.organizationDetails());
-
         abstractCustomerService.updateAbstractCustomerDetails(government, updateRequest.customerDetails());
 
         businessEntityService.updateBusinessEntityFields(government, updateRequest.businessEntityDetails());

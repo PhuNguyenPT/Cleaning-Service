@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 public record AbstractCustomerRequest(
+        String taxId,
+        String registrationNumber,
         @Size(min = 10, max = 255, message = "Billing address must be between 10 and 255 characters")
         String billingAddress,
         EPaymentType paymentMethod,

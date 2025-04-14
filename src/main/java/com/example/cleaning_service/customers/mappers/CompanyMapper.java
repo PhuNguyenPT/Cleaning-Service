@@ -18,8 +18,8 @@ public class CompanyMapper {
     public Company fromCompanyRequestToCompany(@Valid CompanyRequest companyRequest) {
         return new Company(
                 companyRequest.companyType(),
-                companyRequest.registrationNumber(),
                 companyRequest.taxId(),
+                companyRequest.registrationNumber(),
                 companyRequest.billingAddress(),
                 companyRequest.paymentMethod(),
                 customerPreferredDayMapper.fromEDaysToCustomerPreferredDays(companyRequest.preferredDays()),

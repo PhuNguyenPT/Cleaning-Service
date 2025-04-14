@@ -3,7 +3,6 @@ package com.example.cleaning_service.customers.dto.inidividuals;
 import com.example.cleaning_service.commons.BusinessEntityRequest;
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;
 import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
-import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
 import com.example.cleaning_service.validator.ITaxIdentifiable;
@@ -15,11 +14,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
         description = "Request DTO for updating an individual customer",
         example = """
         {
-          "organizationDetails": {
-            "taxId": "123-45-6789",
-            "registrationNumber": "12-3456789"
-          },
           "customerDetails": {
+            "taxId": "123-45-6789",
+            "registrationNumber": "12-3456789",
             "billingAddress": "35 Park Avenue, Apt 15C, New York, NY 10016, US",
             "paymentMethod": "CREDIT",
             "preferredDays": ["TUESDAY", "SATURDAY"]
@@ -41,8 +38,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @ValidTaxId
 @ValidRegistrationNumber
 public record IndividualCustomerUpdateRequest(
-        OrganizationDetailsRequest organizationDetails,
-
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
@@ -51,7 +46,7 @@ public record IndividualCustomerUpdateRequest(
     @Schema(hidden = true)
     @Override
     public String registrationNumber() {
-        return organizationDetails.registrationNumber();
+        return customerDetails.registrationNumber();
     }
 
     @Override
@@ -62,7 +57,7 @@ public record IndividualCustomerUpdateRequest(
     @Schema(hidden = true)
     @Override
     public String taxId() {
-        return organizationDetails.taxId();
+        return customerDetails.taxId();
     }
 
     @Schema(hidden = true)

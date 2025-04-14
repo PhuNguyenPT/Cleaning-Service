@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.services;
 
-import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.entities.IOrganization;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public interface OrganizationDetailsService {
-    void updateOrganizationDetails(IOrganization organization, OrganizationDetailsRequest organizationDetailsUpdateRequest);
     EAssociationType getEAssociationTypeByIOrganization(IOrganization organization);
     boolean getIsPrimaryByIOrganization(IOrganization organization);
     Link getLinkByIOrganization(IOrganization organization);

@@ -3,7 +3,6 @@ package com.example.cleaning_service.customers.dto.companies;
 import com.example.cleaning_service.commons.BusinessEntityRequest;
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;
 import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
-import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.enums.ECompanyType;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
@@ -17,11 +16,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
         example = """
         {
           "companyType": "START_UP",
-          "organizationDetails": {
+          "customerDetails": {
             "taxId": "12-3456789",
             "registrationNumber": "12-3456789",
-          },
-          "customerDetails": {
             "billingAddress": "123 Finance Avenue, Suite 500, San Francisco, CA 94105, US",
             "paymentMethod": "CASH",
             "preferredDays": ["MONDAY", "WEDNESDAY"]
@@ -45,8 +42,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record CompanyUpdateRequest(
         ECompanyType companyType,
 
-        OrganizationDetailsRequest organizationDetails,
-
         AbstractCustomerRequest customerDetails,
 
         BusinessEntityRequest businessEntityDetails
@@ -55,7 +50,7 @@ public record CompanyUpdateRequest(
     @Schema(hidden = true)
     @Override
     public String registrationNumber() {
-        return organizationDetails.registrationNumber();
+        return customerDetails.registrationNumber();
     }
 
     @Override
@@ -66,7 +61,7 @@ public record CompanyUpdateRequest(
     @Schema(hidden = true)
     @Override
     public String taxId() {
-        return organizationDetails.taxId();
+        return customerDetails.taxId();
     }
 
     @Schema(hidden = true)
