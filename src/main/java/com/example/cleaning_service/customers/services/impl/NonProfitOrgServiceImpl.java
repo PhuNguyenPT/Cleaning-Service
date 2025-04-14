@@ -257,7 +257,7 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
         Account account = accountService.findAccountWithCustomerByUser(user);
 
         if (accountService.isRepresentativeAssociationType(account)) {
-            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to delete the " +
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to the " +
                     "non-profit org with id " + id);
         }
 

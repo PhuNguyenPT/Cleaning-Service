@@ -17,11 +17,11 @@ import com.example.cleaning_service.customers.services.OrganizationDetailsServic
 import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.events.UserDeletedEvent;
-import com.example.cleaning_service.security.events.UserRegisteredEvent;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -99,7 +99,10 @@ class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void checkAccountReferenceCustomer(Account account) {
+    public void checkAccountReferenceCustomer(User user) {
+        Account account = accountRepository.findByUser(user)
+                .orElse(null);
+        if (account == null) {return;}
         log.info("Attempting to check account reference a customer: {}", account);
         if (account.getCustomer() != null) {
             throw new EntityExistsException("Account with ID: " + account.getId() +
@@ -121,7 +124,12 @@ class AccountServiceImpl implements AccountService {
      */
     @Override
     @Transactional
-    public Account updateAccount(@Valid AccountRequest accountRequest, Account account) {
+    public Account handleCustomerCreation(@Valid AccountRequest accountRequest) {
+        Account account = accountRepository.findByUser(accountRequest.user())
+                .orElse(new Account());
+        if (accountRequest.user() != null) {
+            account.setUser(accountRequest.user());
+        }
         if (accountRequest.customer() != null) {
             account.setCustomer(accountRequest.customer());
         }
@@ -139,7 +147,7 @@ class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public void detachCustomerFromAccount(AbstractCustomer abstractCustomer) {
+    public void detachCustomerFromAccount(@NotNull AbstractCustomer abstractCustomer) {
         List<Account> accounts = findAllByCustomer(abstractCustomer);
         accounts.forEach(accountAssociation -> accountAssociation.setCustomer(null));
         accountRepository.saveAll(accounts);
@@ -147,13 +155,6 @@ class AccountServiceImpl implements AccountService {
 
     List<Account> findAllByCustomer(AbstractCustomer abstractCustomer) {
         return accountRepository.findByCustomer(abstractCustomer);
-    }
-
-    @EventListener
-    @Transactional
-    void createAccountOnUserRegisteredEvent(UserRegisteredEvent event) {
-        Account association = new Account(event.user(), null, null, true, EAssociationType.OWNER);
-        saveAccount(association);
     }
 
     @EventListener

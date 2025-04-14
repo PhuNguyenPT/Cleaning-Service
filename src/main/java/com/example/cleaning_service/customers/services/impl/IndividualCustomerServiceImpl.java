@@ -98,8 +98,7 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
                 individualCustomerRepository::existsByEmail
         );
         log.info("Attempting to create an individual customer for user: {}", user.getUsername());
-        Account account = accountService.findAccountWithCustomerByUser(user);
-        accountService.checkAccountReferenceCustomer(account);
+        accountService.checkAccountReferenceCustomer(user);
 
         IndividualCustomer individualCustomer = individualCustomerMapper.fromRequestToCustomer(individualCustomerRequest);
         IndividualCustomer savedIndividualCustomer = saveIndividualCustomer(individualCustomer);
@@ -111,16 +110,16 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
 
         // Create account
         AccountRequest accountRequest = new AccountRequest(
-                savedIndividualCustomer, null, isPrimary, associationType
+                user, savedIndividualCustomer, null, isPrimary, associationType
         );
-        Account updatedAccount = accountService.updateAccount(accountRequest, account);
+        Account account = accountService.handleCustomerCreation(accountRequest);
 
-        if (isNotValidReferenceAbstractCustomer(updatedAccount.getCustomer().getId(), updatedAccount.getCustomer())) {
+        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
             throw new IllegalStateException("Account does not reference a valid individual.");
         }
 
         IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerModelAssembler
-                .toModel((IndividualCustomer) updatedAccount.getCustomer());
+                .toModel((IndividualCustomer) account.getCustomer());
         log.info("Successfully created individual customer response: {}", individualCustomerResponseModel);
 
         return individualCustomerResponseModel;
@@ -260,7 +259,7 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
         Account account = accountService.findAccountWithCustomerByUser(user);
 
         if (accountService.isRepresentativeAssociationType(account)) {
-            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to update the " +
+            throw new AccessDeniedException("User " + user.getUsername() + " does not have permission to the " +
                     "individual with id " + id);
         }
 

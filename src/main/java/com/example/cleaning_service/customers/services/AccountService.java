@@ -20,8 +20,8 @@ public interface AccountService {
     AccountDetailsResponseModel patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest);
 
     Account findAccountWithCustomerByUser(User user);
-    void checkAccountReferenceCustomer(Account account);
-    Account updateAccount(AccountRequest accountRequest, Account account);
+    void checkAccountReferenceCustomer(User user);
+    Account handleCustomerCreation(AccountRequest accountRequest);
     void detachCustomerFromAccount(AbstractCustomer abstractCustomer);
     boolean isRepresentativeAssociationType(Account account);
 }
