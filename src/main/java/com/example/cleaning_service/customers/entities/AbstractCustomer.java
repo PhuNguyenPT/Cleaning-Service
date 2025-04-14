@@ -57,7 +57,7 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return loyaltyType;
     }
 
-    protected void setLoyaltyType(ELoyaltyType loyaltyType) {
+    public void setLoyaltyType(ELoyaltyType loyaltyType) {
         this.loyaltyType = loyaltyType;
     }
 

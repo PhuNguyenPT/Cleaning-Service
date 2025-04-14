@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
         {
           "companyType": "START_UP",
           "customerDetails": {
+            "loyaltyType": "BRONZE",
             "taxId": "12-3456789",
             "registrationNumber": "12-3456789",
             "billingAddress": "123 Finance Avenue, Suite 500, San Francisco, CA 94105, US",

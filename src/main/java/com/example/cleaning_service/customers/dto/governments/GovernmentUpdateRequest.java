@@ -21,6 +21,7 @@ import jakarta.validation.constraints.Size;
           "isTaxExempt": true,
           "requiresEmergencyCleaning": false,
           "customerDetails": {
+            "loyaltyType": "BRONZE",
             "taxId": "12-3456789",
             "registrationNumber": "12-3456789",
             "billingAddress": "1200 New Jersey Ave SE, Washington, DC 20590, US",

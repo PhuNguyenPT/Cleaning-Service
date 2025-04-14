@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
         example = """
         {
           "customerDetails": {
+            "loyaltyType": "BRONZE",
             "taxId": "52-1693387",
             "registrationNumber": "52-1693387",
             "billingAddress": "789 Charity Lane, Suite 300, Los Angeles, CA 90015, US",

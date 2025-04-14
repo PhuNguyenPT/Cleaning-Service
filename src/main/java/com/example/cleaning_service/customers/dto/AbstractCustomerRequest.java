@@ -1,12 +1,14 @@
 package com.example.cleaning_service.customers.dto;
 
 import com.example.cleaning_service.customers.enums.EDay;
+import com.example.cleaning_service.customers.enums.ELoyaltyType;
 import com.example.cleaning_service.customers.enums.EPaymentType;
 import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
 public record AbstractCustomerRequest(
+        ELoyaltyType loyaltyType,
         String taxId,
         String registrationNumber,
         @Size(min = 10, max = 255, message = "Billing address must be between 10 and 255 characters")
