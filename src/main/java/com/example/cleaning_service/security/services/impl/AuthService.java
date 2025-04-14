@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -81,8 +82,13 @@ class AuthService implements IAuthService {
     @Override
     @Transactional
     public void logout(String token) {
-        token = token.substring(7); // Remove "Bearer " prefix
-        jwtService.logoutToken(token);
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // Remove "Bearer " prefix
+            jwtService.logoutToken(token);
+        } else {
+            log.warn("Invalid authorization header format for logout");
+            throw new BadCredentialsException("Invalid token format");
+        }
     }
 
     @Override
