@@ -9,7 +9,7 @@
         <sql>CREATE SCHEMA IF NOT EXISTS sale AUTHORIZATION pg_database_owner;</sql>
         <sql>CREATE SCHEMA IF NOT EXISTS customer AUTHORIZATION pg_database_owner;</sql>
     </changeSet>
-    <include file="db/changelog/2025/03/11-01-changelog.xml"/>
+    <include file="db/changelog/2025/03/14-01-changelog.xml"/>
 
 </databaseChangeLog>
 

@@ -34,7 +34,6 @@ public class BusinessEntity extends Auditable {
                     "- Extension: 2 to 6 letters (e.g., .com, .net, .org). " +
                     "Examples: user@example.com, john.doe@company.org."
     )
-    @Column(unique = true)
     protected String email;
 
     protected String city;

@@ -21,6 +21,15 @@ class AbstractCustomerServiceImpl implements AbstractCustomerService {
 
     @Transactional
     public void updateAbstractCustomerDetails(AbstractCustomer customer, AbstractCustomerRequest customerDetails) {
+        if (customerDetails.loyaltyType() != null) {
+            customer.setLoyaltyType(customerDetails.loyaltyType());
+        }
+        if (customerDetails.taxId() != null) {
+            customer.setTaxId(customerDetails.taxId());
+        }
+        if (customerDetails.registrationNumber() != null) {
+            customer.setRegistrationNumber(customerDetails.registrationNumber());
+        }
         if (customerDetails.billingAddress() != null) {
             customer.setBillingAddress(customerDetails.billingAddress());
         }

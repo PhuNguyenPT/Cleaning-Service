@@ -1,9 +1,9 @@
 package com.example.cleaning_service.customers.controllers;
 
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerDetailsResponseModel;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerUpdateRequest;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerUpdateRequest;
 import com.example.cleaning_service.customers.services.IndividualCustomerService;
 import com.example.cleaning_service.security.entities.user.User;
 import io.swagger.v3.oas.annotations.Operation;

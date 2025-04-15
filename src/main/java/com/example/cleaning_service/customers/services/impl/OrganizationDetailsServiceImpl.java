@@ -1,14 +1,12 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.customers.controllers.*;
-import com.example.cleaning_service.customers.dto.OrganizationDetailsRequest;
 import com.example.cleaning_service.customers.entities.*;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.services.OrganizationDetailsService;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.util.PagedModelAssemblerUtil;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -25,24 +23,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
-public class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
+class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
 
     private static final Logger log = LoggerFactory.getLogger(OrganizationDetailsServiceImpl.class);
     private final PagedModelAssemblerUtil pageModelAssemblerUtil;
 
-    public OrganizationDetailsServiceImpl(PagedModelAssemblerUtil pageModelAssemblerUtil) {
+    OrganizationDetailsServiceImpl(PagedModelAssemblerUtil pageModelAssemblerUtil) {
         this.pageModelAssemblerUtil = pageModelAssemblerUtil;
-    }
-
-    @Override
-    @Transactional
-    public void updateOrganizationDetails(IOrganization organization, @Valid OrganizationDetailsRequest organizationDetailsUpdateRequest) {
-        if (organizationDetailsUpdateRequest.taxId() != null) {
-            organization.setTaxId(organizationDetailsUpdateRequest.taxId());
-        }
-        if (organizationDetailsUpdateRequest.registrationNumber() != null) {
-            organization.setRegistrationNumber(organizationDetailsUpdateRequest.registrationNumber());
-        }
     }
 
     @Override

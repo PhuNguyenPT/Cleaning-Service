@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers.dto.inidividuals;
+package com.example.cleaning_service.customers.dto.individuals;
 
 import org.springframework.hateoas.RepresentationModel;
 
