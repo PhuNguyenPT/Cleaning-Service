@@ -4,7 +4,6 @@ import com.example.cleaning_service.customers.dto.individuals.IndividualCustomer
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerUpdateRequest;
-import com.example.cleaning_service.customers.services.impl.IndividualCustomerServiceImpl;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,7 +16,6 @@ import java.util.UUID;
  * This service provides operations for creating, retrieving, updating, and deleting
  * individual customer information, ensuring data integrity and coordinating with related services.
  *
- * @see IndividualCustomerServiceImpl
  */
 public interface IndividualCustomerService {
 
