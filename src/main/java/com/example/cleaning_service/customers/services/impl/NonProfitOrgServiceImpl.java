@@ -28,10 +28,11 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Service class responsible for managing Non-Profit Organization entities.
+ * Implementation of {@link NonProfitOrgService} responsible for managing Non-Profit Organization entities.
  * <p>
- * This service provides operations for creating, retrieving, updating, and deleting
+ * This service provides concrete implementations for creating, retrieving, updating, and deleting
  * non-profit organization information, ensuring data integrity and coordinating with related services.
+ * @see NonProfitOrgService
  */
 @Service
 public class NonProfitOrgServiceImpl implements NonProfitOrgService {
@@ -49,6 +50,20 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
     private final NonProfitOrgMapper nonProfitOrgMapper;
     private final AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler;
 
+    /**
+     * Constructs a new {@link NonProfitOrgServiceImpl} with the required dependencies.
+     *
+     * @param nonProfitOrgRepository Repository for {@link NonProfitOrg} data access
+     * @param accountService Service for managing account associations
+     * @param organizationDetailsService Service for managing organization details
+     * @param abstractCustomerService Service for managing customer details
+     * @param businessEntityService Service for managing business entity details
+     * @param customerService Service for general customer operations
+     * @param nonProfitOrgModelAssembler Assembler for basic organization models
+     * @param nonProfitOrgDetailModelAssembler Assembler for detailed organization models
+     * @param nonProfitOrgMapper Mapper for converting between DTOs and entities
+     * @param adminNonProfitOrgDetailsModelAssembler Assembler for admin-focused organization models
+     */
     public NonProfitOrgServiceImpl(
             NonProfitOrgRepository nonProfitOrgRepository,
             AccountService accountService,
@@ -56,10 +71,8 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
             CustomerService customerService,
-
             NonProfitOrgModelAssembler nonProfitOrgModelAssembler,
             NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler,
-
             NonProfitOrgMapper nonProfitOrgMapper,
             AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler) {
 
@@ -78,19 +91,18 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
     }
 
     /**
-     * Creates a new non-profit organization and associates it with the specified user.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the user's current account association.
-     * 2. Creates and persists a new non-profit organization based on the provided request data.
-     * 3. Determines the appropriate association type and primary status for the non-profit organization.
-     * 4. Updates the user's account association with the newly created non-profit organization.
-     * 5. Ensures that the updated account association references a valid non-profit organization.
-     *
-     * @param nonProfitOrgRequest The request containing non-profit organization details.
-     * @param user The user to associate with the non-profit organization.
-     * @return A {@link NonProfitOrgResponseModel} containing details of the created non-profit organization.
-     * @throws IllegalStateException If the updated account association does not reference a valid non-profit organization.
+     * Implementation steps:
+     * <ol>
+     *     <li>Validates for duplicate fields using {@link CustomerService}</li>
+     *     <li>Verifies user's account reference status using {@link AccountService}</li>
+     *     <li>Maps request data to a {@link NonProfitOrg} entity and persists it</li>
+     *     <li>Determines association type and primary status via {@link OrganizationDetailsService}</li>
+     *     <li>Creates account association with the new organization</li>
+     *     <li>Verifies the account association references the correct organization</li>
+     *     <li>Creates and returns the response model</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -131,8 +143,8 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
     /**
      * Saves a non-profit organization entity to the database.
      *
-     * @param nonProfitOrg The non-profit organization entity to persist.
-     * @return The saved non-profit organization entity with updated metadata.
+     * @param nonProfitOrg The non-profit organization entity to persist
+     * @return The saved {@link NonProfitOrg} entity with updated metadata
      */
     @Transactional
     NonProfitOrg saveNonProfitOrg(NonProfitOrg nonProfitOrg) {
@@ -140,17 +152,13 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
     }
 
     /**
-     * Retrieves detailed non-profit organization information by ID for a specific user.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the non-profit organization entity using the provided ID.
-     * 2. Verifies if the user is associated with the non-profit organization.
-     * 3. Converts the non-profit organization entity into a detailed response model.
-     *
-     * @param id The UUID of the non-profit organization to retrieve.
-     * @param user The user requesting the non-profit organization details.
-     * @return A detailed response model containing non-profit organization information.
-     * @throws IllegalStateException If the non-profit organization is not found or the user doesn't have access.
+     * Implementation steps:
+     * <ol>
+     *     <li>Retrieves and validates the {@link NonProfitOrg} using {@link #getByIdAndUser}</li>
+     *     <li>Converts the entity to a detailed response model</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -160,18 +168,19 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
     }
 
     /**
-     * Retrieves a non-profit organization by its ID while verifying that the requesting user has access to it.
+     * Retrieves a non-profit organization by its ID while verifying user access rights.
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the non-profit organization entity using the provided ID.
-     * 2. Checks if the user is associated with the non-profit organization through an account association.
-     * 3. If the user lacks the required association, throws an {@code IllegalStateException}.
+     * Implementation steps:
+     * <ol>
+     *     <li>Fetches the user's associated {@link AbstractCustomer} via {@link AccountService}</li>
+     *     <li>Validates that the customer is the requested non-profit organization</li>
+     *     <li>Returns the validated {@link NonProfitOrg} entity</li>
+     * </ol>
      *
-     * @param id The UUID of the non-profit organization to retrieve.
-     * @param user The user requesting access to the non-profit organization.
-     * @return The non-profit organization entity if found and accessible by the user.
-     * @throws AccessDeniedException If the non-profit organization is not found or if the user does not have
-     *                               the required association.
+     * @param id The UUID of the non-profit organization to retrieve
+     * @param user The user requesting access to the organization
+     * @return The {@link NonProfitOrg} entity if accessible by the user
+     * @throws AccessDeniedException If the user doesn't have access to the organization
      */
     @Transactional
     NonProfitOrg getByIdAndUser(UUID id, User user) {
@@ -184,19 +193,14 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
     }
 
     /**
-     * Updates non-profit organization details based on the provided request.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the non-profit organization entity by its ID while ensuring the requesting user has access.
-     * 2. Updates the organization's fields based on the provided update request.
-     * 3. Persists the updated non-profit organization entity to the database.
-     * 4. Converts the updated entity into a response model and returns it.
-     *
-     * @param id The UUID of the non-profit organization to update.
-     * @param updateRequest The request containing fields to update.
-     * @param user The user requesting the update.
-     * @return A detailed response model containing the updated non-profit organization information.
-     * @throws IllegalStateException If the non-profit organization is not found or the user doesn't have access.
+     * Implementation steps:
+     * <ol>
+     *     <li>Finds and validates the {@link NonProfitOrg} using {@link #findNonProfitOrgToChange}</li>
+     *     <li>Updates the entity fields using {@link #updateNonProfitOrgDetails}</li>
+     *     <li>Persists the updated entity and returns the detailed response model</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -207,39 +211,38 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
         updateNonProfitOrgDetails(nonProfitOrg, updateRequest);
 
         NonProfitOrg updatedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
-        log.info("Successfully updated company with ID: {}", updatedNonProfitOrg.getId());
+        log.info("Successfully updated organization with ID: {}", updatedNonProfitOrg.getId());
 
         return nonProfitOrgDetailModelAssembler.toModel(updatedNonProfitOrg);
     }
 
     /**
-     * Updates only the non-null fields of the non-profit organization entity.
+     * Updates non-null fields of the non-profit organization entity.
      * <p>
-     * This method performs the following operations:
-     * 1. Delegates the update of organization-specific details to {@code OrganizationDetailsService}.
-     * 2. Delegates the update of customer-related details to {@code AbstractCustomerService}.
-     * 3. Delegates the update of business entity-specific details to {@code BusinessEntityService}.
+     * Implementation steps:
+     * <ol>
+     *     <li>Updates customer details via {@link AbstractCustomerService}</li>
+     *     <li>Updates business entity details via {@link BusinessEntityService}</li>
+     * </ol>
      *
-     * @param nonProfitOrg The non-profit organization entity to update.
-     * @param updateRequest The request containing fields to update.
+     * @param nonProfitOrg The non-profit organization entity to update
+     * @param updateRequest The request containing fields to update
      */
     @Transactional
     void updateNonProfitOrgDetails(NonProfitOrg nonProfitOrg, @Valid NonProfitOrgUpdateRequest updateRequest) {
         abstractCustomerService.updateAbstractCustomerDetails(nonProfitOrg, updateRequest.customerDetails());
-
         businessEntityService.updateBusinessEntityFields(nonProfitOrg, updateRequest.businessEntityDetails());
     }
 
     /**
-     * Deletes a non-profit organization by its ID and ensures it is associated with the specified user.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the non-profit organization by its ID and verifies that it is associated with the given user.
-     * 2. Detaches the non-profit organization from any account associations linked to the user.
-     * 3. Deletes the non-profit organization from the database.
-     *
-     * @param id   The unique identifier of the non-profit organization to be deleted. Must not be {@code null}.
-     * @param user The user requesting the deletion. Must not be {@code null}.
+     * Implementation steps:
+     * <ol>
+     *     <li>Finds and validates the {@link NonProfitOrg} using {@link #findNonProfitOrgToChange}</li>
+     *     <li>Detaches the organization from account associations via {@link AccountService}</li>
+     *     <li>Removes the organization from the database</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -250,6 +253,22 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
         nonProfitOrgRepository.delete(nonProfitOrg);
     }
 
+    /**
+     * Finds a non-profit organization that the user is authorized to modify.
+     * <p>
+     * Implementation steps:
+     * <ol>
+     *     <li>Retrieves the user's account with its associated customer</li>
+     *     <li>Verifies the user has suitable association type for modifications</li>
+     *     <li>Validates that the customer is the requested non-profit organization</li>
+     * </ol>
+     *
+     * @param id The UUID of the non-profit organization to find
+     * @param user The user requesting access to modify the organization
+     * @return The {@link NonProfitOrg} if the user has permission to modify it
+     * @throws AccessDeniedException If the user doesn't have required permissions
+     * @throws IllegalStateException If the account doesn't reference a valid organization
+     */
     @Transactional
     NonProfitOrg findNonProfitOrgToChange(UUID id, User user) {
         Account account = accountService.findAccountWithCustomerByUser(user);
@@ -266,17 +285,40 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
         return (NonProfitOrg) account.getCustomer();
     }
 
+    /**
+     * Checks if the abstract customer is not a valid non-profit organization with the expected ID.
+     *
+     * @param abstractCustomerId The expected customer ID
+     * @param abstractCustomer The customer to validate
+     * @return {@code true} if the customer is invalid or not a non-profit organization, {@code false} otherwise
+     */
     @Transactional
     boolean isNotValidReferenceAbstractCustomer(UUID abstractCustomerId, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(abstractCustomerId) || !(abstractCustomer instanceof NonProfitOrg);
     }
 
+    /**
+     * Finds a non-profit organization by its ID without user association validation.
+     *
+     * @param id The UUID of the non-profit organization to find
+     * @return The {@link NonProfitOrg} entity
+     * @throws EntityNotFoundException If no organization exists with the given ID
+     */
     @Transactional
     NonProfitOrg findById(UUID id) {
         return nonProfitOrgRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Non-profit organization with ID: " + id + " not found"));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Implementation steps:
+     * <ol>
+     *     <li>Retrieves the {@link NonProfitOrg} by ID using {@link #findById}</li>
+     *     <li>Creates admin-level detailed response model via appropriate assembler</li>
+     * </ol>
+     */
     @Override
     @Transactional
     public NonProfitOrgDetailsResponseModel getAdminNonProfitOrgDetailsResponseModelById(UUID id) {

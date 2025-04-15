@@ -5,10 +5,10 @@ import com.example.cleaning_service.customers.assemblers.individuals.AdminIndivi
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerDetailsResponseModel;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerUpdateRequest;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerUpdateRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
@@ -28,10 +28,12 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Service class responsible for managing Individual Customer entities.
+ * Service implementation responsible for managing {@link IndividualCustomer} entities.
  * <p>
  * This service provides operations for creating, retrieving, updating, and deleting
  * individual customer information, ensuring data integrity and coordinating with related services.
+ *
+ * @see IndividualCustomerService
  */
 @Service
 public class IndividualCustomerServiceImpl implements IndividualCustomerService {
@@ -48,6 +50,20 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
     private final IndividualCustomerMapper individualCustomerMapper;
     private final AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler;
 
+    /**
+     * Constructs a new IndividualCustomerServiceImpl with required dependencies.
+     *
+     * @param individualCustomerRepository The repository for individual customer operations
+     * @param accountService The service for account operations
+     * @param abstractCustomerService The service for abstract customer operations
+     * @param businessEntityService The service for business entity operations
+     * @param organizationDetailsService The service for organization details operations
+     * @param individualCustomerModelAssembler The assembler for basic individual customer models
+     * @param individualCustomerDetailsModelAssembler The assembler for detailed individual customer models
+     * @param customerService The service for general customer operations
+     * @param individualCustomerMapper The mapper for individual customer objects
+     * @param adminIndividualCustomerDetailsModelAssembler The assembler for admin-specific detailed individual customer models
+     */
     public IndividualCustomerServiceImpl(
             IndividualCustomerRepository individualCustomerRepository,
             AccountService accountService,
@@ -73,19 +89,18 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
     }
 
     /**
-     * Creates a new individual customer and associates it with the specified user.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the user's current account.
-     * 2. Creates and persists a new individual customer based on the provided request data.
-     * 3. Determines the appropriate association type and primary status for the individual customer.
-     * 4. Updates the user's account with the newly created individual customer.
-     * 5. Ensures that the updated account references a valid individual customer.
-     *
-     * @param individualCustomerRequest The request containing individual customer details.
-     * @param user The user to associate with the individual customer.
-     * @return A {@link IndividualCustomerResponseModel} containing details of the created individual customer.
-     * @throws IllegalStateException If the updated account does not reference a valid individual customer.
+     * Implementation details:
+     * <ol>
+     *   <li>Validates for duplicated fields using {@link CustomerService}</li>
+     *   <li>Verifies account validity using {@link AccountService}</li>
+     *   <li>Maps request data to entity using {@link IndividualCustomerMapper}</li>
+     *   <li>Saves the new individual customer to the database</li>
+     *   <li>Determines association type and primary status using {@link OrganizationDetailsService}</li>
+     *   <li>Creates and links an account for the user and individual customer</li>
+     *   <li>Verifies the account references the created individual customer correctly</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -131,8 +146,8 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
      * This method persists the provided individual customer entity and returns the saved
      * instance with updated metadata.
      *
-     * @param individualCustomer The individual customer entity to persist.
-     * @return The saved individual customer entity with updated metadata.
+     * @param individualCustomer The {@link IndividualCustomer} entity to persist
+     * @return The saved {@link IndividualCustomer} entity with updated metadata
      */
     @Transactional
     IndividualCustomer saveIndividualCustomer(IndividualCustomer individualCustomer) {
@@ -140,17 +155,15 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
     }
 
     /**
-     * Retrieves detailed individual customer information by ID for a specific user.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the individual customer entity using the provided ID.
-     * 2. Verifies if the user is associated with the individual customer.
-     * 3. Converts the individual customer entity into a detailed response model.
-     *
-     * @param id The UUID of the individual customer to retrieve.
-     * @param user The user requesting the customer details.
-     * @return A detailed response model containing individual customer information.
-     * @throws IllegalStateException If the individual customer is not found or the user doesn't have access.
+     * Implementation details:
+     * <ol>
+     *   <li>Logs retrieval attempt</li>
+     *   <li>Calls {@link #getByIdAndUser} to verify access and retrieve the entity</li>
+     *   <li>Uses {@link IndividualCustomerDetailsModelAssembler} to create the response model</li>
+     *   <li>Logs successful retrieval</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -167,14 +180,16 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
      * Retrieves an individual customer by its ID while verifying that the requesting user has access to it.
      * <p>
      * This method performs the following operations:
-     * 1. Retrieves the individual customer entity using the provided ID.
-     * 2. Checks if the user is associated with the individual customer through an account.
-     * 3. If the user lacks the required association, throws an {@code IllegalStateException}.
+     * <ol>
+     *   <li>Retrieves the user's account and associated customer</li>
+     *   <li>Verifies the customer is the requested individual customer</li>
+     *   <li>Returns the individual customer if validation passes</li>
+     * </ol>
      *
-     * @param id The UUID of the individual customer to retrieve.
-     * @param user The user requesting access to the individual customer.
-     * @return The individual customer entity if found and accessible by the user.
-     * @throws AccessDeniedException If the user does not have the required association.
+     * @param id The UUID of the individual customer to retrieve
+     * @param user The user requesting access to the individual customer
+     * @return The {@link IndividualCustomer} entity if found and accessible by the user
+     * @throws AccessDeniedException If the user does not have the required association
      */
     @Transactional
     IndividualCustomer getByIdAndUser(UUID id, User user) {
@@ -186,19 +201,17 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
     }
 
     /**
-     * Updates individual customer details based on the provided request.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the individual customer entity by its ID while ensuring the requesting user has access.
-     * 2. Updates the customer's fields based on the provided update request.
-     * 3. Persists the updated customer entity to the database.
-     * 4. Converts the updated entity into a response model and returns it.
-     *
-     * @param id The UUID of the individual customer to update.
-     * @param updateRequest The request containing fields to update.
-     * @param user The user requesting the update.
-     * @return A detailed response model containing the updated individual customer information.
-     * @throws IllegalStateException If the individual customer is not found or the user doesn't have access.
+     * Implementation details:
+     * <ol>
+     *   <li>Logs update attempt</li>
+     *   <li>Calls {@link #findIndividualCustomerToChange} to retrieve and verify access to the customer</li>
+     *   <li>Updates the customer's fields using {@link #updateCustomerFields}</li>
+     *   <li>Saves the updated customer to the database</li>
+     *   <li>Logs successful update</li>
+     *   <li>Returns the updated customer details as a response model</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -218,12 +231,13 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
      * Updates only the non-null fields of the individual customer entity.
      * <p>
      * This method performs the following operations:
-     * 1. Delegates the update of organization-specific details to {@code OrganizationDetailsService}.
-     * 2. Delegates the update of customer-related details to {@code AbstractCustomerService}.
-     * 3. Delegates the update of business entity-specific details to {@code BusinessEntityService}.
+     * <ol>
+     *   <li>Delegates the update of customer-related details to {@link AbstractCustomerService}</li>
+     *   <li>Delegates the update of business entity-specific details to {@link BusinessEntityService}</li>
+     * </ol>
      *
-     * @param individualCustomer The individual customer entity to update.
-     * @param updateRequest The request containing fields to update.
+     * @param individualCustomer The {@link IndividualCustomer} entity to update
+     * @param updateRequest The request containing fields to update
      */
     @Transactional
     void updateCustomerFields(IndividualCustomer individualCustomer, @Valid IndividualCustomerUpdateRequest updateRequest) {
@@ -233,15 +247,15 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
     }
 
     /**
-     * Deletes an individual customer by its ID and ensures it is associated with the specified user.
+     * {@inheritDoc}
      * <p>
-     * This method performs the following operations:
-     * 1. Retrieves the individual customer by its ID and verifies that it is associated with the given user.
-     * 2. Detaches the individual customer from any account linked to the user.
-     * 3. Deletes the individual customer from the database.
-     *
-     * @param id   The unique identifier of the individual customer to be deleted. Must not be {@code null}.
-     * @param user The user requesting the deletion. Must not be {@code null}.
+     * Implementation details:
+     * <ol>
+     *   <li>Logs deletion attempt</li>
+     *   <li>Calls {@link #findIndividualCustomerToChange} to retrieve and verify access</li>
+     *   <li>Detaches the individual customer from the user's account using {@link AccountService}</li>
+     *   <li>Deletes the individual customer entity from the database</li>
+     * </ol>
      */
     @Override
     @Transactional
@@ -252,6 +266,23 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
         individualCustomerRepository.delete(individualCustomer);
     }
 
+    /**
+     * Finds an individual customer for modification operations with access verification.
+     * <p>
+     * This method performs the following operations:
+     * <ol>
+     *   <li>Retrieves the user's account with associated customer</li>
+     *   <li>Verifies the user has proper permission based on association type</li>
+     *   <li>Verifies the customer is the requested individual customer</li>
+     *   <li>Returns the individual customer if all verifications pass</li>
+     * </ol>
+     *
+     * @param id The UUID of the individual customer to retrieve
+     * @param user The user requesting to change the individual customer
+     * @return The {@link IndividualCustomer} entity if found and accessible by the user
+     * @throws AccessDeniedException If the user does not have appropriate permissions
+     * @throws IllegalStateException If the account does not reference a valid individual customer
+     */
     @Transactional
     IndividualCustomer findIndividualCustomerToChange(UUID id, User user) {
         Account account = accountService.findAccountWithCustomerByUser(user);
@@ -267,17 +298,53 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
         return (IndividualCustomer) account.getCustomer();
     }
 
+    /**
+     * Checks if the abstract customer is not a valid reference to the specified individual customer.
+     * <p>
+     * A reference is considered invalid if:
+     * <ol>
+     *   <li>The abstract customer is null</li>
+     *   <li>The abstract customer's ID does not match the expected ID</li>
+     *   <li>The abstract customer is not an instance of {@link IndividualCustomer}</li>
+     * </ol>
+     *
+     * @param id The expected UUID of the individual customer
+     * @param abstractCustomer The {@link AbstractCustomer} to validate
+     * @return true if the reference is invalid, false otherwise
+     */
     @Transactional
     boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof IndividualCustomer);
     }
 
+    /**
+     * Finds an individual customer by its ID.
+     * <p>
+     * This method retrieves an individual customer by ID without checking user associations,
+     * intended for administrative use.
+     *
+     * @param id The UUID of the individual customer to retrieve
+     * @return The {@link IndividualCustomer} entity if found
+     * @throws EntityNotFoundException If the individual customer with the specified ID is not found
+     */
     @Transactional
     IndividualCustomer findById(UUID id) {
         return individualCustomerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Implementation details:
+     * <ol>
+     *   <li>Logs retrieval attempt</li>
+     *   <li>Calls {@link #findById} to retrieve the individual customer by ID</li>
+     *   <li>Logs retrieval of customer details</li>
+     *   <li>Uses {@link AdminIndividualCustomerDetailsModelAssembler} to create the response model</li>
+     *   <li>Logs successful model creation</li>
+     * </ol>
+     */
     @Override
     @Transactional
     public IndividualCustomerDetailsResponseModel getAdminIndividualCustomerDetailsResponseModelById(UUID id) {
