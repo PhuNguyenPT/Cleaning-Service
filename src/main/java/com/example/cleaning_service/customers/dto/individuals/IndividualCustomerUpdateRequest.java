@@ -1,4 +1,4 @@
-package com.example.cleaning_service.customers.dto.inidividuals;
+package com.example.cleaning_service.customers.dto.individuals;
 
 import com.example.cleaning_service.commons.BusinessEntityRequest;
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;

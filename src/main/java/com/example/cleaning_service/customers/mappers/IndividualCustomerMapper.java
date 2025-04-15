@@ -1,8 +1,8 @@
 package com.example.cleaning_service.customers.mappers;
 
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerDetailsResponseModel;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerRequest;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import org.springframework.stereotype.Component;
 

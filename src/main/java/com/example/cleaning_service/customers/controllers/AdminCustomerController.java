@@ -5,7 +5,7 @@ import com.example.cleaning_service.customers.dto.accounts.AccountResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountUpdateRequest;
 import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDetailsResponseModel;
 import com.example.cleaning_service.customers.services.*;
 import io.swagger.v3.oas.annotations.Operation;

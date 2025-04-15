@@ -1,7 +1,7 @@
 package com.example.cleaning_service.customers.assemblers.individuals;
 
 import com.example.cleaning_service.customers.controllers.IndividualCustomerController;
-import com.example.cleaning_service.customers.dto.inidividuals.IndividualCustomerDetailsResponseModel;
+import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerDetailsResponseModel;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
 import org.jspecify.annotations.NonNull;
