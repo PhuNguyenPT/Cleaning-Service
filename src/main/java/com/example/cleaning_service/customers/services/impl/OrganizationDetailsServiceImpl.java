@@ -23,12 +23,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
-public class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
+class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
 
     private static final Logger log = LoggerFactory.getLogger(OrganizationDetailsServiceImpl.class);
     private final PagedModelAssemblerUtil pageModelAssemblerUtil;
 
-    public OrganizationDetailsServiceImpl(PagedModelAssemblerUtil pageModelAssemblerUtil) {
+    OrganizationDetailsServiceImpl(PagedModelAssemblerUtil pageModelAssemblerUtil) {
         this.pageModelAssemblerUtil = pageModelAssemblerUtil;
     }
 

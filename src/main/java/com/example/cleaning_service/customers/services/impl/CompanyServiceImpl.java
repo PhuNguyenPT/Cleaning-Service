@@ -36,7 +36,7 @@ import java.util.UUID;
  * and users within the cleaning service system.
  */
 @Service
-public class CompanyServiceImpl implements CompanyService {
+class CompanyServiceImpl implements CompanyService {
     private static final Logger log = LoggerFactory.getLogger(CompanyServiceImpl.class);
     private final CompanyRepository companyRepository;
 
@@ -66,7 +66,7 @@ public class CompanyServiceImpl implements CompanyService {
      * @param companyMapper Mapper for company entities and DTOs
      * @param adminCompanyDetailsModelAssembler Assembler for administrative company details
      */
-    public CompanyServiceImpl(
+    CompanyServiceImpl(
             CompanyRepository companyRepository,
             AccountService accountService,
             BusinessEntityService businessEntityService,

@@ -34,7 +34,7 @@ import java.util.UUID;
  * government information, ensuring data integrity and coordinating with related services.
  */
 @Service
-public class GovernmentServiceImpl implements GovernmentService {
+class GovernmentServiceImpl implements GovernmentService {
     private static final Logger log = LoggerFactory.getLogger(GovernmentServiceImpl.class);
     private final GovernmentRepository governmentRepository;
     private final AccountService accountService;
@@ -50,7 +50,7 @@ public class GovernmentServiceImpl implements GovernmentService {
     private final GovernmentMapper governmentMapper;
     private final AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
 
-    public GovernmentServiceImpl(
+    GovernmentServiceImpl(
             GovernmentRepository governmentRepository,
             AccountService accountService,
             BusinessEntityService businessEntityService,

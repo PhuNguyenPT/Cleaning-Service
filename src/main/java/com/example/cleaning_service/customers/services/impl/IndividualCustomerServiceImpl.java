@@ -36,7 +36,7 @@ import java.util.UUID;
  * @see IndividualCustomerService
  */
 @Service
-public class IndividualCustomerServiceImpl implements IndividualCustomerService {
+class IndividualCustomerServiceImpl implements IndividualCustomerService {
 
     private static final Logger log = LoggerFactory.getLogger(IndividualCustomerServiceImpl.class);
     private final IndividualCustomerRepository individualCustomerRepository;
@@ -64,7 +64,7 @@ public class IndividualCustomerServiceImpl implements IndividualCustomerService 
      * @param individualCustomerMapper The mapper for individual customer objects
      * @param adminIndividualCustomerDetailsModelAssembler The assembler for admin-specific detailed individual customer models
      */
-    public IndividualCustomerServiceImpl(
+    IndividualCustomerServiceImpl(
             IndividualCustomerRepository individualCustomerRepository,
             AccountService accountService,
             AbstractCustomerService abstractCustomerService,

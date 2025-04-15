@@ -35,7 +35,7 @@ import java.util.UUID;
  * @see NonProfitOrgService
  */
 @Service
-public class NonProfitOrgServiceImpl implements NonProfitOrgService {
+class NonProfitOrgServiceImpl implements NonProfitOrgService {
     private static final Logger log = LoggerFactory.getLogger(NonProfitOrgServiceImpl.class);
     private final NonProfitOrgRepository nonProfitOrgRepository;
     private final AccountService accountService;
@@ -64,7 +64,7 @@ public class NonProfitOrgServiceImpl implements NonProfitOrgService {
      * @param nonProfitOrgMapper Mapper for converting between DTOs and entities
      * @param adminNonProfitOrgDetailsModelAssembler Assembler for admin-focused organization models
      */
-    public NonProfitOrgServiceImpl(
+    NonProfitOrgServiceImpl(
             NonProfitOrgRepository nonProfitOrgRepository,
             AccountService accountService,
             OrganizationDetailsService organizationDetailsService,
