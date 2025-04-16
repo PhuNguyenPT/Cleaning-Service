@@ -16,7 +16,6 @@ import com.example.cleaning_service.customers.services.AccountService;
 import com.example.cleaning_service.customers.services.OrganizationDetailsService;
 import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.entities.user.User;
-import com.example.cleaning_service.security.events.UserDeletedEvent;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -24,7 +23,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -155,13 +153,6 @@ class AccountServiceImpl implements AccountService {
 
     List<Account> findAllByCustomer(AbstractCustomer abstractCustomer) {
         return accountRepository.findByCustomer(abstractCustomer);
-    }
-
-    @EventListener
-    @Transactional
-    void deleteAccountByUser(UserDeletedEvent event) {
-        accountRepository.deleteByUser(event.user());
-        log.info("User with id {} 's account successfully deleted.", event.user().getId());
     }
 
     @Override

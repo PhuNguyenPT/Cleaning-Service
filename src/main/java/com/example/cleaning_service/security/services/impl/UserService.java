@@ -1,6 +1,5 @@
 package com.example.cleaning_service.security.services.impl;
 
-import com.example.cleaning_service.providers.events.ProviderCreatedEvent;
 import com.example.cleaning_service.security.assemblers.UserResponseModelAssembler;
 import com.example.cleaning_service.security.controllers.AdminController;
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
@@ -30,13 +29,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -217,30 +213,7 @@ class UserService implements IUserService {
         return userResponseModelAssembler.toModel(updatedUser);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handleProviderCreatedEvent(ProviderCreatedEvent providerCreatedEvent) {
-        Role providerRole = roleService.ensureRoleExists(ERole.PROVIDER);
-        log.info("Provider role {} created.", providerRole.getName());
-        User user = findById(providerCreatedEvent.user().getId());
-        if (user == null) {
-            log.error("User in ProviderCreatedEvent is null.");
-            throw new IllegalStateException("User in ProviderCreatedEvent is null.");
-        }
-        user.addRole(providerRole);
-        log.info("Set role for user ID: {} to '{}'", user.getId(), providerRole.getName());
-
-        Set<Permission> copiedPermissions = new HashSet<>(providerRole.getPermissions());
-        user.addPermissions(copiedPermissions);
-        log.info("Set permissions for user ID: {} to '{}'", user.getId(), copiedPermissions);
-
-        User savedUser = saveUser(user);
-
-        Set<String> userRoles = user.getRoles().stream().map(role -> role.getName().name())
-                .collect(Collectors.toSet());
-        log.info("User with ID: {} successfully updated with new role {}.", savedUser.getId(), userRoles);
-    }
-
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public User saveUser(User user) {
         return userRepository.saveAndFlush(user);
