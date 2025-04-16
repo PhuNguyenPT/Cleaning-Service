@@ -4,8 +4,9 @@ import com.example.cleaning_service.security.entities.permission.EPermission;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.repositories.PermissionRepository;
 import com.example.cleaning_service.security.services.IPermissionService;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,16 +24,18 @@ public class PermissionService implements IPermissionService {
      * Ensures that all required permissions exist in the database.
      * If any permissions are missing, they are created and saved.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Set<Permission> ensurePermissionsExist(Set<EPermission> requiredPermissions) {
         // 🔹 Fetch existing permissions in one query
         Set<Permission> existingPermissions = permissionRepository.findByNameIn(requiredPermissions);
 
-        // 🔹 Identify missing permissions
+        Set<EPermission> existingNames = existingPermissions.stream()
+                .map(Permission::getName)
+                .collect(Collectors.toSet());
+
         Set<EPermission> missingPermissions = requiredPermissions.stream()
-                .filter(permission -> existingPermissions.stream()
-                        .noneMatch(existing -> existing.getName().equals(permission)))
+                .filter(permission -> !existingNames.contains(permission))
                 .collect(Collectors.toSet());
 
         // 🔹 Insert missing permissions in **one batch query**

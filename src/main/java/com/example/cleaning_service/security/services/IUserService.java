@@ -11,6 +11,7 @@ import org.springframework.hateoas.PagedModel;
 import java.util.UUID;
 
 public interface IUserService {
+    User findById(UUID userId);
     UserResponseModel createUser(@Valid UserRequest userRequest);
     PagedModel<UserResponseModel> findAll(Pageable pageable);
     User register(AuthRequest authRequest);

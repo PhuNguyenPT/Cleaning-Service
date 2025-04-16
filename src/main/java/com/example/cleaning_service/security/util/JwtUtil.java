@@ -6,7 +6,7 @@ import com.nimbusds.jose.crypto.*;
 import com.nimbusds.jwt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
     private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
+    private static final Long EXPIRATION_TIME_IN_MILLIS = 86400000L;
+    private static final Long EXPIRATION_TIME_IN_SECONDS = EXPIRATION_TIME_IN_MILLIS / 1000;
     private final KeyProvider keyProvider;
     public JwtUtil(KeyProvider keyProvider) {
         this.keyProvider = keyProvider;
@@ -31,21 +33,25 @@ public class JwtUtil {
      * @param expirationMillis The expiration time in milliseconds.
      * @return The generated JWT token.
      */
-    public String generateToken(User subject, long expirationMillis) {
+    public String generateToken(User subject, @Nullable Long expirationMillis) {
         JWSSigner signer = new RSASSASigner(keyProvider.getPrivateKey());
 
         // Extract role and permissions
-        String role = subject.getRole().getName().name(); // Convert Enum to String
+        List<String> roles= subject.getRoles().stream()
+                .map(role -> role.getName().name())
+                .toList(); // Convert Enum to String
         List<String> permissions = subject.getPermissions().stream()
                 .map(permission -> permission.getName().name()) // Convert Enum to String
-                .collect(Collectors.toList());
+                .toList();
 
         Date now = new Date(System.currentTimeMillis());
+        expirationMillis = (expirationMillis != null)
+                ? expirationMillis : getDefaultExpirationTimeInMillis();
         Date expiryDate = new Date(now.getTime() + expirationMillis);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(subject.getUsername())  // Store username
-                .claim("role", role)          // Store user role
+                .claim("roles", roles)          // Store user roles
                 .claim("permissions", permissions)  // Store user permissions
                 .issueTime(now)  // Issue time
                 .expirationTime(expiryDate) // Expiration time
@@ -59,6 +65,14 @@ public class JwtUtil {
         }
 
         return signedJWT.serialize();
+    }
+
+    public Long getDefaultExpirationTimeInSeconds() {
+        return EXPIRATION_TIME_IN_SECONDS;
+    }
+
+    private Long getDefaultExpirationTimeInMillis() {
+        return EXPIRATION_TIME_IN_MILLIS;
     }
 
     /**
@@ -85,10 +99,10 @@ public class JwtUtil {
      * Validates the JWT token against UserDetails using RS256.
      *
      * @param token The JWT token.
-     * @param userDetails The user details to validate against.
+     * @param user The user details to validate against.
      * @return true if the token is valid, false otherwise.
      */
-    public boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, User user) {
         SignedJWT signedJWT;
         try {
             signedJWT = SignedJWT.parse(token);
@@ -115,8 +129,8 @@ public class JwtUtil {
             throw new RuntimeException(e);
         }
         String usernameFromToken = claims.getSubject();
-        String roleFromToken = extractRole(token);
-        Set<String> permissionsFromToken = extractPermissions(token);
+        Set<String> tokenRoles = extractRoles(token);
+        Set<String> tokenPermissions = extractPermissions(token);
 
         // Validate expiration time
         if (new Date().after(claims.getExpirationTime())) {
@@ -125,28 +139,38 @@ public class JwtUtil {
         }
 
         // Validate username
-        if (!userDetails.getUsername().equals(usernameFromToken)) {
+        if (!user.getUsername().equals(usernameFromToken)) {
             log.warn("Token's username unknown: {}", token);
             return false;
         }
 
-        // Validate role and permissions
-        if (userDetails instanceof User user) {
-            Set<String> userPermissions = user.getPermissions().stream()
-                    .map(permission -> permission.getName().name())
-                    .collect(Collectors.toSet());
-
-            return roleFromToken.equals(user.getRole().getName().name())
-                    && userPermissions.containsAll(permissionsFromToken);
+        Set<String> userRoles = user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
+        // Validate role
+        if (!userRoles.containsAll(tokenRoles)) {
+            log.warn("Token's role: {} not included in user's role {}", tokenRoles, userRoles);
+            return false;
         }
 
-        return false;
+        Set<String> userPermissions = user.getPermissions().stream()
+                .map(permission -> permission.getName().name())
+                .collect(Collectors.toSet());
+
+        // Validate permissions
+        if (!userPermissions.containsAll(tokenPermissions)) {
+            log.warn("Token's permissions: {} not equal to user' permissions {}",
+                    tokenPermissions, userPermissions);
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * Extracts the role from a JWT token.
      */
-    public String extractRole(String token) {
+    public Set<String> extractRoles(String token) {
         SignedJWT signedJWT;
         try {
             signedJWT = SignedJWT.parse(token);
@@ -154,7 +178,7 @@ public class JwtUtil {
             throw new RuntimeException(e);
         }
         try {
-            return signedJWT.getJWTClaimsSet().getStringClaim("role");
+            return new HashSet<>(signedJWT.getJWTClaimsSet().getStringListClaim("roles"));
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

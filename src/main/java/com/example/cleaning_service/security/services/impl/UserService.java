@@ -1,5 +1,6 @@
 package com.example.cleaning_service.security.services.impl;
 
+import com.example.cleaning_service.providers.events.ProviderCreatedEvent;
 import com.example.cleaning_service.security.assemblers.UserResponseModelAssembler;
 import com.example.cleaning_service.security.controllers.AdminController;
 import com.example.cleaning_service.security.dtos.auth.AuthRequest;
@@ -16,8 +17,6 @@ import com.example.cleaning_service.security.services.IRoleService;
 import com.example.cleaning_service.security.services.IUserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,16 +28,21 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Service
-public class UserService implements IUserService {
+class UserService implements IUserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final IRoleService roleService;
@@ -47,19 +51,19 @@ public class UserService implements IUserService {
     private final PagedResourcesAssembler<User> pagedResourcesAssembler;
     private final UserResponseModelAssembler userResponseModelAssembler;
 
-        public UserService(UserRepository userRepository,
-                           IRoleService roleService,
-                           BCryptPasswordEncoder passwordEncoder,
-                           ApplicationEventPublisher applicationEventPublisher,
-                           UserResponseModelAssembler userResponseModelAssembler,
-                           PagedResourcesAssembler<User> pagedResourcesAssembler) {
-            this.userRepository = userRepository;
-            this.roleService = roleService;
-            this.passwordEncoder = passwordEncoder;
-            this.applicationEventPublisher = applicationEventPublisher;
-            this.pagedResourcesAssembler = pagedResourcesAssembler; // Injected, not new
-            this.userResponseModelAssembler = userResponseModelAssembler;
-        }
+    UserService(UserRepository userRepository,
+                IRoleService roleService,
+                BCryptPasswordEncoder passwordEncoder,
+                ApplicationEventPublisher applicationEventPublisher,
+                UserResponseModelAssembler userResponseModelAssembler,
+                PagedResourcesAssembler<User> pagedResourcesAssembler) {
+        this.userRepository = userRepository;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.pagedResourcesAssembler = pagedResourcesAssembler; // Injected, not new
+        this.userResponseModelAssembler = userResponseModelAssembler;
+    }
 
     @Override
     @Transactional
@@ -147,17 +151,17 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public UserResponseModel getUserResponseModelById(@NotNull UUID id) {
+    public UserResponseModel getUserResponseModelById(UUID id) {
         User user = findById(id);
         return  userResponseModelAssembler.toModel(user);
     }
 
-    @Transactional
-    User findById(UUID id) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public User findById(UUID id) {
         log.info("Fetching user with ID: {}", id);
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
-        log.info("User found: {}", user);
+        log.info("User found: {}", user.getId());
         return user;
     }
 
@@ -202,7 +206,7 @@ public class UserService implements IUserService {
 
             // 🔹 Create a COPY of the permissions set to avoid shared references
             Set<Permission> copiedPermissions = new HashSet<>(newRole.getPermissions());
-            user.setRole(newRole);
+            user.addRole(newRole);
             user.setPermissions(copiedPermissions);
         }
 
@@ -211,5 +215,34 @@ public class UserService implements IUserService {
         log.info("User with ID: {} successfully updated.", id);
 
         return userResponseModelAssembler.toModel(updatedUser);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void handleProviderCreatedEvent(ProviderCreatedEvent providerCreatedEvent) {
+        Role providerRole = roleService.ensureRoleExists(ERole.PROVIDER);
+        log.info("Provider role {} created.", providerRole.getName());
+        User user = findById(providerCreatedEvent.user().getId());
+        if (user == null) {
+            log.error("User in ProviderCreatedEvent is null.");
+            throw new IllegalStateException("User in ProviderCreatedEvent is null.");
+        }
+        user.addRole(providerRole);
+        log.info("Set role for user ID: {} to '{}'", user.getId(), providerRole.getName());
+
+        Set<Permission> copiedPermissions = new HashSet<>(providerRole.getPermissions());
+        user.addPermissions(copiedPermissions);
+        log.info("Set permissions for user ID: {} to '{}'", user.getId(), copiedPermissions);
+
+        User savedUser = saveUser(user);
+
+        Set<String> userRoles = user.getRoles().stream().map(role -> role.getName().name())
+                .collect(Collectors.toSet());
+        log.info("User with ID: {} successfully updated with new role {}.", savedUser.getId(), userRoles);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public User saveUser(User user) {
+        return userRepository.saveAndFlush(user);
     }
 }

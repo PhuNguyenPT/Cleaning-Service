@@ -1,8 +1,15 @@
 package com.example.cleaning_service.security.services;
 
+import com.example.cleaning_service.security.entities.token.TokenEntity;
+
+import java.util.UUID;
+
 public interface IJwtService {
-    void saveToken(String token);
-    boolean existsTokenById(String token);
+    TokenEntity saveToken(String token);
+    boolean existsByToken(String token);
     void logoutToken(String token);
+
+    TokenEntity findById(UUID id);
+    TokenEntity findByToken(String token);
     boolean isTokenBlacklisted(String token);
 }

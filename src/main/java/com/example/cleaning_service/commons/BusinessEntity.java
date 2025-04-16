@@ -1,22 +1,24 @@
 package com.example.cleaning_service.commons;
 
+import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.customers.enums.ECountryType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @MappedSuperclass
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class BusinessEntity {
+public abstract class BusinessEntity extends Auditable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     protected UUID id;
 
@@ -59,5 +61,21 @@ public abstract class BusinessEntity {
         this.zip = zip;
         this.country = country;
         this.notes = notes;
+    }
+
+    @Override
+    public String toString() {
+        return "BusinessEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                ", country=" + country +
+                ", notes='" + notes + '\'' +
+                '}';
     }
 }

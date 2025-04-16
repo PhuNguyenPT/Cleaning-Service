@@ -2,9 +2,11 @@ package com.example.cleaning_service.security.entities.role;
 
 import com.example.cleaning_service.security.entities.permission.EPermission;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 import java.util.Set;
 
+@Getter
 @Schema(enumAsRef = true, example = "USER")
 public enum ERole {
     ADMIN(Set.of(EPermission.MANAGE_USERS, EPermission.MANAGE_ROLES, EPermission.VIEW_REPORTS, EPermission.DELETE_ACCOUNTS)),
@@ -19,9 +21,5 @@ public enum ERole {
 
     ERole(Set<EPermission> permissions) {
         this.permissions = permissions;
-    }
-
-    public Set<EPermission> getPermissions() {
-        return permissions;
     }
 }
