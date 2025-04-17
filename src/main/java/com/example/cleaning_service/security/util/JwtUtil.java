@@ -159,8 +159,8 @@ public class JwtUtil {
 
         // Validate permissions
         if (!userPermissions.containsAll(tokenPermissions)) {
-            log.warn("Token's permissions: {} not equal to user' permissions {}",
-                    tokenPermissions, userPermissions);
+            log.warn("User permissions {} not contain all token permissions {}",
+                    userPermissions, tokenPermissions);
             return false;
         }
 

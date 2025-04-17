@@ -13,6 +13,7 @@ import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.enums.EAssociationType;
+import com.example.cleaning_service.customers.events.CustomerCreationEvent;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
 import com.example.cleaning_service.customers.repositories.CompanyRepository;
 import com.example.cleaning_service.customers.services.*;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,7 @@ class CompanyServiceImpl implements CompanyService {
 
     private final CompanyMapper companyMapper;
     private final AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Constructs a new CompanyServiceImpl with all required dependencies.
@@ -76,7 +79,7 @@ class CompanyServiceImpl implements CompanyService {
             CompanyModelAssembler companyModelAssembler,
             CompanyDetailsModelAssembler companyDetailsModelAssembler,
             CompanyMapper companyMapper,
-            AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler) {
+            AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
 
         this.companyRepository = companyRepository;
         this.accountService = accountService;
@@ -88,6 +91,7 @@ class CompanyServiceImpl implements CompanyService {
         this.companyDetailsModelAssembler = companyDetailsModelAssembler;
         this.companyMapper = companyMapper;
         this.adminCompanyDetailsModelAssembler = adminCompanyDetailsModelAssembler;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -116,14 +120,17 @@ class CompanyServiceImpl implements CompanyService {
         AccountRequest accountRequest = new AccountRequest(
                 user, savedCompany, null, isPrimary, associationType
         );
-        Account account = accountService.handleCustomerCreation(accountRequest);
+        CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
+        applicationEventPublisher.publishEvent(customerCreationEvent);
 
-        // Ensure the account correctly references a company
-        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-            throw new IllegalStateException("Account does not reference a valid company.");
-        }
-
-        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel((Company) account.getCustomer());
+//        Account account = accountService.handleCustomerCreation(accountRequest);
+//        // Ensure the account correctly references a company
+//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
+//            throw new IllegalStateException("Account does not reference a valid company.");
+//        }
+//
+//        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel((Company) account.getCustomer());
+        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel(savedCompany);
         log.info("Successfully created company response: {}", companyResponseModel);
 
         return companyResponseModel;

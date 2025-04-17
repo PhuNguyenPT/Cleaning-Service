@@ -11,6 +11,7 @@
         <sql>CREATE SCHEMA IF NOT EXISTS provider AUTHORIZATION pg_database_owner;</sql>
     </changeSet>
     <include file="db/changelog/2025/04/16-01-changelog.xml"/>
+    <include file="db/changelog/2025/04/17-01-changelog.xml"/>
 
 </databaseChangeLog>
 

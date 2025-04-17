@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,22 +15,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 @Setter
 @Entity
 @Table(name = "users", schema = "security")
 public class User extends Auditable implements UserDetails {
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Setter
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Setter
     @Column(nullable = false)
     @JsonIgnore
     private String password;
@@ -39,18 +38,15 @@ public class User extends Auditable implements UserDetails {
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
 
-    @Setter
-    @Getter
-    @ManyToMany(fetch = FetchType.EAGER)
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "user_roles",
             schema = "security",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @Setter
-    @Getter
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "user_permissions",
             schema = "security",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -89,26 +85,32 @@ public class User extends Auditable implements UserDetails {
 
     public void addAllRoles(Set<Role> roles) {
         this.roles.addAll(roles);
+        log.info("Roles after added: {}", roles);
     }
 
     public void addRole(Role role) {
         this.roles.add(role);
     }
 
-    public void removeRole(Role role) {
-        this.roles.remove(role);
+    public void removeRole(Role removeRole) {
+        this.roles.removeIf(userRole -> userRole.getName().equals(removeRole.getName()));
+
     }
 
-    public void removeAllRoles(Set<Role> roles) {
-        this.roles.removeAll(roles);
+    public void removeAllRoles(Set<Role> removeRoles) {
+        removeRoles.forEach(this::removeRole);
     }
 
     public void addPermissions(Set<Permission> permissions) {
         this.permissions.addAll(permissions);
     }
 
-    public void removePermissions(Set<Permission> permissions) {
-        this.permissions.removeAll(permissions);
+    public void removePermission(Permission removePermission) {
+        this.permissions.removeIf(permission -> permission.getName().equals(removePermission.getName()));
+    }
+
+    public void removePermissions(Set<Permission> removePermissions) {
+        removePermissions.forEach(this::removePermission);
     }
 
     @Override
@@ -124,8 +126,9 @@ public class User extends Auditable implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>(permissions);
-        Set<GrantedAuthority> roleAuthorities = roles.stream().map(role ->
-                new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toSet());
+        Set<GrantedAuthority> roleAuthorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
+                .collect(Collectors.toSet());
         authorities.addAll(roleAuthorities);
         return authorities;
     }

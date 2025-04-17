@@ -55,6 +55,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/users", "/auth/token/public/**").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/public/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/ws-endpoint/**").permitAll()
                         .requestMatchers("/reports/**").hasAuthority("VIEW_REPORTS")
                         .requestMatchers("/orders/create").hasAuthority("CREATE_ORDERS")
                         .requestMatchers("/orders/view").hasAuthority("VIEW_ORDERS")
