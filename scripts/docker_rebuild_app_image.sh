@@ -4,4 +4,6 @@ chmod +x scripts/build_app_image.sh
 ./scripts/build_app_image.sh
 
 echo "Remove old service and compose"
-docker-compose stop app && docker-compose rm -f app && docker compose up -f docker-compose.yaml -d app
+docker compose -f docker-compose.yaml stop app
+docker compose -f docker-compose.yaml rm -f app
+docker compose -f docker-compose.yaml up -d app
