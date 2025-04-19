@@ -24,20 +24,21 @@ WORKDIR /opt/app
 COPY --from=build /opt/app/target/*.jar application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM ubuntu:jammy
-
-RUN apt-get update && apt-get install -y curl
+FROM debian:bookworm-slim
+RUN set -eux \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl fontconfig java-common
 
 ENV JAVA_HOME=/opt/java/jdk21
 ENV PATH=$JAVA_HOME/bin:$PATH
 COPY --from=build /customjre $JAVA_HOME
 WORKDIR /opt/app
-COPY --from=extractor /opt/app/dependencies/ ./
-COPY --from=extractor /opt/app/spring-boot-loader/ ./
-COPY --from=extractor /opt/app/snapshot-dependencies/ ./
-COPY --from=extractor /opt/app/application/ ./
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /opt/app
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+COPY --chown=appuser:appgroup --from=extractor /opt/app/dependencies/ ./
+COPY --chown=appuser:appgroup --from=extractor /opt/app/spring-boot-loader/ ./
+COPY --chown=appuser:appgroup --from=extractor /opt/app/snapshot-dependencies/ ./
+COPY --chown=appuser:appgroup --from=extractor /opt/app/application/ ./
 USER appuser
 
 ENTRYPOINT ["java","-XX:+UseParallelGC","-XX:MaxRAMPercentage=75","org.springframework.boot.loader.launch.JarLauncher"]

@@ -206,6 +206,33 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+			<groupId>com.google.cloud.tools</groupId>
+			<artifactId>jib-maven-plugin</artifactId>
+			<version>3.4.5</version>
+			<configuration>
+				<from>
+					<image>eclipse-temurin:21-jre-slim@sha256:9fe87739492c449b9d4e036ac0a79a7e2c75ce36c99d4ba4a0666a5d4e409e73</image>
+					<platforms>
+					<platform>
+						<architecture>amd64</architecture>
+						<os>linux</os>
+					</platform>
+					</platforms>
+				</from>
+				<to>
+					<image>docker.io/phunpt01/app-image:jib</image>
+					<credHelper>secretservice</credHelper>
+				</to>
+				<container>
+					<jvmFlags>
+						<jvmFlag>-XX:+UseParallelGC</jvmFlag>
+						<jvmFlag>-XX:MaxRAMPercentage=75</jvmFlag>
+					</jvmFlags>
+					<mainClass>com.example.cleaning_service.CleaningServiceApplication</mainClass>
+				</container>
+			</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

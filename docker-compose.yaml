@@ -266,9 +266,7 @@ services:
       - kafka-network
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: app-image:bookworm-slim-corretto
     container_name: app
     ports:
       - "8081:8081"
@@ -298,7 +296,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 60s
     networks:
       - kafka-network
       - app-network

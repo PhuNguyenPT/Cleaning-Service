@@ -1,0 +1,58 @@
+FROM maven:3-amazoncorretto-21-debian-bookworm AS build
+RUN apt-get update && apt-get install -y binutils
+WORKDIR /opt/app
+COPY src ./src
+COPY pom.xml .
+RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests
+RUN jar xf target/*.jar
+RUN jdeps --ignore-missing-deps -q  \
+    --recursive  \
+    --multi-release 21  \
+    --print-module-deps  \
+    --class-path 'BOOT-INF/lib/*'  \
+    target/*.jar > deps.info
+RUN jlink \
+    --verbose \
+    --add-modules $(cat deps.info) \
+    --strip-debug \
+    --compress 2 \
+    --no-header-files \
+    --no-man-pages \
+    --output /customjre
+
+FROM amazoncorretto:21 AS extractor
+WORKDIR /opt/app
+COPY --from=build /opt/app/target/*.jar application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
+
+FROM debian:bookworm-slim
+
+ARG version=21.0.7.6-1
+# In addition to installing the Amazon corretto, we also install
+# fontconfig. The folks who manage the docker hub's
+# official image library have found that font management
+# is a common usecase, and painpoint, and have
+# recommended that Java images include font support.
+#
+# See:
+#  https://github.com/docker-library/official-images/blob/master/test/tests/java-uimanager-font/container.java
+
+RUN set -eux \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl fontconfig java-common
+
+ENV LANG=C.UTF-8
+ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto
+ENV PATH=$JAVA_HOME/bin:$PATH
+COPY --from=build /customjre $JAVA_HOME
+
+WORKDIR /opt/app
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+COPY --chown=appuser:appgroup --from=extractor /opt/app/dependencies/ ./
+COPY --chown=appuser:appgroup --from=extractor /opt/app/spring-boot-loader/ ./
+COPY --chown=appuser:appgroup --from=extractor /opt/app/snapshot-dependencies/ ./
+COPY --chown=appuser:appgroup --from=extractor /opt/app/application/ ./
+USER appuser
+
+ENTRYPOINT ["java","-XX:+UseParallelGC","-XX:MaxRAMPercentage=75","org.springframework.boot.loader.launch.JarLauncher"]
