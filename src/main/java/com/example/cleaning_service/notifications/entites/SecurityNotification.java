@@ -1,9 +1,10 @@
 package com.example.cleaning_service.notifications.entites;
 
-import com.example.cleaning_service.security.entities.user.User;
+import java.util.UUID;
 
 public record SecurityNotification(
-        User user,
+        UUID userId,
+        String userName,
         String type,
         String message,
         long timestamp

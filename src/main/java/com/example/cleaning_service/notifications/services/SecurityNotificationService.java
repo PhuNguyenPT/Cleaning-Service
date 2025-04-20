@@ -25,7 +25,8 @@ public class SecurityNotificationService {
     @EventListener
     public void handleUserRoleUpdatedEvent(UserRoleUpdatedEvent event) {
         SecurityNotification notification = new SecurityNotification(
-                event.user(),
+                event.user().getId(),
+                event.user().getUsername(),
                 "ROLE_UPDATED",
                 "Your account permissions have been updated. Please refresh your session.",
                 System.currentTimeMillis()

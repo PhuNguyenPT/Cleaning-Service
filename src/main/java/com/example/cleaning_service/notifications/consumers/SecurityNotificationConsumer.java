@@ -30,14 +30,14 @@ public class SecurityNotificationConsumer {
     public void consume(String message) {
         try {
             SecurityNotification notification = objectMapper.readValue(message, SecurityNotification.class);
-            log.info("Received security notification for user: {}", notification.user().getUsername());
+            log.info("Received security notification for user: {}", notification.userName());
 
             // Store notification for later retrieval (e.g., for users who are offline)
             persistenceService.saveNotification(notification);
 
             // Forward to connected WebSocket clients
             messagingTemplate.convertAndSendToUser(
-                    notification.user().getUsername(),
+                    notification.userName(),
                     "/queue/security-updates",
                     notification
             );
