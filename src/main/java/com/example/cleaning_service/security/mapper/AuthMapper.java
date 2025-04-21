@@ -8,7 +8,7 @@ public class AuthMapper {
         return new AuthResponseProfileModel(
                 user.getId(),
                 user.getUsername(),
-                RoleMapper.fromRoleToRoleResponse(user.getRole()),
+                RoleMapper.fromRolesToRoleResponseSet(user.getRoles()),
                 PermissionMapper.fromPermissionSetToPermissionResponseSet(user.getPermissions())
         );
     }

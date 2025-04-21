@@ -1,6 +1,8 @@
 package com.example.cleaning_service.security.config;
 
+import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.services.IJwtService;
+import com.example.cleaning_service.security.services.impl.CustomUserDetailsService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,23 +15,21 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     private final IJwtService jwtService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, IJwtService jwtService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService, IJwtService jwtService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             token = authHeader.substring(7);
 
             // 🔹 Check if token exists in Redis (ensure it's valid and not revoked)
-            if (!jwtService.existsTokenById(token)) {
+            if (!jwtService.existsByToken(token)) {
                 logger.warn("Token not found in Redis (possible logout or expiration)");
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
@@ -64,20 +64,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            User user = userDetailsService.loadUserByUsername(username);
 
-            if (!jwtUtil.validateToken(token, userDetails)) {
+            if (!jwtUtil.validateToken(token, user)) {
                 logger.warn("Invalid JWT token: {}", token);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
                 return;
             }
-            String role = jwtUtil.extractRole(token);
-            Set<GrantedAuthority> authorities = new HashSet<>(userDetails.getAuthorities());
+            Set<GrantedAuthority> roles = jwtUtil.extractRoles(token).stream()
+                    .map(s -> new SimpleGrantedAuthority("ROLE_" + s))
+                    .collect(Collectors.toSet());
+            Set<GrantedAuthority> authorities = jwtUtil.extractPermissions(token).stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toSet());
 
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+            authorities.addAll(roles);
 
             UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                    new UsernamePasswordAuthenticationToken(user, null, authorities);
 
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

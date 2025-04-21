@@ -3,11 +3,14 @@ package com.example.cleaning_service.security.entities.role;
 import com.example.cleaning_service.audit.Auditable;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "roles", schema = "security")
 public class Role extends Auditable {
@@ -16,10 +19,12 @@ public class Role extends Auditable {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
     private ERole name;
 
+    @Setter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permissions",
@@ -33,26 +38,6 @@ public class Role extends Auditable {
 
     public Role(ERole name, Set<Permission> permissions) {
         this.name = name;
-        this.permissions = permissions;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public ERole getName() {
-        return name;
-    }
-
-    public void setName(ERole name) {
-        this.name = name;
-    }
-
-    public Set<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Set<Permission> permissions) {
         this.permissions = permissions;
     }
 

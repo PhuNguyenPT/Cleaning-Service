@@ -36,8 +36,10 @@ class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
     @Transactional
     public EAssociationType getEAssociationTypeByIOrganization(IOrganization organization) {
         return switch (organization) {
-            case Company _, Government _, NonProfitOrg _ -> EAssociationType.REPRESENTATIVE;
-            case IndividualCustomer _ -> EAssociationType.OWNER;
+            case Company ignored -> EAssociationType.REPRESENTATIVE;
+            case Government ignored -> EAssociationType.REPRESENTATIVE;
+            case NonProfitOrg ignored -> EAssociationType.REPRESENTATIVE;
+            case IndividualCustomer ignored -> EAssociationType.OWNER;
         };
     }
 
@@ -45,8 +47,10 @@ class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
     @Transactional
     public boolean getIsPrimaryByIOrganization(IOrganization organization) {
         return switch (organization) {
-            case Company _, Government _, NonProfitOrg _ -> false;
-            case IndividualCustomer _ -> true;
+            case Company ignored -> false;
+            case  Government ignored -> false;
+            case NonProfitOrg ignored -> false;
+            case IndividualCustomer ignored -> true;
         };
     }
 

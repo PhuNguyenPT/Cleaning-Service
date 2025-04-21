@@ -37,7 +37,7 @@ public class AccountController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/me", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
     public AccountResponseModel getAccountByUser(@AuthenticationPrincipal User user) {
@@ -57,7 +57,7 @@ public class AccountController {
                     @ApiResponse(responseCode = "404", description = "Account not found")
             }
     )
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/{id}", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
     public AccountDetailsResponseModel getAccountDetailsById(

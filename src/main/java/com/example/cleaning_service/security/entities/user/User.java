@@ -5,11 +5,19 @@ import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
+@Getter
+@Setter
 @Entity
 @Table(name = "users", schema = "security")
 public class User extends Auditable implements UserDetails {
@@ -30,11 +38,15 @@ public class User extends Auditable implements UserDetails {
     private boolean isAccountNonLocked;
     private boolean isCredentialsNonExpired;
 
-    @ManyToOne(fetch = FetchType.EAGER) // One role per user
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @JoinTable(name = "user_roles",
+            schema = "security",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "user_permissions",
             schema = "security",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -47,7 +59,18 @@ public class User extends Auditable implements UserDetails {
     public User(String username, String password, Role role, Set<Permission> permissions) {
         this.username = username;
         this.password = password;
-        this.role = role;
+        addRole(role);
+        this.permissions = permissions;
+        this.isEnabled = true;
+        this.isAccountNonExpired = true;
+        this.isCredentialsNonExpired = true;
+        this.isAccountNonLocked = true;
+    }
+
+    public User(String username, String password, Set<Role> roles, Set<Permission> permissions) {
+        this.username = username;
+        this.password = password;
+        addAllRoles(roles);
         this.permissions = permissions;
         this.isEnabled = true;
         this.isAccountNonExpired = true;
@@ -60,48 +83,34 @@ public class User extends Auditable implements UserDetails {
         this.password = password;
     }
 
-    public UUID getId() {
-        return id;
+    public void addAllRoles(Set<Role> roles) {
+        this.roles.addAll(roles);
+        log.info("Roles after added: {}", roles);
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void addRole(Role role) {
+        this.roles.add(role);
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void removeRole(Role removeRole) {
+        this.roles.removeIf(userRole -> userRole.getName().equals(removeRole.getName()));
+
     }
 
-    public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
+    public void removeAllRoles(Set<Role> removeRoles) {
+        removeRoles.forEach(this::removeRole);
     }
 
-    public void setAccountNonExpired(boolean accountNonExpired) {
-        isAccountNonExpired = accountNonExpired;
+    public void addPermissions(Set<Permission> permissions) {
+        this.permissions.addAll(permissions);
     }
 
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        isAccountNonLocked = accountNonLocked;
+    public void removePermission(Permission removePermission) {
+        this.permissions.removeIf(permission -> permission.getName().equals(removePermission.getName()));
     }
 
-    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
-        isCredentialsNonExpired = credentialsNonExpired;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public Set<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Set<Permission> permissions) {
-        this.permissions = permissions;
+    public void removePermissions(Set<Permission> removePermissions) {
+        removePermissions.forEach(this::removePermission);
     }
 
     @Override
@@ -116,7 +125,12 @@ public class User extends Auditable implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new HashSet<>(permissions);
+        Set<GrantedAuthority> authorities = new HashSet<>(permissions);
+        Set<GrantedAuthority> roleAuthorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
+                .collect(Collectors.toSet());
+        authorities.addAll(roleAuthorities);
+        return authorities;
     }
 
     @Override
@@ -149,7 +163,7 @@ public class User extends Auditable implements UserDetails {
                 ", isAccountNonExpired=" + isAccountNonExpired +
                 ", isAccountNonLocked=" + isAccountNonLocked +
                 ", isCredentialsNonExpired=" + isCredentialsNonExpired +
-                ", role=" + role +
+                ", roles=" + roles +
                 ", permissions=" + permissions +
                 '}';
     }

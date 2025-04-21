@@ -1,6 +1,7 @@
 package com.example.cleaning_service.security.config;
 
 import com.example.cleaning_service.security.services.IJwtService;
+import com.example.cleaning_service.security.services.impl.CustomUserDetailsService;
 import com.example.cleaning_service.security.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, IJwtService jwtService) {
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService, IJwtService jwtService) {
         return new JwtAuthenticationFilter(jwtUtil, userDetailsService, jwtService);
     }
 
@@ -52,8 +53,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/users").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/users", "/auth/token/public/**").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/public/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/ws-endpoint/**").permitAll()
                         .requestMatchers("/reports/**").hasAuthority("VIEW_REPORTS")
                         .requestMatchers("/orders/create").hasAuthority("CREATE_ORDERS")
                         .requestMatchers("/orders/view").hasAuthority("VIEW_ORDERS")

@@ -4,12 +4,14 @@ import com.example.cleaning_service.security.entities.token.TokenEntity;
 import com.example.cleaning_service.security.repositories.TokenRepository;
 import com.example.cleaning_service.security.services.IJwtService;
 import com.example.cleaning_service.security.util.JwtUtil;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService implements IJwtService {
@@ -26,7 +28,7 @@ public class JwtService implements IJwtService {
 
     @Transactional
     @Override
-    public void saveToken(String token) {
+    public TokenEntity saveToken(String token) {
         log.info("Saving token for authentication");
         String username = jwtUtil.extractUsername(token);
         Long expirationMillis = jwtUtil.extractExpirationTime(token);
@@ -44,62 +46,63 @@ public class JwtService implements IJwtService {
 
         if (timeToLive <= 0) {
             log.warn("Attempted to save expired token for user: {}", username);
-            return;
+            throw new IllegalArgumentException("Expired JWT token");
         }
 
         log.info("Token TTL: {} ms for user: {}", timeToLive, username);
         TokenEntity tokenEntity = new TokenEntity(token, username, timeToLive);
         TokenEntity savedEntity = tokenRepository.save(tokenEntity);
         log.info("Token successfully saved: {}", savedEntity);
+        return savedEntity;
     }
 
     @Transactional
     @Override
     public void logoutToken(String token) {
         log.info("Processing logout for token");
-        tokenRepository.findById(token).ifPresent(tokenEntity -> {
-            log.debug("Found token: {}, marking as blacklisted", tokenEntity);
+        TokenEntity tokenEntity = findByToken(token);
+        log.info("Found token: {}, marking as blacklisted", tokenEntity);
 
-            // Reduce TTL to a short duration for blacklisted tokens
-            tokenEntity.setBlacklisted(true);
-            tokenEntity.setTimeToLive(BLACKLIST_TTL); // Set a short TTL for blacklisted tokens
+        // Reduce TTL to a short duration for blacklisted tokens
+        tokenEntity.setBlacklisted(true);
+        tokenEntity.setTimeToLive(BLACKLIST_TTL); // Set a short TTL for blacklisted tokens
 
-            TokenEntity updatedEntity = tokenRepository.save(tokenEntity);
-            log.info("Token successfully blacklisted: {}", updatedEntity);
-        });
-
-        if (!tokenRepository.existsById(token)) {
-            log.warn("Attempted to blacklist non-existent token");
-        }
+        TokenEntity savedEntity = tokenRepository.save(tokenEntity);
+        log.info("Token successfully blacklisted: {}", savedEntity);
     }
 
     @Transactional
     @Override
-    public boolean existsTokenById(String token) {
+    public boolean existsByToken(String token) {
         log.debug("Checking if token exists in repository");
-        boolean exists = tokenRepository.existsById(token);
+        boolean exists = tokenRepository.existsByToken(token);
         if (!exists) {
-            log.debug("Token does not exist: {}...", token.substring(0, 10));
+            log.info("Token does not exist: {}...", token.substring(0, 10));
+            return false;
         }
+        return true;
+    }
 
-        tokenRepository.findById(token).ifPresent(tokenEntity ->
-                log.debug("Token found in repository: {}", tokenEntity));
-        return exists;
+    @Transactional
+    @Override
+    public TokenEntity findByToken(String token) {
+        return tokenRepository.findByToken(token)
+                .orElseThrow(() -> new AccessDeniedException("Token not found"));
+    }
+
+    @Transactional
+    @Override
+    public TokenEntity findById(UUID id) {
+        return tokenRepository.findById(id)
+                .orElseThrow(() -> new AccessDeniedException("Token with id " + id + "not found"));
     }
 
     @Transactional
     @Override
     public boolean isTokenBlacklisted(String token) {
         log.debug("Checking if token is blacklisted");
-        return tokenRepository.findById(token)
-                .map(tokenEntity -> {
-                    boolean isBlacklisted = tokenEntity.isBlacklisted();
-                    log.debug("Token status: {}, Blacklisted: {}", tokenEntity, isBlacklisted);
-                    return isBlacklisted;
-                })
-                .orElseGet(() -> {
-                    log.debug("Token not found in repository");
-                    return false;
-                });
+        TokenEntity tokenEntity = findByToken(token);
+        log.info("Found token: {}, blacklisted: {}", token, tokenEntity.isBlacklisted());
+        return tokenEntity.isBlacklisted();
     }
 }

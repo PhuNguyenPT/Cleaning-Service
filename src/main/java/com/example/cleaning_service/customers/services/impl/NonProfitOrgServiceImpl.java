@@ -13,6 +13,7 @@ import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import com.example.cleaning_service.customers.enums.EAssociationType;
+import com.example.cleaning_service.customers.events.CustomerCreationEvent;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
 import com.example.cleaning_service.customers.repositories.NonProfitOrgRepository;
 import com.example.cleaning_service.customers.services.*;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
 
     private final NonProfitOrgMapper nonProfitOrgMapper;
     private final AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Constructs a new {@link NonProfitOrgServiceImpl} with the required dependencies.
@@ -74,7 +77,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
             NonProfitOrgModelAssembler nonProfitOrgModelAssembler,
             NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler,
             NonProfitOrgMapper nonProfitOrgMapper,
-            AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler) {
+            AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
 
         this.nonProfitOrgRepository = nonProfitOrgRepository;
         this.accountService = accountService;
@@ -88,6 +91,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
 
         this.nonProfitOrgMapper = nonProfitOrgMapper;
         this.adminNonProfitOrgDetailsModelAssembler = adminNonProfitOrgDetailsModelAssembler;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -129,12 +133,16 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
         AccountRequest accountRequest = new AccountRequest(
                 user, savedNonProfitOrg, null, isPrimary, associationType
         );
-        Account account = accountService.handleCustomerCreation(accountRequest);
+        CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
+        applicationEventPublisher.publishEvent(customerCreationEvent);
+//        Account account = accountService.handleCustomerCreation(accountRequest);
+//
+//        if(isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
+//            throw new IllegalStateException("Account association does not reference a valid non-profit org.");
+//        }
+//        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel((NonProfitOrg) account.getCustomer());
 
-        if(isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-            throw new IllegalStateException("Account association does not reference a valid non-profit org.");
-        }
-        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel((NonProfitOrg) account.getCustomer());
+        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel(savedNonProfitOrg);
         log.info("Successfully created non-profit response: {}", nonProfitOrgResponseModel);
 
         return nonProfitOrgResponseModel;

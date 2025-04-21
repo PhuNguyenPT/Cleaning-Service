@@ -13,6 +13,7 @@ import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.enums.EAssociationType;
+import com.example.cleaning_service.customers.events.CustomerCreationEvent;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
 import com.example.cleaning_service.customers.repositories.GovernmentRepository;
 import com.example.cleaning_service.customers.services.*;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,7 @@ class GovernmentServiceImpl implements GovernmentService {
 
     private final GovernmentMapper governmentMapper;
     private final AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     GovernmentServiceImpl(
             GovernmentRepository governmentRepository,
@@ -62,7 +65,7 @@ class GovernmentServiceImpl implements GovernmentService {
             GovernmentDetailsModelAssembler governmentDetailsModelAssembler,
 
             GovernmentMapper governmentMapper,
-            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler) {
+            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
 
         this.governmentRepository = governmentRepository;
 
@@ -77,6 +80,7 @@ class GovernmentServiceImpl implements GovernmentService {
 
         this.governmentMapper = governmentMapper;
         this.adminGovernmentDetailsModelAssembler = adminGovernmentDetailsModelAssembler;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -104,13 +108,17 @@ class GovernmentServiceImpl implements GovernmentService {
         AccountRequest accountRequest = new AccountRequest(
                 user, savedGovernment, null, isPrimary, associationType
         );
-        Account account = accountService.handleCustomerCreation(accountRequest);
+        CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
+        applicationEventPublisher.publishEvent(customerCreationEvent);
+//        Account account = accountService.handleCustomerCreation(accountRequest);
+//
+//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
+//            throw new IllegalStateException("Account association does not reference a valid government.");
+//        }
+//
+//        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) account.getCustomer());
+        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel(savedGovernment);
 
-        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-            throw new IllegalStateException("Account association does not reference a valid government.");
-        }
-
-        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) account.getCustomer());
         log.info("Successfully created government response: {}", governmentResponseModel);
 
         return governmentResponseModel;

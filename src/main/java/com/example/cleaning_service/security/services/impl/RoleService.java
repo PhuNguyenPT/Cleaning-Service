@@ -7,8 +7,9 @@ import com.example.cleaning_service.security.entities.permission.EPermission;
 import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.services.IPermissionService;
 import com.example.cleaning_service.security.services.IRoleService;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -27,7 +28,7 @@ public class RoleService implements IRoleService {
      * Ensures that a role exists in the database.
      * If the role is missing, it is created along with its required permissions.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public Role ensureRoleExists(ERole roleName) {
         return roleRepository.findByName(roleName)

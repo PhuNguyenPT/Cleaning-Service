@@ -9,7 +9,7 @@ public class UserMapper {
         return new UserResponseModel(
                 user.getId(),
                 user.getUsername(),
-                RoleMapper.fromRoleToRoleResponse(user.getRole()),
+                RoleMapper.fromRolesToRoleResponseSet(user.getRoles()),
                 PermissionMapper.fromPermissionSetToPermissionResponseSet(user.getPermissions())
         );
     }

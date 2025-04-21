@@ -13,6 +13,7 @@ import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.enums.EAssociationType;
+import com.example.cleaning_service.customers.events.CustomerCreationEvent;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
 import com.example.cleaning_service.customers.repositories.IndividualCustomerRepository;
 import com.example.cleaning_service.customers.services.*;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
     private final CustomerService customerService;
     private final IndividualCustomerMapper individualCustomerMapper;
     private final AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Constructs a new IndividualCustomerServiceImpl with required dependencies.
@@ -74,7 +77,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
             IndividualCustomerDetailsModelAssembler individualCustomerDetailsModelAssembler,
             CustomerService customerService,
             IndividualCustomerMapper individualCustomerMapper,
-            AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler) {
+            AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
 
         this.individualCustomerRepository = individualCustomerRepository;
         this.accountService = accountService;
@@ -86,6 +89,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
         this.customerService = customerService;
         this.individualCustomerMapper = individualCustomerMapper;
         this.adminIndividualCustomerDetailsModelAssembler = adminIndividualCustomerDetailsModelAssembler;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -127,14 +131,18 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
         AccountRequest accountRequest = new AccountRequest(
                 user, savedIndividualCustomer, null, isPrimary, associationType
         );
-        Account account = accountService.handleCustomerCreation(accountRequest);
-
-        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-            throw new IllegalStateException("Account does not reference a valid individual.");
-        }
-
+        CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
+        applicationEventPublisher.publishEvent(customerCreationEvent);
+//        Account account = accountService.handleCustomerCreation(accountRequest);
+//
+//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
+//            throw new IllegalStateException("Account does not reference a valid individual.");
+//        }
+//
+//        IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerModelAssembler
+//                .toModel((IndividualCustomer) account.getCustomer());
         IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerModelAssembler
-                .toModel((IndividualCustomer) account.getCustomer());
+                .toModel(savedIndividualCustomer);
         log.info("Successfully created individual customer response: {}", individualCustomerResponseModel);
 
         return individualCustomerResponseModel;

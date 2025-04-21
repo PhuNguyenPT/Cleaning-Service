@@ -50,7 +50,7 @@ public class CompanyController {
             @ApiResponse(responseCode = "404", description = "Company not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel getCompanyById(@PathVariable UUID id,
@@ -66,7 +66,7 @@ public class CompanyController {
             @ApiResponse(responseCode = "404", description = "Company not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CompanyDetailsResponseModel updateCompany(@PathVariable UUID id,
@@ -82,7 +82,7 @@ public class CompanyController {
             @ApiResponse(responseCode = "404", description = "Company not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping(path = "/{id}", produces = "application/hal+json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompany(@PathVariable UUID id,

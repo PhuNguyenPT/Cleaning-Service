@@ -52,7 +52,7 @@ public class IndividualCustomerController {
             @ApiResponse(responseCode = "404", description = "Individual customer not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public IndividualCustomerDetailsResponseModel getIndividualCustomerById(@PathVariable UUID id,
@@ -68,7 +68,7 @@ public class IndividualCustomerController {
             @ApiResponse(responseCode = "404", description = "Individual customer not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public IndividualCustomerDetailsResponseModel updateIndividualCustomerById(@PathVariable UUID id,
@@ -84,7 +84,7 @@ public class IndividualCustomerController {
             @ApiResponse(responseCode = "404", description = "Individual customer not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteIndividualCustomerById(@PathVariable UUID id, @AuthenticationPrincipal User user) {

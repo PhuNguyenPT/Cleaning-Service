@@ -50,7 +50,7 @@ public class NonProfitOrgController {
             @ApiResponse(responseCode = "404", description = "Non-profit organization not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public NonProfitOrgDetailsResponseModel getNonProfitOrgById(@PathVariable UUID id,
@@ -66,7 +66,7 @@ public class NonProfitOrgController {
             @ApiResponse(responseCode = "404", description = "Non-profit organization not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(@PathVariable UUID id,
@@ -82,7 +82,7 @@ public class NonProfitOrgController {
             @ApiResponse(responseCode = "404", description = "Non-profit organization not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNonProfitOrgById(@PathVariable UUID id, @AuthenticationPrincipal User user) {

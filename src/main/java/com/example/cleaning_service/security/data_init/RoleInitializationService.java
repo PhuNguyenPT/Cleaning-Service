@@ -1,5 +1,6 @@
 package com.example.cleaning_service.security.data_init;
 
+import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.services.IRoleService;
@@ -7,6 +8,9 @@ import com.example.cleaning_service.security.entities.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class RoleInitializationService {
@@ -20,6 +24,7 @@ public class RoleInitializationService {
     @Transactional
     public User createAdminUser(String email, String password, PasswordEncoder passwordEncoder) {
         Role adminRole = roleService.ensureRoleExists(ERole.ADMIN);
-        return new User(email, passwordEncoder.encode(password), adminRole, adminRole.getPermissions());
+        Set<Permission> adminPermissions = new HashSet<>(adminRole.getPermissions());
+        return new User(email, passwordEncoder.encode(password), adminRole, adminPermissions);
     }
 }
