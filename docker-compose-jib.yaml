@@ -280,6 +280,7 @@ services:
       SPRING_KAFKA_CONSUMER_GROUP_ID: cleaning-service-group
       SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
       SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry0:8085
+      SPRING_DOCKER_COMPOSE_ENABLED: ${SPRING_DOCKER_COMPOSE_ENABLED}
     depends_on:
       postgres:
         condition: service_healthy
