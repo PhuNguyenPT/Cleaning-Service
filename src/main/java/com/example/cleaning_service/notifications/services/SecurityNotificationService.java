@@ -5,24 +5,28 @@ import com.example.cleaning_service.security.events.UserRoleUpdatedEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @Service
 public class SecurityNotificationService {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private static final String SECURITY_NOTIFICATION_TOPIC = "security-notifications";
 
-    public SecurityNotificationService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+    public SecurityNotificationService(KafkaTemplate<String, Object> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
     }
 
-    @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserRoleUpdatedEvent(UserRoleUpdatedEvent event) {
         SecurityNotification notification = new SecurityNotification(
                 event.user().getId(),

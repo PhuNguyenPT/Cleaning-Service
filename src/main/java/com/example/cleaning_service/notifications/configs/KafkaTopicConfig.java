@@ -25,6 +25,6 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic securityNotificationsTopic() {
-        return new NewTopic("security-notifications", 3, (short) 2);
+        return new NewTopic("security-notifications", 3, (short) 1);
     }
 }
