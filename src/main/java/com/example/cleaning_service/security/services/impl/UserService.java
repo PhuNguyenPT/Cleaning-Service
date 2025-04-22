@@ -152,7 +152,7 @@ class UserService implements IUserService {
         return  userResponseModelAssembler.toModel(user);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public User findById(UUID id) {
         log.info("Fetching user with ID: {}", id);
         User user = userRepository.findById(id)
@@ -214,7 +214,7 @@ class UserService implements IUserService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public User saveUser(User user) {
         return userRepository.saveAndFlush(user);
     }

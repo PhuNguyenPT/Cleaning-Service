@@ -6,7 +6,6 @@ import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.services.OrganizationDetailsService;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.util.PagedModelAssemblerUtil;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.function.BiConsumer;

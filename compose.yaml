@@ -77,13 +77,15 @@ services:
         condition: service_healthy
       local-kafka1:
         condition: service_healthy
+      local-kafka2:
+        condition: service_healthy
       local-schema-registry0:
         condition: service_healthy
       local-kafka-connect0:
         condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'local-kafka0:29092, local-kafka1:29092'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'local-kafka0:29092,local-kafka1:29092,local-kafka2:29092'
       KAFKA_CLUSTERS_0_METRICS_PORT: 9997
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: 'http://local-schema-registry0:8085'
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
@@ -118,7 +120,7 @@ services:
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=local-kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 0
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093, 1@local-kafka1:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093,1@local-kafka1:29093,2@local-kafka2:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://local-kafka0:29092,CONTROLLER://local-kafka0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
@@ -155,7 +157,7 @@ services:
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=local-kafka1 -Dcom.sun.management.jmxremote.rmi.port=9998
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 1
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093,1@local-kafka1:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093,1@local-kafka1:29093,2@local-kafka2:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://local-kafka1:29092,CONTROLLER://local-kafka1:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
@@ -165,6 +167,43 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     healthcheck:
       test: [ "CMD", "kafka-topics", "--bootstrap-server", "local-kafka1:9092", "--list" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - local-kafka-network
+
+  local-kafka2:
+    image: confluentinc/cp-kafka:7.2.1
+    hostname: local-kafka2
+    container_name: local-kafka2
+    ports:
+      - "9094:9092"
+      - "9999:9999"
+    environment:
+      CLUSTER_ID: '45vUBEgyQjSywv_811biQw'
+      KAFKA_BROKER_ID: 2
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://local-kafka2:29092,PLAINTEXT_HOST://localhost:9094'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=local-kafka2 -Dcom.sun.management.jmxremote.rmi.port=9999
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093,1@local-kafka1:29093,2@local-kafka2:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://local-kafka2:29092,CONTROLLER://local-kafka2:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+    volumes:
+      - ./scripts/update_run.sh:/tmp/update_run.sh
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "local-kafka2:9092", "--list" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -182,8 +221,10 @@ services:
         condition: service_healthy
       local-kafka1:
         condition: service_healthy
+      local-kafka2:
+        condition: service_healthy
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://local-kafka0:29092,PLAINTEXT://local-kafka1:29092'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://local-kafka0:29092,PLAINTEXT://local-kafka1:29092,PLAINTEXT://local-kafka2:29092'
       SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: 'PLAINTEXT'
       SCHEMA_REGISTRY_HOST_NAME: local-schema-registry0
       SCHEMA_REGISTRY_LISTENERS: 'http://local-schema-registry0:8085'
@@ -207,10 +248,14 @@ services:
     depends_on:
       local-kafka0:
         condition: service_healthy
+      local-kafka1:
+        condition: service_healthy
+      local-kafka2:
+        condition: service_healthy
       local-schema-registry0:
         condition: service_healthy
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'local-kafka0:29092,local-kafka1:29092'
+      CONNECT_BOOTSTRAP_SERVERS: 'local-kafka0:29092,local-kafka1:29092,local-kafka2:29092'
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: _connect_configs
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
@@ -218,9 +263,9 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_TOPIC: _connect_status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://local-schema-registry0:8085'
-      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://local-schema-registry0:8085'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter

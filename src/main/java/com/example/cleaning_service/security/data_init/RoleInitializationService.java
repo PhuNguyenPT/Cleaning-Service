@@ -5,9 +5,9 @@ import com.example.cleaning_service.security.entities.role.ERole;
 import com.example.cleaning_service.security.entities.role.Role;
 import com.example.cleaning_service.security.services.IRoleService;
 import com.example.cleaning_service.security.entities.user.User;
-import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -28,7 +28,7 @@ public class RoleService implements IRoleService {
      * Ensures that a role exists in the database.
      * If the role is missing, it is created along with its required permissions.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
     public Role ensureRoleExists(ERole roleName) {
         return roleRepository.findByName(roleName)

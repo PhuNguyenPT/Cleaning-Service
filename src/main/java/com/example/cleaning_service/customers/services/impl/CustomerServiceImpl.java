@@ -3,8 +3,8 @@ package com.example.cleaning_service.customers.services.impl;
 import com.example.cleaning_service.customers.dto.DuplicatedValidatable;
 import com.example.cleaning_service.customers.services.CustomerService;
 import com.example.cleaning_service.exceptions.DuplicateFieldsException;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
