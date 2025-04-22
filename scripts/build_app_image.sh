@@ -19,12 +19,6 @@ docker build -t phunpt01/app-image:eclipse-temurin-bookworm-slim -f Dockerfile-b
   -Djib.from.platforms=linux/amd64
 
 ./mvnw compile jib:dockerBuild \
-  -Djib.from.image=amazoncorretto:21.0.7@sha256:674d24b818b8e889fb530a98c250f8638f14116f34eddbe0191f74e4dbc12aa0 \
-  -Djib.to.image=docker.io/phunpt01/app-image:jib-amazoncorretto-21.0.7 \
-  -Djib.container.jvmFlags="-XX:+UseParallelGC,-XX:MaxRAMPercentage=75" \
-  -Djib.from.platforms=linux/amd64
-
-./mvnw compile jib:dockerBuild \
   -Djib.from.image=amazoncorretto:21@sha256:674d24b818b8e889fb530a98c250f8638f14116f34eddbe0191f74e4dbc12aa0 \
   -Djib.to.image=docker.io/phunpt01/app-image:jib-amazoncorretto-21 \
   -Djib.container.jvmFlags="-XX:+UseParallelGC,-XX:MaxRAMPercentage=75" \

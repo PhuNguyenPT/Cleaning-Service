@@ -79,21 +79,15 @@ services:
         condition: service_healthy
       local-schema-registry0:
         condition: service_healthy
-      local-schema-registry1:
-        condition: service_healthy
       local-kafka-connect0:
         condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: local-kafka0:29092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'local-kafka0:29092, local-kafka1:29092'
       KAFKA_CLUSTERS_0_METRICS_PORT: 9997
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://local-schema-registry0:8085
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: 'http://local-schema-registry0:8085'
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://local-kafka-connect0:8083
-      KAFKA_CLUSTERS_1_NAME: secondLocal
-      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: local-kafka1:29092
-      KAFKA_CLUSTERS_1_METRICS_PORT: 9998
-      KAFKA_CLUSTERS_1_SCHEMAREGISTRY: http://local-schema-registry1:8085
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: 'http://local-kafka-connect0:8083'
       DYNAMIC_CONFIG_ENABLED: 'true'
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://local-kafka-ui:8080"]
@@ -112,7 +106,8 @@ services:
       - "9092:9092"
       - "9997:9997"
     environment:
-      KAFKA_BROKER_ID: 1
+      CLUSTER_ID: '45vUBEgyQjSywv_811biQw'
+      KAFKA_BROKER_ID: 0
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
       KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://local-kafka0:29092,PLAINTEXT_HOST://localhost:9092'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -122,8 +117,8 @@ services:
       KAFKA_JMX_PORT: 9997
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=local-kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
       KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_NODE_ID: 1
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@local-kafka0:29093'
+      KAFKA_NODE_ID: 0
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093, 1@local-kafka1:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://local-kafka0:29092,CONTROLLER://local-kafka0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
@@ -148,18 +143,19 @@ services:
       - "9093:9092"
       - "9998:9998"
     environment:
+      CLUSTER_ID: '45vUBEgyQjSywv_811biQw'
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://local-kafka1:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://local-kafka1:29092,PLAINTEXT_HOST://localhost:9093'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9998
-      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=local-kafka0 -Dcom.sun.management.jmxremote.rmi.port=9998
+      KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=local-kafka1 -Dcom.sun.management.jmxremote.rmi.port=9998
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_NODE_ID: 1
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@local-kafka1:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '0@local-kafka0:29093,1@local-kafka1:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://local-kafka1:29092,CONTROLLER://local-kafka1:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
@@ -184,43 +180,18 @@ services:
     depends_on:
       local-kafka0:
         condition: service_healthy
+      local-kafka1:
+        condition: service_healthy
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://local-kafka0:29092
-      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://local-kafka0:29092,PLAINTEXT://local-kafka1:29092'
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: 'PLAINTEXT'
       SCHEMA_REGISTRY_HOST_NAME: local-schema-registry0
-      SCHEMA_REGISTRY_LISTENERS: http://local-schema-registry0:8085
-
+      SCHEMA_REGISTRY_LISTENERS: 'http://local-schema-registry0:8085'
       SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "http"
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
     healthcheck:
       test: ["CMD", "curl", "--output", "/dev/null", "--silent", "--head", "--fail", "http://local-schema-registry0:8085/subjects"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 20s
-    networks:
-      - local-kafka-network
-
-  local-schema-registry1:
-    image: confluentinc/cp-schema-registry:7.2.1
-    container_name: local-schema-registry1
-    ports:
-      - "18085:8085"
-    depends_on:
-      local-kafka1:
-        condition: service_healthy
-    environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://local-kafka1:29092
-      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
-      SCHEMA_REGISTRY_HOST_NAME: local-schema-registry1
-      SCHEMA_REGISTRY_LISTENERS: http://local-schema-registry1:8085
-
-      SCHEMA_REGISTRY_SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: "http"
-      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
-    healthcheck:
-      test: ["CMD", "curl", "--output", "/dev/null", "--silent", "--head", "--fail", "http://local-schema-registry1:8085/subjects"]
       interval: 30s
       timeout: 10s
       retries: 10
@@ -239,7 +210,7 @@ services:
       local-schema-registry0:
         condition: service_healthy
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: local-kafka0:29092
+      CONNECT_BOOTSTRAP_SERVERS: 'local-kafka0:29092,local-kafka1:29092'
       CONNECT_GROUP_ID: compose-connect-group
       CONNECT_CONFIG_STORAGE_TOPIC: _connect_configs
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
@@ -248,9 +219,9 @@ services:
       CONNECT_STATUS_STORAGE_TOPIC: _connect_status
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://local-schema-registry0:8085
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://local-schema-registry0:8085'
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://local-schema-registry0:8085
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://local-schema-registry0:8085'
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_REST_ADVERTISED_HOST_NAME: local-kafka-connect0
