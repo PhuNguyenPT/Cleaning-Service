@@ -7,15 +7,13 @@ import com.example.cleaning_service.providers.mappers.ProviderMapper;
 import com.example.cleaning_service.providers.repositories.ProviderRepository;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
-
-import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @Slf4j
 @Service
@@ -49,7 +47,7 @@ public class ProviderService {
         return savedProvider;
     }
 
-    @Transactional(REQUIRES_NEW)
+    @Transactional
     public Provider findById(UUID id) {
         return providerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Provider with id " + id + " not found"));

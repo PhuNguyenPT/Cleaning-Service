@@ -29,7 +29,7 @@ public class ProviderAccountListener {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleProviderAccountCreatedEvent(ProviderCreatedEvent providerCreatedEvent) {
+    void handleProviderAccountCreatedEvent(ProviderCreatedEvent providerCreatedEvent) {
         Provider provider = providerService.findById(providerCreatedEvent.provider().getId());
         User user = userService.findById(providerCreatedEvent.user().getId());
         ProviderAccount providerAccount = ProviderAccount.builder()

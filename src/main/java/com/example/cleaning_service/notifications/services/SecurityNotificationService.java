@@ -38,7 +38,6 @@ public class SecurityNotificationService {
 
         try {
             String notificationJson = objectMapper.writeValueAsString(notification);
-            // Use user ID as key for partitioning
             kafkaTemplate.send(SECURITY_NOTIFICATION_TOPIC, event.user().getId().toString(), notificationJson);
             log.info("Sent role update notification to Kafka for user: {}", event.user().getUsername());
         } catch (JsonProcessingException e) {

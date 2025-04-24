@@ -24,7 +24,7 @@ public class PermissionService implements IPermissionService {
      * Ensures that all required permissions exist in the database.
      * If any permissions are missing, they are created and saved.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     @Override
     public Set<Permission> ensurePermissionsExist(Set<EPermission> requiredPermissions) {
         // 🔹 Fetch existing permissions in one query

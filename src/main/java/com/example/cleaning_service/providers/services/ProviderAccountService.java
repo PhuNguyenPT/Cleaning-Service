@@ -21,7 +21,7 @@ public class ProviderAccountService {
         this.providerAccountRepository = providerAccountRepository;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public ProviderAccount saveProviderAccount(ProviderAccount providerAccount) {
         return providerAccountRepository.saveAndFlush(providerAccount);
     }
