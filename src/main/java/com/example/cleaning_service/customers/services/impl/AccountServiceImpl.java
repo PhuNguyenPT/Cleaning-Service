@@ -171,7 +171,7 @@ class AccountServiceImpl implements AccountService {
             accountResponseModel.add(customerLink);
         }
 
-        Link userProfileLink = linkTo(methodOn(AuthController.class).getAuthenticatedUser(user)).withRel("profile");
+        Link userProfileLink = linkTo(methodOn(AuthController.class).getAuthenticatedUser(user, null)).withRel("profile");
         log.info("Retrieved user profile link {}", userProfileLink);
 
         accountResponseModel.add(userProfileLink);

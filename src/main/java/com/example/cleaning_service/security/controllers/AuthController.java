@@ -1,5 +1,6 @@
 package com.example.cleaning_service.security.controllers;
 
+import com.example.cleaning_service.security.assemblers.AuthResponseProfileModelAssembler;
 import com.example.cleaning_service.security.assemblers.AuthResponseRegisterModelAssembler;
 import com.example.cleaning_service.security.assemblers.TokenLoginModelAssembler;
 import com.example.cleaning_service.security.assemblers.TokenModelAssembler;
@@ -7,6 +8,7 @@ import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.token.TokenEntity;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.services.IAuthService;
+import com.example.cleaning_service.security.services.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,13 +37,18 @@ public class AuthController {
     private final AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler;
     private final TokenModelAssembler tokenModelAssembler;
     private final TokenLoginModelAssembler tokenLoginModelAssembler;
+    private final AuthResponseProfileModelAssembler authResponseProfileModelAssembler;
+    private final IUserService iUserService;
 
     public AuthController(IAuthService authService, AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler,
-                          TokenModelAssembler tokenModelAssembler, TokenLoginModelAssembler tokenLoginModelAssembler) {
+                          TokenModelAssembler tokenModelAssembler, TokenLoginModelAssembler tokenLoginModelAssembler,
+                          AuthResponseProfileModelAssembler authResponseProfileModelAssembler, IUserService iUserService) {
         this.authService = authService;
         this.authResponseRegisterModelAssembler = authResponseRegisterModelAssembler;
         this.tokenModelAssembler = tokenModelAssembler;
         this.tokenLoginModelAssembler = tokenLoginModelAssembler;
+        this.authResponseProfileModelAssembler = authResponseProfileModelAssembler;
+        this.iUserService = iUserService;
     }
 
     @Operation(summary = "User login", description = "Authenticates a user and returns a JWT token.")
@@ -66,8 +73,14 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping(value = "/me", produces = { "application/hal+json" })
     @ResponseStatus(HttpStatus.OK)
-    public AuthResponseProfileModel getAuthenticatedUser(@AuthenticationPrincipal User user) {
-        return authService.getAuthenticatedUser(user);
+    public AuthResponseProfileModel getAuthenticatedUser(@AuthenticationPrincipal User user, HttpServletRequest request) {
+        User savedUser = iUserService.findById(user.getId());
+        log.info("Assembling model for authenticated user {}", user.getId());
+        AuthResponseProfileModel authResponseProfileModel = authResponseProfileModelAssembler.toModel(savedUser);
+        log.info("Assembling model {} or authenticated user {}", authResponseProfileModel.getId(), user.getId());
+        Link logoutLink = linkTo(methodOn(AuthController.class).logout(request)).withRel("logout");
+        authResponseProfileModel.add(logoutLink);
+        return authResponseProfileModel;
     }
 
     @Operation(summary = "User registration", description = "Registers a new user and returns user details with a token.")

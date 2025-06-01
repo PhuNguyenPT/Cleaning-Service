@@ -46,19 +46,21 @@ class UserService implements IUserService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final PagedResourcesAssembler<User> pagedResourcesAssembler;
     private final UserResponseModelAssembler userResponseModelAssembler;
+    private final AuthMapper authMapper;
 
     UserService(UserRepository userRepository,
                 IRoleService roleService,
                 BCryptPasswordEncoder passwordEncoder,
                 ApplicationEventPublisher applicationEventPublisher,
                 UserResponseModelAssembler userResponseModelAssembler,
-                PagedResourcesAssembler<User> pagedResourcesAssembler) {
+                PagedResourcesAssembler<User> pagedResourcesAssembler, AuthMapper authMapper) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
         this.applicationEventPublisher = applicationEventPublisher;
         this.pagedResourcesAssembler = pagedResourcesAssembler; // Injected, not new
         this.userResponseModelAssembler = userResponseModelAssembler;
+        this.authMapper = authMapper;
     }
 
     @Override
@@ -121,7 +123,7 @@ class UserService implements IUserService {
             throw new EntityExistsException("Username: '"  + authRequest.username() + "' already exists!");
         }
 
-        User newUserRequest = AuthMapper.fromAuthRequestToUser(authRequest);
+        User newUserRequest = authMapper.fromAuthRequestToUser(authRequest);
 
         // 🔹 Ensure the "USER" role exists and fetch it
         Role userRole = roleService.ensureRoleExists(ERole.USER);

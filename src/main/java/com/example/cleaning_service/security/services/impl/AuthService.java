@@ -82,18 +82,6 @@ class AuthService implements IAuthService {
 
     @Override
     @Transactional
-    public AuthResponseProfileModel getAuthenticatedUser(User user) {
-        log.info("Assembling model for authenticated user {}", user.getId());
-        AuthResponseProfileModel authResponseProfileModel = authResponseProfileModelAssembler.toModel(user);
-        // Add HATEOAS self-link
-        Link selfLink =  linkTo(methodOn(AuthController.class).getAuthenticatedUser(user)).withSelfRel();
-        Link logoutLink = linkTo(methodOn(AuthController.class).logout(httpServletRequest)).withRel("logout");
-        authResponseProfileModel.add(selfLink, logoutLink);
-        return authResponseProfileModel;
-    }
-
-    @Override
-    @Transactional
     public TokenEntity refreshToken(String token, User user) {
         log.info("Attempting to refresh token for user {}", user.getId());
         logout(token);
