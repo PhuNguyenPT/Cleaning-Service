@@ -1,7 +1,5 @@
 package com.example.cleaning_service.security.services.impl;
 
-import com.example.cleaning_service.security.assemblers.AuthResponseProfileModelAssembler;
-import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.dtos.auth.*;
 import com.example.cleaning_service.security.entities.token.TokenEntity;
 import com.example.cleaning_service.security.entities.user.User;
@@ -9,10 +7,8 @@ import com.example.cleaning_service.security.services.IAuthService;
 import com.example.cleaning_service.security.services.IJwtService;
 import com.example.cleaning_service.security.services.IUserService;
 import com.example.cleaning_service.security.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.Link;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,9 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @Service
 class AuthService implements IAuthService {
 
@@ -34,19 +27,13 @@ class AuthService implements IAuthService {
     private final IUserService userService;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-    private final AuthResponseProfileModelAssembler authResponseProfileModelAssembler;
-    private final HttpServletRequest httpServletRequest;
-
 
     public AuthService(IJwtService jwtService, IUserService userService, JwtUtil jwtUtil,
-                       AuthenticationManager authenticationManager,
-                       AuthResponseProfileModelAssembler authResponseProfileModelAssembler, HttpServletRequest httpServletRequest) {
+                       AuthenticationManager authenticationManager) {
         this.jwtService = jwtService;
         this.userService = userService;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
-        this.authResponseProfileModelAssembler = authResponseProfileModelAssembler;
-        this.httpServletRequest = httpServletRequest;
     }
 
     @Override
