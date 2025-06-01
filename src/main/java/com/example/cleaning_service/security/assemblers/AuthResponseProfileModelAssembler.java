@@ -1,6 +1,5 @@
 package com.example.cleaning_service.security.assemblers;
 
-import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseProfileModel;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.mapper.AuthMapper;
