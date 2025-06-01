@@ -1,7 +1,6 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.governments.AdminGovernmentDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.governments.GovernmentModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
@@ -50,7 +49,6 @@ class GovernmentServiceImpl implements GovernmentService {
     private final GovernmentDetailsModelAssembler governmentDetailsModelAssembler;
 
     private final GovernmentMapper governmentMapper;
-    private final AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     GovernmentServiceImpl(
@@ -65,7 +63,7 @@ class GovernmentServiceImpl implements GovernmentService {
             GovernmentDetailsModelAssembler governmentDetailsModelAssembler,
 
             GovernmentMapper governmentMapper,
-            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher) {
 
         this.governmentRepository = governmentRepository;
 
@@ -79,7 +77,6 @@ class GovernmentServiceImpl implements GovernmentService {
         this.governmentDetailsModelAssembler = governmentDetailsModelAssembler;
 
         this.governmentMapper = governmentMapper;
-        this.adminGovernmentDetailsModelAssembler = adminGovernmentDetailsModelAssembler;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -110,13 +107,7 @@ class GovernmentServiceImpl implements GovernmentService {
         );
         CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
         applicationEventPublisher.publishEvent(customerCreationEvent);
-//        Account account = accountService.handleCustomerCreation(accountRequest);
-//
-//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-//            throw new IllegalStateException("Account association does not reference a valid government.");
-//        }
-//
-//        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) account.getCustomer());
+
         GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel(savedGovernment);
 
         log.info("Successfully created government response: {}", governmentResponseModel);
@@ -249,8 +240,9 @@ class GovernmentServiceImpl implements GovernmentService {
      * @return The {@link Government} entity if found
      * @throws EntityNotFoundException If no government exists with the given ID
      */
+    @Override
     @Transactional
-    Government findById(UUID id) {
+    public Government findById(UUID id) {
         return governmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found"));
     }
@@ -271,16 +263,5 @@ class GovernmentServiceImpl implements GovernmentService {
     @Transactional
     boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Government);
-    }
-
-    @Override
-    @Transactional
-    public GovernmentDetailsResponseModel getAdminGovernmentDetailsResponseModelById(UUID id) {
-        log.info("Attempting to retrieve admin government with ID: {}", id);
-        Government government = findById(id);
-        log.info("Retrieved government with ID: {}", id);
-        GovernmentDetailsResponseModel governmentDetailsResponseModel = adminGovernmentDetailsModelAssembler.toModel(government);
-        log.info("Successfully retrieved admin government details response model: {}", governmentDetailsResponseModel);
-        return governmentDetailsResponseModel;
     }
 }

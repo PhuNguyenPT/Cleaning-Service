@@ -4,6 +4,7 @@ import com.example.cleaning_service.customers.dto.companies.CompanyDetailsRespon
 import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
 import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
+import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -94,15 +95,13 @@ public interface CompanyService {
      * This method performs the following operations:
      * <ol>
      * <li>Retrieves the company entity using the provided ID</li>
-     * <li>Converts the company entity into an administrative detailed response model</li>
-     * <li>Returns the admin-specific view of company details</li>
      * </ol>
      * <p>
      * Note: This method does not perform user permission checks as it's intended for admin use.
      *
      * @param id The UUID of the company to retrieve
-     * @return A {@link CompanyDetailsResponseModel} containing company information for admin view
+     * @return A {@link Company} containing company information for admin view
      * @throws EntityNotFoundException If no company exists with the given ID
      */
-    CompanyDetailsResponseModel getAdminCompanyDetailsResponseModelById(UUID id);
+    Company findById(UUID id);
 }

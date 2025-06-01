@@ -4,6 +4,7 @@ import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsR
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentUpdateRequest;
+import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -92,12 +93,11 @@ public interface GovernmentService {
      * This method performs the following operations:
      * <ol>
      *   <li>Retrieves the government entity using the provided ID</li>
-     *   <li>Converts the government entity into an admin-specific detailed response model</li>
      * </ol>
      *
      * @param id The UUID of the government entity to retrieve
-     * @return A {@link GovernmentDetailsResponseModel} containing government entity information
+     * @return A {@link Government} containing government entity information
      * @throws EntityNotFoundException If the government entity is not found
      */
-    GovernmentDetailsResponseModel getAdminGovernmentDetailsResponseModelById(UUID id);
+    Government findById(UUID id);
 }

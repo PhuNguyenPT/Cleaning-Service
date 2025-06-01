@@ -4,6 +4,7 @@ import com.example.cleaning_service.customers.dto.individuals.IndividualCustomer
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerUpdateRequest;
+import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -101,5 +102,5 @@ public interface IndividualCustomerService {
       * @return A {@link IndividualCustomerDetailsResponseModel} containing individual customer information
       * @throws EntityNotFoundException If the individual customer with the specified ID is not found
       */
-     IndividualCustomerDetailsResponseModel getAdminIndividualCustomerDetailsResponseModelById(UUID id);
+     IndividualCustomer findById(UUID id);
 }

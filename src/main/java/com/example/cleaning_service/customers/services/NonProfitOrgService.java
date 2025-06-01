@@ -103,5 +103,5 @@ public interface NonProfitOrgService {
      * @return A {@link NonProfitOrgDetailsResponseModel} containing administrative organization information
      * @throws EntityNotFoundException If the organization is not found
      */
-    NonProfitOrgDetailsResponseModel getAdminNonProfitOrgDetailsResponseModelById(UUID id);
+    NonProfitOrg findById(UUID id);
 }

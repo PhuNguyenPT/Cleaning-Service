@@ -1,7 +1,6 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.AdminNonProfitOrgDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailModelAssembler;
 import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
@@ -50,7 +49,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
     private final NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler;
 
     private final NonProfitOrgMapper nonProfitOrgMapper;
-    private final AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -65,7 +63,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
      * @param nonProfitOrgModelAssembler Assembler for basic organization models
      * @param nonProfitOrgDetailModelAssembler Assembler for detailed organization models
      * @param nonProfitOrgMapper Mapper for converting between DTOs and entities
-     * @param adminNonProfitOrgDetailsModelAssembler Assembler for admin-focused organization models
      */
     NonProfitOrgServiceImpl(
             NonProfitOrgRepository nonProfitOrgRepository,
@@ -77,7 +74,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
             NonProfitOrgModelAssembler nonProfitOrgModelAssembler,
             NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler,
             NonProfitOrgMapper nonProfitOrgMapper,
-            AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher) {
 
         this.nonProfitOrgRepository = nonProfitOrgRepository;
         this.accountService = accountService;
@@ -90,7 +87,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
         this.nonProfitOrgDetailModelAssembler = nonProfitOrgDetailModelAssembler;
 
         this.nonProfitOrgMapper = nonProfitOrgMapper;
-        this.adminNonProfitOrgDetailsModelAssembler = adminNonProfitOrgDetailsModelAssembler;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -312,30 +308,10 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
      * @return The {@link NonProfitOrg} entity
      * @throws EntityNotFoundException If no organization exists with the given ID
      */
-    @Transactional
-    NonProfitOrg findById(UUID id) {
-        return nonProfitOrgRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Non-profit organization with ID: " + id + " not found"));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Implementation steps:
-     * <ol>
-     *     <li>Retrieves the {@link NonProfitOrg} by ID using {@link #findById}</li>
-     *     <li>Creates admin-level detailed response model via appropriate assembler</li>
-     * </ol>
-     */
     @Override
     @Transactional
-    public NonProfitOrgDetailsResponseModel getAdminNonProfitOrgDetailsResponseModelById(UUID id) {
-        log.info("Attempting to retrieve admin non-profit organization details for ID: {}", id);
-        NonProfitOrg nonProfitOrg = findById(id);
-        log.info("Retrieved admin non-profit organization details: {}", nonProfitOrg);
-        NonProfitOrgDetailsResponseModel nonProfitOrgDetailsResponseModel =
-                adminNonProfitOrgDetailsModelAssembler.toModel(nonProfitOrg);
-        log.info("Successfully retrieved admin non-profit organization details response model: {}", nonProfitOrgDetailsResponseModel);
-        return nonProfitOrgDetailsResponseModel;
+    public NonProfitOrg findById(UUID id) {
+        return nonProfitOrgRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Non-profit organization with ID: " + id + " not found"));
     }
 }

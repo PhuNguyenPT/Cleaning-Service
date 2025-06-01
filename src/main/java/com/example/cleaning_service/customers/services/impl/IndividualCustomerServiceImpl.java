@@ -1,7 +1,6 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.individuals.AdminIndividualCustomerDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
@@ -50,7 +49,6 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
     private final IndividualCustomerDetailsModelAssembler individualCustomerDetailsModelAssembler;
     private final CustomerService customerService;
     private final IndividualCustomerMapper individualCustomerMapper;
-    private final AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -65,7 +63,6 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      * @param individualCustomerDetailsModelAssembler The assembler for detailed individual customer models
      * @param customerService The service for general customer operations
      * @param individualCustomerMapper The mapper for individual customer objects
-     * @param adminIndividualCustomerDetailsModelAssembler The assembler for admin-specific detailed individual customer models
      */
     IndividualCustomerServiceImpl(
             IndividualCustomerRepository individualCustomerRepository,
@@ -77,7 +74,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
             IndividualCustomerDetailsModelAssembler individualCustomerDetailsModelAssembler,
             CustomerService customerService,
             IndividualCustomerMapper individualCustomerMapper,
-            AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher) {
 
         this.individualCustomerRepository = individualCustomerRepository;
         this.accountService = accountService;
@@ -88,7 +85,6 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
         this.individualCustomerDetailsModelAssembler = individualCustomerDetailsModelAssembler;
         this.customerService = customerService;
         this.individualCustomerMapper = individualCustomerMapper;
-        this.adminIndividualCustomerDetailsModelAssembler = adminIndividualCustomerDetailsModelAssembler;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -335,33 +331,10 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      * @return The {@link IndividualCustomer} entity if found
      * @throws EntityNotFoundException If the individual customer with the specified ID is not found
      */
-    @Transactional
-    IndividualCustomer findById(UUID id) {
-        return individualCustomerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Implementation details:
-     * <ol>
-     *   <li>Logs retrieval attempt</li>
-     *   <li>Calls {@link #findById} to retrieve the individual customer by ID</li>
-     *   <li>Logs retrieval of customer details</li>
-     *   <li>Uses {@link AdminIndividualCustomerDetailsModelAssembler} to create the response model</li>
-     *   <li>Logs successful model creation</li>
-     * </ol>
-     */
     @Override
     @Transactional
-    public IndividualCustomerDetailsResponseModel getAdminIndividualCustomerDetailsResponseModelById(UUID id) {
-        log.info("Attempting to retrieve admin individual customer details for ID: {}", id);
-        IndividualCustomer individualCustomer = findById(id);
-        log.info("Retrieved admin individual customer details: {}", individualCustomer);
-        IndividualCustomerDetailsResponseModel individualCustomerDetailsResponseModel =
-                adminIndividualCustomerDetailsModelAssembler.toModel(individualCustomer);
-        log.info("Successfully retrieved admin individual customer details response model: {}", individualCustomerDetailsResponseModel);
-        return individualCustomerDetailsResponseModel;
+    public IndividualCustomer findById(UUID id) {
+        return individualCustomerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
     }
 }
