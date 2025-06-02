@@ -30,7 +30,7 @@ public interface CompanyService {
      * @return A {@link CompanyResponseModel} containing details of the created company
      * @throws IllegalStateException If the updated account does not reference a valid company
      */
-    CompanyResponseModel createCompany(CompanyRequest companyRequest, User user);
+    Company createCompany(CompanyRequest companyRequest, User user);
 
     /**
      * Retrieves detailed company information by ID for a specific user.
@@ -48,7 +48,7 @@ public interface CompanyService {
      * @throws AccessDeniedException If the user is not associated with the requested company
      * @throws EntityNotFoundException If the company does not exist
      */
-    CompanyDetailsResponseModel getCompanyDetailsResponseModelById(UUID id, User user);
+    Company findByIdAndUser(UUID id, User user);
 
     /**
      * Updates company details based on the provided request.
@@ -69,7 +69,7 @@ public interface CompanyService {
      * @throws AccessDeniedException If the user lacks permission to update the company
      * @throws IllegalStateException If the company is not associated with the user's account
      */
-    CompanyDetailsResponseModel updateCompanyDetailsById(UUID id, CompanyUpdateRequest updateRequest, User user);
+    Company updateCompanyDetailsById(UUID id, CompanyUpdateRequest updateRequest, User user);
 
     /**
      * Deletes a company by its ID after verifying user permissions.
