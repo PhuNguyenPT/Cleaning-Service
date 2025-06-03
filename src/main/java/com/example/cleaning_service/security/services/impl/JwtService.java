@@ -102,7 +102,7 @@ public class JwtService implements IJwtService {
     public boolean isTokenBlacklisted(String token) {
         log.debug("Checking if token is blacklisted");
         TokenEntity tokenEntity = findByToken(token);
-        log.info("Found token: {}, blacklisted: {}", token, tokenEntity.isBlacklisted());
+        log.info("Found token: {}, blacklisted: {}", token.substring(0,20), tokenEntity.isBlacklisted());
         return tokenEntity.isBlacklisted();
     }
 }
