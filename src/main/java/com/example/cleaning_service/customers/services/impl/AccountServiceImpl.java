@@ -1,20 +1,11 @@
 package com.example.cleaning_service.customers.services.impl;
 
-import com.example.cleaning_service.customers.assemblers.accounts.AccountDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.accounts.AccountModelAssembler;
-import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountModelAssembler;
-import com.example.cleaning_service.customers.controllers.AccountController;
-import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.accounts.AccountResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountUpdateRequest;
 import com.example.cleaning_service.customers.entities.*;
 import com.example.cleaning_service.customers.enums.EAssociationType;
 import com.example.cleaning_service.customers.repositories.AccountRepository;
 import com.example.cleaning_service.customers.services.AccountService;
-import com.example.cleaning_service.customers.services.OrganizationDetailsService;
-import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,22 +13,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Service class that manages associations between users and customer accounts.
@@ -52,31 +33,14 @@ class AccountServiceImpl implements AccountService {
 
     private static final Logger log = LoggerFactory.getLogger(AccountServiceImpl.class);
     private final AccountRepository accountRepository;
-    private final AccountDetailsModelAssembler accountDetailsModelAssembler;
-    private final OrganizationDetailsService organizationDetailsService;
-    private final AccountModelAssembler accountModelAssembler;
-    private final PagedResourcesAssembler<Account> pagedResourcesAssembler;
-    private final AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler;
-    private final AdminAccountModelAssembler adminAccountModelAssembler;
 
-    AccountServiceImpl(AccountRepository accountRepository,
-                       AccountDetailsModelAssembler accountDetailsModelAssembler,
-                       OrganizationDetailsService organizationDetailsService,
-                       AccountModelAssembler accountModelAssembler,
-                       AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler,
-                       AdminAccountModelAssembler adminAccountModelAssembler,
-                       PagedResourcesAssembler<Account> pagedResourcesAssembler) {
+    AccountServiceImpl(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
-        this.accountDetailsModelAssembler = accountDetailsModelAssembler;
-        this.organizationDetailsService = organizationDetailsService;
-        this.accountModelAssembler = accountModelAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
-        this.adminAccountDetailsModelAssembler = adminAccountDetailsModelAssembler;
-        this.adminAccountModelAssembler = adminAccountModelAssembler;
     }
 
+    @Override
     @Transactional
-    Account findById(UUID id) {
+    public Account findById(UUID id) {
         log.info("Start retrieving account details with id: {}", id);
         return accountRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Account with id " + id + " not found"));
@@ -157,43 +121,12 @@ class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public AccountResponseModel getAccountResponseModelById(User user) {
-        log.info("Start retrieving account details for {}", user);
-        Account account = findAccountWithCustomerByUser(user);
-        log.info("Retrieved account entity {}", account);
-
-        AccountResponseModel accountResponseModel = accountModelAssembler.toModel(account);
-        log.info("Retrieved account model {}", accountResponseModel);
-
-        if (account.getCustomer() != null) {
-            Link customerLink = organizationDetailsService.getLinkByIOrganization((IOrganization) account.getCustomer());
-            log.info("Retrieved customer link {}", customerLink);
-            accountResponseModel.add(customerLink);
-        }
-
-        Link userProfileLink = linkTo(methodOn(AuthController.class).getAuthenticatedUser(user)).withRel("profile");
-        log.info("Retrieved user profile link {}", userProfileLink);
-
-        accountResponseModel.add(userProfileLink);
-
-        return accountResponseModel;
-    }
-
-    @Override
-    @Transactional
-    public AccountDetailsResponseModel getAccountDetailsResponseModelById(UUID id, User user) {
+    public Account getAccountDetailsResponseModelById(UUID id, User user) {
         Account account = findById(id);
         if (!account.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("User " + user.getUsername()  + " is not authorized to access this account with id " + id);
         }
-        AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsModelAssembler.toModel(account);
-        log.info("Retrieved account details model {}", accountDetailsResponseModel);
-
-        Link accountDefaultLink = linkTo(methodOn(AccountController.class).getAccountByUser(user)).withRel("me");
-        log.info("Retrieved account link {}", accountDefaultLink);
-        accountDetailsResponseModel.add(accountDefaultLink);
-
-        return accountDetailsResponseModel;
+        return account;
     }
 
     @Transactional
@@ -203,51 +136,14 @@ class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public PagedModel<AccountResponseModel> getAdminAccountDetailsPageModelByPageable(Pageable pageable) {
-        log.info("Attempting to get account page by pageable {}", pageable);
-        Page<Account> accountPage = accountRepository.findAll(pageable);
-
-        log.info("Retrieved account page {}", accountPage);
-        PagedModel<AccountResponseModel> accountDetailsResponseModelPagedModel = pagedResourcesAssembler.toModel(
-                accountPage, adminAccountModelAssembler
-        );
-        log.info("Retrieved account page model {}", accountDetailsResponseModelPagedModel);
-        Map<UUID, Link> uuidLinkMap = new HashMap<>();
-        organizationDetailsService.addLinksForIOrganization(
-                uuidLinkMap,
-                accountPage,
-                accountDetailsResponseModelPagedModel,
-                Account::getId,
-                AccountResponseModel::getId,
-                Account::getIOrganization,
-                organizationDetailsService::getAdminCustomerLinkByIOrganization,
-                AccountResponseModel::addSingleLink
-        );
-
-        return accountDetailsResponseModelPagedModel;
-    }
-
-    @Override
-    @Transactional
-    public AccountDetailsResponseModel getAdminAccountDetailsResponseModelById(UUID id) {
-        log.info("Attempting to get account details by id {}", id);
-        Account account = findById(id);
-        AccountDetailsResponseModel accountDetailsResponseModel = adminAccountDetailsModelAssembler.toModel(account);
-        log.info("Retrieved admin finding: account details model {}", accountDetailsResponseModel);
-        return accountDetailsResponseModel;
-    }
-
-    @Override
-    @Transactional
-    public AccountDetailsResponseModel patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest) {
+    public Account patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest) {
         log.info("Attempting to update account details by id {}", id);
         Account account = findById(id);
         log.info("Retrieved account details for patch {}", account);
         Account patchedAccount = patchAccountFields(account, accountUpdateRequest);
         log.info("Patched account details {}", patchedAccount);
-        AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsModelAssembler.toModel(patchedAccount);
-        log.info("Patched account details model {}", accountDetailsResponseModel);
-        return accountDetailsResponseModel;
+        return patchedAccount;
+
     }
 
     @Transactional

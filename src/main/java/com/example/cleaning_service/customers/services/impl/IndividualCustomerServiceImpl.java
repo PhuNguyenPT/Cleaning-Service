@@ -1,13 +1,9 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.individuals.AdminIndividualCustomerDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
-import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerUpdateRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
@@ -46,11 +42,8 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
     private final OrganizationDetailsService organizationDetailsService;
-    private final IndividualCustomerModelAssembler individualCustomerModelAssembler;
-    private final IndividualCustomerDetailsModelAssembler individualCustomerDetailsModelAssembler;
     private final CustomerService customerService;
     private final IndividualCustomerMapper individualCustomerMapper;
-    private final AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -61,11 +54,8 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      * @param abstractCustomerService The service for abstract customer operations
      * @param businessEntityService The service for business entity operations
      * @param organizationDetailsService The service for organization details operations
-     * @param individualCustomerModelAssembler The assembler for basic individual customer models
-     * @param individualCustomerDetailsModelAssembler The assembler for detailed individual customer models
      * @param customerService The service for general customer operations
      * @param individualCustomerMapper The mapper for individual customer objects
-     * @param adminIndividualCustomerDetailsModelAssembler The assembler for admin-specific detailed individual customer models
      */
     IndividualCustomerServiceImpl(
             IndividualCustomerRepository individualCustomerRepository,
@@ -73,22 +63,17 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
             OrganizationDetailsService organizationDetailsService,
-            IndividualCustomerModelAssembler individualCustomerModelAssembler,
-            IndividualCustomerDetailsModelAssembler individualCustomerDetailsModelAssembler,
             CustomerService customerService,
             IndividualCustomerMapper individualCustomerMapper,
-            AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher) {
 
         this.individualCustomerRepository = individualCustomerRepository;
         this.accountService = accountService;
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
         this.organizationDetailsService = organizationDetailsService;
-        this.individualCustomerModelAssembler = individualCustomerModelAssembler;
-        this.individualCustomerDetailsModelAssembler = individualCustomerDetailsModelAssembler;
         this.customerService = customerService;
         this.individualCustomerMapper = individualCustomerMapper;
-        this.adminIndividualCustomerDetailsModelAssembler = adminIndividualCustomerDetailsModelAssembler;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -108,7 +93,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      */
     @Override
     @Transactional
-    public IndividualCustomerResponseModel createIndividualCustomer(@Valid IndividualCustomerRequest individualCustomerRequest, User user) {
+    public IndividualCustomer createIndividualCustomer(@Valid IndividualCustomerRequest individualCustomerRequest, User user) {
         log.info("Check duplicated fields");
         customerService.checkDuplicatedFields(
                 individualCustomerRequest,
@@ -133,19 +118,8 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
         );
         CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
         applicationEventPublisher.publishEvent(customerCreationEvent);
-//        Account account = accountService.handleCustomerCreation(accountRequest);
-//
-//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-//            throw new IllegalStateException("Account does not reference a valid individual.");
-//        }
-//
-//        IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerModelAssembler
-//                .toModel((IndividualCustomer) account.getCustomer());
-        IndividualCustomerResponseModel individualCustomerResponseModel = individualCustomerModelAssembler
-                .toModel(savedIndividualCustomer);
-        log.info("Successfully created individual customer response: {}", individualCustomerResponseModel);
 
-        return individualCustomerResponseModel;
+        return savedIndividualCustomer;
     }
 
     /**
@@ -175,13 +149,9 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      */
     @Override
     @Transactional
-    public IndividualCustomerDetailsResponseModel getIndividualCustomerDetailsById(UUID id, User user) {
+    public IndividualCustomer getIndividualCustomerDetailsById(UUID id, User user) {
         log.info("Retrieving individual details for ID: {} by user: {}", id, user.getUsername());
-        IndividualCustomer individualCustomer = getByIdAndUser(id, user);
-        IndividualCustomerDetailsResponseModel individualCustomerDetailsResponseModel =
-                individualCustomerDetailsModelAssembler.toModel(individualCustomer);
-        log.info("Retrieved individual details: {}", individualCustomerDetailsResponseModel);
-        return individualCustomerDetailsResponseModel;
+        return getByIdAndUser(id, user);
     }
 
     /**
@@ -223,7 +193,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      */
     @Override
     @Transactional
-    public IndividualCustomerDetailsResponseModel updateIndividualCustomerDetailsById(UUID id, @Valid IndividualCustomerUpdateRequest updateRequest, User user) {
+    public IndividualCustomer updateIndividualCustomerDetailsById(UUID id, @Valid IndividualCustomerUpdateRequest updateRequest, User user) {
         log.info("Attempting to update individual customer details for ID: {} by user: {}", id, user.getUsername());
         IndividualCustomer individualCustomer = findIndividualCustomerToChange(id, user);
 
@@ -232,7 +202,7 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
         IndividualCustomer updatedIndividualCustomer = saveIndividualCustomer(individualCustomer);
         log.info("Successfully updated company with ID: {}", updatedIndividualCustomer.getId());
 
-        return individualCustomerDetailsModelAssembler.toModel(updatedIndividualCustomer);
+        return updatedIndividualCustomer;
     }
 
     /**
@@ -335,33 +305,10 @@ class IndividualCustomerServiceImpl implements IndividualCustomerService {
      * @return The {@link IndividualCustomer} entity if found
      * @throws EntityNotFoundException If the individual customer with the specified ID is not found
      */
-    @Transactional
-    IndividualCustomer findById(UUID id) {
-        return individualCustomerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Implementation details:
-     * <ol>
-     *   <li>Logs retrieval attempt</li>
-     *   <li>Calls {@link #findById} to retrieve the individual customer by ID</li>
-     *   <li>Logs retrieval of customer details</li>
-     *   <li>Uses {@link AdminIndividualCustomerDetailsModelAssembler} to create the response model</li>
-     *   <li>Logs successful model creation</li>
-     * </ol>
-     */
     @Override
     @Transactional
-    public IndividualCustomerDetailsResponseModel getAdminIndividualCustomerDetailsResponseModelById(UUID id) {
-        log.info("Attempting to retrieve admin individual customer details for ID: {}", id);
-        IndividualCustomer individualCustomer = findById(id);
-        log.info("Retrieved admin individual customer details: {}", individualCustomer);
-        IndividualCustomerDetailsResponseModel individualCustomerDetailsResponseModel =
-                adminIndividualCustomerDetailsModelAssembler.toModel(individualCustomer);
-        log.info("Successfully retrieved admin individual customer details response model: {}", individualCustomerDetailsResponseModel);
-        return individualCustomerDetailsResponseModel;
+    public IndividualCustomer findById(UUID id) {
+        return individualCustomerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Individual customer with ID: " + id + " not found"));
     }
 }

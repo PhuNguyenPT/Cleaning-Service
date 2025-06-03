@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.assemblers.companies;
 
-import com.example.cleaning_service.customers.controllers.CompanyController;
 import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
 import com.example.cleaning_service.customers.entities.Company;
 import com.example.cleaning_service.customers.mappers.CompanyMapper;
@@ -12,8 +11,8 @@ import org.springframework.stereotype.Component;
 public class CompanyModelAssembler extends RepresentationModelAssemblerSupport<Company, CompanyResponseModel> {
     private final CompanyMapper companyMapper;
 
-    public CompanyModelAssembler(CompanyMapper companyMapper) {
-        super(CompanyController.class, CompanyResponseModel.class);
+    public CompanyModelAssembler(Class<?> controllerClass, Class<CompanyResponseModel> resourceType, CompanyMapper companyMapper) {
+        super(controllerClass, resourceType);
         this.companyMapper = companyMapper;
     }
 

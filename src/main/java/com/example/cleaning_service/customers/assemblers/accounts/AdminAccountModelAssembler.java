@@ -17,8 +17,8 @@ public class AdminAccountModelAssembler extends RepresentationModelAssemblerSupp
 
     private final AccountMapper accountMapper;
 
-    public AdminAccountModelAssembler(AccountMapper accountMapper) {
-        super(AdminCustomerController.class, AccountResponseModel.class);
+    public AdminAccountModelAssembler(Class<?> controllerClass, Class<AccountResponseModel> resourceType, AccountMapper accountMapper) {
+        super(controllerClass, resourceType);
         this.accountMapper = accountMapper;
     }
 

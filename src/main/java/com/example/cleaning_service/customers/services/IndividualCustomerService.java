@@ -4,6 +4,7 @@ import com.example.cleaning_service.customers.dto.individuals.IndividualCustomer
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerRequest;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerUpdateRequest;
+import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,7 +36,7 @@ public interface IndividualCustomerService {
       * @return A {@link IndividualCustomerResponseModel} containing details of the created individual customer
       * @throws IllegalStateException If the updated account does not reference a valid individual customer
       */
-     IndividualCustomerResponseModel createIndividualCustomer(IndividualCustomerRequest individualCustomerRequest, User user);
+     IndividualCustomer createIndividualCustomer(IndividualCustomerRequest individualCustomerRequest, User user);
 
      /**
       * Retrieves detailed individual customer information by ID for a specific user.
@@ -52,7 +53,7 @@ public interface IndividualCustomerService {
       * @return A {@link IndividualCustomerDetailsResponseModel} containing individual customer information
       * @throws AccessDeniedException If the user does not have access to the requested individual customer
       */
-     IndividualCustomerDetailsResponseModel getIndividualCustomerDetailsById(UUID id, User user);
+     IndividualCustomer getIndividualCustomerDetailsById(UUID id, User user);
 
      /**
       * Updates individual customer details based on the provided request.
@@ -72,7 +73,7 @@ public interface IndividualCustomerService {
       * @throws AccessDeniedException If the user does not have appropriate permissions
       * @throws IllegalStateException If the individual customer is not found or the user doesn't have access
       */
-     IndividualCustomerDetailsResponseModel updateIndividualCustomerDetailsById(UUID id, IndividualCustomerUpdateRequest updateRequest, User user);
+     IndividualCustomer updateIndividualCustomerDetailsById(UUID id, IndividualCustomerUpdateRequest updateRequest, User user);
 
      /**
       * Deletes an individual customer by its ID and ensures it is associated with the specified user.
@@ -101,5 +102,5 @@ public interface IndividualCustomerService {
       * @return A {@link IndividualCustomerDetailsResponseModel} containing individual customer information
       * @throws EntityNotFoundException If the individual customer with the specified ID is not found
       */
-     IndividualCustomerDetailsResponseModel getAdminIndividualCustomerDetailsResponseModelById(UUID id);
+     IndividualCustomer findById(UUID id);
 }

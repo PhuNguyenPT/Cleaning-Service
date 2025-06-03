@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.assemblers.accounts;
 
-import com.example.cleaning_service.customers.controllers.AccountController;
 import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.mappers.AccountMapper;
@@ -12,8 +11,8 @@ import org.springframework.stereotype.Component;
 public class AccountDetailsModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountDetailsResponseModel> {
     private final AccountMapper accountMapper;
 
-    public AccountDetailsModelAssembler(AccountMapper accountMapper) {
-        super(AccountController.class, AccountDetailsResponseModel.class);
+    public AccountDetailsModelAssembler(Class<?> controllerClass, Class<AccountDetailsResponseModel> resourceType, AccountMapper accountMapper) {
+        super(controllerClass, resourceType);
         this.accountMapper = accountMapper;
     }
 

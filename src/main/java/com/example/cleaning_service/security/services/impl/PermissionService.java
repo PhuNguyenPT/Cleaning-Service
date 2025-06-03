@@ -5,7 +5,6 @@ import com.example.cleaning_service.security.entities.permission.Permission;
 import com.example.cleaning_service.security.repositories.PermissionRepository;
 import com.example.cleaning_service.security.services.IPermissionService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;

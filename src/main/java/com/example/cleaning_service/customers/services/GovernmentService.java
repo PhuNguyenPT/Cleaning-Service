@@ -4,6 +4,7 @@ import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsR
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
 import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentUpdateRequest;
+import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.security.entities.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,7 +30,7 @@ public interface GovernmentService {
      * @return A {@link GovernmentResponseModel} containing details of the created government entity
      * @throws IllegalStateException If validation fails or account association doesn't reference a valid government
      */
-    GovernmentResponseModel createGovernment(GovernmentRequest governmentRequest, User user);
+    Government createGovernment(GovernmentRequest governmentRequest, User user);
 
     /**
      * Retrieves detailed government entity information by ID for a specific user.
@@ -47,7 +48,7 @@ public interface GovernmentService {
      * @throws AccessDeniedException If the user doesn't have access to the government entity
      * @throws IllegalStateException If the government entity is not found
      */
-    GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, User user);
+    Government getGovernmentDetailsResponseModelById(UUID id, User user);
 
     /**
      * Updates government details based on the provided request.
@@ -67,7 +68,7 @@ public interface GovernmentService {
      * @throws AccessDeniedException If the user doesn't have permission to update the government
      * @throws IllegalStateException If the government entity is not found or account doesn't reference a valid government
      */
-    GovernmentDetailsResponseModel updateCompanyDetailsById(UUID id, GovernmentUpdateRequest updateRequest, User user);
+    Government updateCompanyDetailsById(UUID id, GovernmentUpdateRequest updateRequest, User user);
 
     /**
      * Deletes a government entity by its ID and ensures it is associated with the specified user.
@@ -92,12 +93,11 @@ public interface GovernmentService {
      * This method performs the following operations:
      * <ol>
      *   <li>Retrieves the government entity using the provided ID</li>
-     *   <li>Converts the government entity into an admin-specific detailed response model</li>
      * </ol>
      *
      * @param id The UUID of the government entity to retrieve
-     * @return A {@link GovernmentDetailsResponseModel} containing government entity information
+     * @return A {@link Government} containing government entity information
      * @throws EntityNotFoundException If the government entity is not found
      */
-    GovernmentDetailsResponseModel getAdminGovernmentDetailsResponseModelById(UUID id);
+    Government findById(UUID id);
 }

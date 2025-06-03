@@ -36,7 +36,7 @@ public interface NonProfitOrgService {
      * @return A {@link NonProfitOrgResponseModel} containing details of the created non-profit organization
      * @throws IllegalStateException If the organization creation process fails
      */
-    NonProfitOrgResponseModel createProfitOrg(NonProfitOrgRequest nonProfitOrgRequest, User user);
+    NonProfitOrg createProfitOrg(NonProfitOrgRequest nonProfitOrgRequest, User user);
 
     /**
      * Retrieves detailed non-profit organization information by ID for a specific user.
@@ -53,7 +53,7 @@ public interface NonProfitOrgService {
      * @return A {@link NonProfitOrgDetailsResponseModel} containing non-profit organization information
      * @throws AccessDeniedException If the user doesn't have access to the organization
      */
-    NonProfitOrgDetailsResponseModel getNonProfitOrgDetailsResponseModelById(UUID id, User user);
+    NonProfitOrg getNonProfitOrgDetailsResponseModelById(UUID id, User user);
 
     /**
      * Updates non-profit organization details based on the provided request.
@@ -72,7 +72,7 @@ public interface NonProfitOrgService {
      * @return A {@link NonProfitOrgDetailsResponseModel} containing updated organization information
      * @throws AccessDeniedException If the user doesn't have access to modify the organization
      */
-    NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(UUID id, NonProfitOrgUpdateRequest updateRequest, User user);
+    NonProfitOrg updateNonProfitOrgDetailsById(UUID id, NonProfitOrgUpdateRequest updateRequest, User user);
 
     /**
      * Deletes a non-profit organization by its ID after verifying user association.
@@ -103,5 +103,5 @@ public interface NonProfitOrgService {
      * @return A {@link NonProfitOrgDetailsResponseModel} containing administrative organization information
      * @throws EntityNotFoundException If the organization is not found
      */
-    NonProfitOrgDetailsResponseModel getAdminNonProfitOrgDetailsResponseModelById(UUID id);
+    NonProfitOrg findById(UUID id);
 }

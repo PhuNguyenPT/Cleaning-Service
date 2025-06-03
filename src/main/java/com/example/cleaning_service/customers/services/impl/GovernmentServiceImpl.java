@@ -1,13 +1,8 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.governments.AdminGovernmentDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.governments.GovernmentModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
-import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentUpdateRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
@@ -44,13 +39,7 @@ class GovernmentServiceImpl implements GovernmentService {
     private final AbstractCustomerService abstractCustomerService;
     private final OrganizationDetailsService organizationDetailsService;
     private final CustomerService customerService;
-
-
-    private final GovernmentModelAssembler governmentModelAssembler;
-    private final GovernmentDetailsModelAssembler governmentDetailsModelAssembler;
-
     private final GovernmentMapper governmentMapper;
-    private final AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     GovernmentServiceImpl(
@@ -61,11 +50,8 @@ class GovernmentServiceImpl implements GovernmentService {
             OrganizationDetailsService organizationDetailsService,
             CustomerService customerService,
 
-            GovernmentModelAssembler governmentModelAssembler,
-            GovernmentDetailsModelAssembler governmentDetailsModelAssembler,
-
             GovernmentMapper governmentMapper,
-            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher) {
 
         this.governmentRepository = governmentRepository;
 
@@ -75,17 +61,13 @@ class GovernmentServiceImpl implements GovernmentService {
         this.organizationDetailsService = organizationDetailsService;
         this.customerService = customerService;
 
-        this.governmentModelAssembler = governmentModelAssembler;
-        this.governmentDetailsModelAssembler = governmentDetailsModelAssembler;
-
         this.governmentMapper = governmentMapper;
-        this.adminGovernmentDetailsModelAssembler = adminGovernmentDetailsModelAssembler;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
     @Transactional
-    public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, User user) {
+    public Government createGovernment(@Valid GovernmentRequest governmentRequest, User user) {
         log.info("Check duplicated fields");
         customerService.checkDuplicatedFields(
                 governmentRequest,
@@ -110,18 +92,8 @@ class GovernmentServiceImpl implements GovernmentService {
         );
         CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
         applicationEventPublisher.publishEvent(customerCreationEvent);
-//        Account account = accountService.handleCustomerCreation(accountRequest);
-//
-//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-//            throw new IllegalStateException("Account association does not reference a valid government.");
-//        }
-//
-//        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel((Government) account.getCustomer());
-        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel(savedGovernment);
 
-        log.info("Successfully created government response: {}", governmentResponseModel);
-
-        return governmentResponseModel;
+        return savedGovernment;
     }
 
     /**
@@ -140,9 +112,8 @@ class GovernmentServiceImpl implements GovernmentService {
 
     @Override
     @Transactional
-    public GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, User user) {
-        Government dbGovernment = getByIdAndUser(id, user);
-        return governmentDetailsModelAssembler.toModel(dbGovernment);
+    public Government getGovernmentDetailsResponseModelById(UUID id, User user) {
+        return getByIdAndUser(id, user);
     }
 
     /**
@@ -171,14 +142,14 @@ class GovernmentServiceImpl implements GovernmentService {
 
     @Override
     @Transactional
-    public GovernmentDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
+    public Government updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
         log.info("Updating government details for ID: {} by user: {}", id, user);
         Government government = findGovernmentToChange(id, user);
         updateGovernmentFields(government, updateRequest);
         Government updatedGovernment = saveGovernment(government);
         log.info("Successfully updated company with ID: {}", updatedGovernment.getId());
 
-        return governmentDetailsModelAssembler.toModel(updatedGovernment);
+        return updatedGovernment;
     }
 
     /**
@@ -249,8 +220,9 @@ class GovernmentServiceImpl implements GovernmentService {
      * @return The {@link Government} entity if found
      * @throws EntityNotFoundException If no government exists with the given ID
      */
+    @Override
     @Transactional
-    Government findById(UUID id) {
+    public Government findById(UUID id) {
         return governmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Government with id " + id + " not found"));
     }
@@ -271,16 +243,5 @@ class GovernmentServiceImpl implements GovernmentService {
     @Transactional
     boolean isNotValidReferenceAbstractCustomer(UUID id, AbstractCustomer abstractCustomer) {
         return abstractCustomer == null || !abstractCustomer.getId().equals(id) || !(abstractCustomer instanceof Government);
-    }
-
-    @Override
-    @Transactional
-    public GovernmentDetailsResponseModel getAdminGovernmentDetailsResponseModelById(UUID id) {
-        log.info("Attempting to retrieve admin government with ID: {}", id);
-        Government government = findById(id);
-        log.info("Retrieved government with ID: {}", id);
-        GovernmentDetailsResponseModel governmentDetailsResponseModel = adminGovernmentDetailsModelAssembler.toModel(government);
-        log.info("Successfully retrieved admin government details response model: {}", governmentDetailsResponseModel);
-        return governmentDetailsResponseModel;
     }
 }

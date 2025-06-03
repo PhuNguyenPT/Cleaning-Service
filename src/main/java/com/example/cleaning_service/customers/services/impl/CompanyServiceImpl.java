@@ -1,13 +1,8 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.companies.AdminCompanyDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.companies.CompanyModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.companies.CompanyDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyRequest;
-import com.example.cleaning_service.customers.dto.companies.CompanyResponseModel;
 import com.example.cleaning_service.customers.dto.companies.CompanyUpdateRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
@@ -47,12 +42,7 @@ class CompanyServiceImpl implements CompanyService {
     private final AbstractCustomerService abstractCustomerService;
     private final OrganizationDetailsService organizationDetailsService;
     private final CustomerService customerService;
-
-    private final CompanyModelAssembler companyModelAssembler;
-    private final CompanyDetailsModelAssembler companyDetailsModelAssembler;
-
     private final CompanyMapper companyMapper;
-    private final AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -64,10 +54,8 @@ class CompanyServiceImpl implements CompanyService {
      * @param abstractCustomerService Service for customer operations
      * @param organizationDetailsService Service for organization details
      * @param customerService Service for general customer operations
-     * @param companyModelAssembler Assembler for basic company models
-     * @param companyDetailsModelAssembler Assembler for detailed company models
+
      * @param companyMapper Mapper for company entities and DTOs
-     * @param adminCompanyDetailsModelAssembler Assembler for administrative company details
      */
     CompanyServiceImpl(
             CompanyRepository companyRepository,
@@ -76,10 +64,8 @@ class CompanyServiceImpl implements CompanyService {
             AbstractCustomerService abstractCustomerService,
             OrganizationDetailsService organizationDetailsService,
             CustomerService customerService,
-            CompanyModelAssembler companyModelAssembler,
-            CompanyDetailsModelAssembler companyDetailsModelAssembler,
             CompanyMapper companyMapper,
-            AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler, ApplicationEventPublisher applicationEventPublisher) {
+            ApplicationEventPublisher applicationEventPublisher) {
 
         this.companyRepository = companyRepository;
         this.accountService = accountService;
@@ -87,16 +73,13 @@ class CompanyServiceImpl implements CompanyService {
         this.abstractCustomerService = abstractCustomerService;
         this.organizationDetailsService = organizationDetailsService;
         this.customerService = customerService;
-        this.companyModelAssembler = companyModelAssembler;
-        this.companyDetailsModelAssembler = companyDetailsModelAssembler;
         this.companyMapper = companyMapper;
-        this.adminCompanyDetailsModelAssembler = adminCompanyDetailsModelAssembler;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
     @Transactional
-    public CompanyResponseModel createCompany(@Valid CompanyRequest companyRequest, User user) {
+    public Company createCompany(@Valid CompanyRequest companyRequest, User user) {
         log.info("Check duplicated fields");
         customerService.checkDuplicatedFields(
                 companyRequest,
@@ -123,17 +106,7 @@ class CompanyServiceImpl implements CompanyService {
         CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
         applicationEventPublisher.publishEvent(customerCreationEvent);
 
-//        Account account = accountService.handleCustomerCreation(accountRequest);
-//        // Ensure the account correctly references a company
-//        if (isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-//            throw new IllegalStateException("Account does not reference a valid company.");
-//        }
-//
-//        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel((Company) account.getCustomer());
-        CompanyResponseModel companyResponseModel = companyModelAssembler.toModel(savedCompany);
-        log.info("Successfully created company response: {}", companyResponseModel);
-
-        return companyResponseModel;
+        return savedCompany;
     }
 
     /**
@@ -153,16 +126,6 @@ class CompanyServiceImpl implements CompanyService {
         return savedCompany;
     }
 
-    @Override
-    @Transactional
-    public CompanyDetailsResponseModel getCompanyDetailsResponseModelById(UUID id, User user) {
-        log.info("Retrieving company details for ID: {} by user: {}", id, user.getUsername());
-        Company dbCompany = getByIdAndUser(id, user);
-        CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsModelAssembler.toModel(dbCompany);
-        log.info("Retrieved company details: {}", companyDetailsResponseModel);
-        return companyDetailsResponseModel;
-    }
-
     /**
      * Retrieves a company by its ID while verifying that the requesting user has access to it.
      * <p>
@@ -178,8 +141,9 @@ class CompanyServiceImpl implements CompanyService {
      * @return The {@link Company} entity if found and accessible by the user
      * @throws AccessDeniedException If the user is not associated with the requested company
      */
+    @Override
     @Transactional
-    Company getByIdAndUser(UUID id, User user) {
+    public Company findByIdAndUser(UUID id, User user) {
         log.info("Fetching company with ID: {} for user: {}", id, user.getUsername());
         AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
         if (isNotValidReferenceAbstractCustomer(id, abstractCustomer)) {
@@ -192,14 +156,13 @@ class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional
-    public CompanyDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid CompanyUpdateRequest updateRequest, User user) {
+    public Company updateCompanyDetailsById(UUID id, @Valid CompanyUpdateRequest updateRequest, User user) {
         log.info("Updating company details for ID: {} by user: {}", id, user.getUsername());
         Company company = findCompanyToChange(id, user);
         updateCompanyFields(company, updateRequest);
         Company updatedCompany = saveCompany(company);
         log.info("Successfully updated company with ID: {}", updatedCompany.getId());
-
-        return companyDetailsModelAssembler.toModel(updatedCompany);
+        return updatedCompany;
     }
 
     /**
@@ -303,21 +266,10 @@ class CompanyServiceImpl implements CompanyService {
      * @return The {@link Company} entity if found
      * @throws EntityNotFoundException If no company exists with the given ID
      */
-    @Transactional
-    Company findById(UUID id) {
-        return companyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Company with id " + id + " not found"));
-    }
-
-
     @Override
     @Transactional
-    public CompanyDetailsResponseModel getAdminCompanyDetailsResponseModelById(UUID id) {
-        log.info("Attempting to retrieve admin company details for ID: {}", id);
-        Company company = findById(id);
-        log.info("Retrieved admin company details: {}", company);
-        CompanyDetailsResponseModel companyDetailsResponseModel = adminCompanyDetailsModelAssembler.toModel(company);
-        log.info("Successfully retrieved admin company details response model: {}", companyDetailsResponseModel);
-        return companyDetailsResponseModel;
+    public Company findById(UUID id) {
+        return companyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Company with id " + id + " not found"));
     }
 }

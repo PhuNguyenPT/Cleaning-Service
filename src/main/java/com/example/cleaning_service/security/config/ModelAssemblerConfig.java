@@ -1,11 +1,14 @@
 package com.example.cleaning_service.security.config;
 
+import com.example.cleaning_service.security.assemblers.AuthResponseProfileModelAssembler;
 import com.example.cleaning_service.security.assemblers.AuthResponseRegisterModelAssembler;
 import com.example.cleaning_service.security.assemblers.TokenLoginModelAssembler;
 import com.example.cleaning_service.security.assemblers.TokenModelAssembler;
 import com.example.cleaning_service.security.controllers.AuthController;
+import com.example.cleaning_service.security.dtos.auth.AuthResponseProfileModel;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseRegisterModel;
 import com.example.cleaning_service.security.dtos.auth.TokenModel;
+import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.mapper.TokenEntityMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ModelAssemblerConfig {
     @Bean
-    public AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler() {
-        return new AuthResponseRegisterModelAssembler(AuthController.class, AuthResponseRegisterModel.class);
+    public AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler(AuthMapper authMapper) {
+        return new AuthResponseRegisterModelAssembler(AuthController.class, AuthResponseRegisterModel.class, authMapper);
     }
 
     @Bean
@@ -25,5 +28,10 @@ public class ModelAssemblerConfig {
     @Bean
     public TokenLoginModelAssembler tokenLoginModelAssembler(TokenEntityMapper tokenEntityMapper) {
         return new TokenLoginModelAssembler(AuthController.class, TokenModel.class, tokenEntityMapper);
+    }
+
+    @Bean
+    public AuthResponseProfileModelAssembler authResponseProfileModelAssembler(AuthMapper authMapper) {
+        return new AuthResponseProfileModelAssembler(AuthController.class, AuthResponseProfileModel.class, authMapper);
     }
 }

@@ -16,8 +16,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AdminAccountDetailsModelAssembler extends RepresentationModelAssemblerSupport<Account, AccountDetailsResponseModel> {
     private final AccountMapper accountMapper;
 
-    public AdminAccountDetailsModelAssembler(AccountMapper accountMapper) {
-        super(AdminCustomerController.class, AccountDetailsResponseModel.class);
+    public AdminAccountDetailsModelAssembler(Class<?> controllerClass, Class<AccountDetailsResponseModel> resourceType, AccountMapper accountMapper) {
+        super(controllerClass, resourceType);
         this.accountMapper = accountMapper;
     }
 

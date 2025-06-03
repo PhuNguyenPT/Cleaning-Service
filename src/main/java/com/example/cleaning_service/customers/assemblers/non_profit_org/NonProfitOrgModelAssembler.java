@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.assemblers.non_profit_org;
 
-import com.example.cleaning_service.customers.controllers.NonProfitOrgController;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
 import com.example.cleaning_service.customers.entities.NonProfitOrg;
 import com.example.cleaning_service.customers.mappers.NonProfitOrgMapper;
@@ -13,8 +12,8 @@ public class NonProfitOrgModelAssembler extends RepresentationModelAssemblerSupp
 
     private final NonProfitOrgMapper nonProfitOrgMapper;
 
-    public NonProfitOrgModelAssembler(NonProfitOrgMapper nonProfitOrgMapper) {
-        super(NonProfitOrgController.class, NonProfitOrgResponseModel.class);
+    public NonProfitOrgModelAssembler(Class<?> controllerClass, Class<NonProfitOrgResponseModel> resourceType, NonProfitOrgMapper nonProfitOrgMapper) {
+        super(controllerClass, resourceType);
         this.nonProfitOrgMapper = nonProfitOrgMapper;
     }
 
