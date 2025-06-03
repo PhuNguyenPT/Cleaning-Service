@@ -10,6 +10,16 @@ services:
     image: ${REDIS_IMAGE}
     container_name: redis
     restart: always
+    command: >
+      sh -c "
+      redis-server 
+      --requirepass ${REDIS_PASSWORD} 
+      --user ${REDIS_USERNAME} on '>${REDIS_USER_PASSWORD}' '~*' '&*' '+@all'
+      "
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_USERNAME: ${REDIS_USERNAME}
+      REDIS_USER_PASSWORD: ${REDIS_USER_PASSWORD}
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
@@ -17,7 +27,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--user", "${REDIS_USERNAME}", "--pass", "${REDIS_USER_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -250,6 +260,8 @@ services:
       SPRING_DATA_MONGODB_DATABASE: '${MONGODB_DATABASE}'
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: '${REDIS_PORT}'
+      SPRING_DATA_REDIS_USERNAME: '${REDIS_USERNAME}'
+      SPRING_DATA_REDIS_USER_PASSWORD: '${REDIS_USER_PASSWORD}'
       SPRING_KAFKA_CONSUMER_GROUP_ID: cleaning-service-group
       SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
       SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: 'http://schema-registry0:8085'
