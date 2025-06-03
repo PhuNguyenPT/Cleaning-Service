@@ -1,7 +1,5 @@
 package com.example.cleaning_service.customers.services.impl;
 
-import com.example.cleaning_service.customers.assemblers.accounts.AccountDetailsModelAssembler;
-import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
 import com.example.cleaning_service.customers.dto.accounts.AccountUpdateRequest;
 import com.example.cleaning_service.customers.entities.*;
@@ -35,12 +33,9 @@ class AccountServiceImpl implements AccountService {
 
     private static final Logger log = LoggerFactory.getLogger(AccountServiceImpl.class);
     private final AccountRepository accountRepository;
-    private final AccountDetailsModelAssembler accountDetailsModelAssembler;
 
-    AccountServiceImpl(AccountRepository accountRepository,
-                       AccountDetailsModelAssembler accountDetailsModelAssembler) {
+    AccountServiceImpl(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
-        this.accountDetailsModelAssembler = accountDetailsModelAssembler;
     }
 
     @Override
@@ -141,15 +136,14 @@ class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public AccountDetailsResponseModel patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest) {
+    public Account patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest) {
         log.info("Attempting to update account details by id {}", id);
         Account account = findById(id);
         log.info("Retrieved account details for patch {}", account);
         Account patchedAccount = patchAccountFields(account, accountUpdateRequest);
         log.info("Patched account details {}", patchedAccount);
-        AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsModelAssembler.toModel(patchedAccount);
-        log.info("Patched account details model {}", accountDetailsResponseModel);
-        return accountDetailsResponseModel;
+        return patchedAccount;
+
     }
 
     @Transactional
