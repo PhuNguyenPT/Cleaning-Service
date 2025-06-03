@@ -1,12 +1,8 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailModelAssembler;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRequest;
-import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgUpdateRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
@@ -44,10 +40,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
     private final AbstractCustomerService abstractCustomerService;
     private final BusinessEntityService businessEntityService;
     private final CustomerService customerService;
-
-    private final NonProfitOrgModelAssembler nonProfitOrgModelAssembler;
-    private final NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler;
-
     private final NonProfitOrgMapper nonProfitOrgMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -60,8 +52,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
      * @param abstractCustomerService Service for managing customer details
      * @param businessEntityService Service for managing business entity details
      * @param customerService Service for general customer operations
-     * @param nonProfitOrgModelAssembler Assembler for basic organization models
-     * @param nonProfitOrgDetailModelAssembler Assembler for detailed organization models
      * @param nonProfitOrgMapper Mapper for converting between DTOs and entities
      */
     NonProfitOrgServiceImpl(
@@ -71,8 +61,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
             AbstractCustomerService abstractCustomerService,
             BusinessEntityService businessEntityService,
             CustomerService customerService,
-            NonProfitOrgModelAssembler nonProfitOrgModelAssembler,
-            NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler,
             NonProfitOrgMapper nonProfitOrgMapper,
             ApplicationEventPublisher applicationEventPublisher) {
 
@@ -82,9 +70,6 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
         this.abstractCustomerService = abstractCustomerService;
         this.businessEntityService = businessEntityService;
         this.customerService = customerService;
-
-        this.nonProfitOrgModelAssembler = nonProfitOrgModelAssembler;
-        this.nonProfitOrgDetailModelAssembler = nonProfitOrgDetailModelAssembler;
 
         this.nonProfitOrgMapper = nonProfitOrgMapper;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -106,7 +91,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
      */
     @Override
     @Transactional
-    public NonProfitOrgResponseModel createProfitOrg(@Valid NonProfitOrgRequest nonProfitOrgRequest, User user) {
+    public NonProfitOrg createProfitOrg(@Valid NonProfitOrgRequest nonProfitOrgRequest, User user) {
         log.info("Check duplicated fields");
         customerService.checkDuplicatedFields(
                 nonProfitOrgRequest,
@@ -131,17 +116,8 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
         );
         CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
         applicationEventPublisher.publishEvent(customerCreationEvent);
-//        Account account = accountService.handleCustomerCreation(accountRequest);
-//
-//        if(isNotValidReferenceAbstractCustomer(account.getCustomer().getId(), account.getCustomer())) {
-//            throw new IllegalStateException("Account association does not reference a valid non-profit org.");
-//        }
-//        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel((NonProfitOrg) account.getCustomer());
 
-        NonProfitOrgResponseModel nonProfitOrgResponseModel = nonProfitOrgModelAssembler.toModel(savedNonProfitOrg);
-        log.info("Successfully created non-profit response: {}", nonProfitOrgResponseModel);
-
-        return nonProfitOrgResponseModel;
+        return savedNonProfitOrg;
     }
 
     /**
@@ -166,9 +142,8 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
      */
     @Override
     @Transactional
-    public NonProfitOrgDetailsResponseModel getNonProfitOrgDetailsResponseModelById(UUID id, User user) {
-        NonProfitOrg nonProfitOrg = getByIdAndUser(id, user);
-        return nonProfitOrgDetailModelAssembler.toModel(nonProfitOrg);
+    public NonProfitOrg getNonProfitOrgDetailsResponseModelById(UUID id, User user) {
+        return getByIdAndUser(id, user);
     }
 
     /**
@@ -189,6 +164,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
     @Transactional
     NonProfitOrg getByIdAndUser(UUID id, User user) {
         AbstractCustomer abstractCustomer = accountService.findAccountWithCustomerByUser(user).getCustomer();
+        log.info("Found customer with ID: {}", abstractCustomer.getId());
         if (isNotValidReferenceAbstractCustomer(id, abstractCustomer)) {
             throw new AccessDeniedException("User " + user.getUsername() + " is not associated with a non-profit " +
                     "organization with id " + id);
@@ -208,7 +184,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
      */
     @Override
     @Transactional
-    public NonProfitOrgDetailsResponseModel updateNonProfitOrgDetailsById(UUID id, @Valid NonProfitOrgUpdateRequest updateRequest, User user) {
+    public NonProfitOrg updateNonProfitOrgDetailsById(UUID id, @Valid NonProfitOrgUpdateRequest updateRequest, User user) {
         log.info("Updating non-profit org details for ID: {} by user: {}", id, user.getUsername());
         NonProfitOrg nonProfitOrg = findNonProfitOrgToChange(id, user);
 
@@ -217,7 +193,7 @@ class NonProfitOrgServiceImpl implements NonProfitOrgService {
         NonProfitOrg updatedNonProfitOrg = saveNonProfitOrg(nonProfitOrg);
         log.info("Successfully updated organization with ID: {}", updatedNonProfitOrg.getId());
 
-        return nonProfitOrgDetailModelAssembler.toModel(updatedNonProfitOrg);
+        return updatedNonProfitOrg;
     }
 
     /**

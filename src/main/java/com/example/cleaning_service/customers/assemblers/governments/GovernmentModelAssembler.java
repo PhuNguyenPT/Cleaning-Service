@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.assemblers.governments;
 
-import com.example.cleaning_service.customers.controllers.GovernmentController;
 import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.entities.Government;
 import com.example.cleaning_service.customers.mappers.GovernmentMapper;
@@ -13,8 +12,8 @@ public class GovernmentModelAssembler extends  RepresentationModelAssemblerSuppo
 
     private final GovernmentMapper governmentMapper;
 
-    public GovernmentModelAssembler(GovernmentMapper governmentMapper) {
-        super(GovernmentController.class, GovernmentResponseModel.class);
+    public GovernmentModelAssembler(Class<?> controllerClass, Class<GovernmentResponseModel> resourceType, GovernmentMapper governmentMapper) {
+        super(controllerClass, resourceType);
         this.governmentMapper = governmentMapper;
     }
 

@@ -1,6 +1,5 @@
 package com.example.cleaning_service.customers.assemblers.individuals;
 
-import com.example.cleaning_service.customers.controllers.IndividualCustomerController;
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.entities.IndividualCustomer;
 import com.example.cleaning_service.customers.mappers.IndividualCustomerMapper;
@@ -12,8 +11,8 @@ import org.springframework.stereotype.Component;
 public class IndividualCustomerModelAssembler extends RepresentationModelAssemblerSupport<IndividualCustomer, IndividualCustomerResponseModel> {
     private final IndividualCustomerMapper individualCustomerMapper;
 
-    public IndividualCustomerModelAssembler(IndividualCustomerMapper individualCustomerMapper) {
-        super(IndividualCustomerController.class, IndividualCustomerResponseModel.class);
+    public IndividualCustomerModelAssembler(Class<?> controllerClass, Class<IndividualCustomerResponseModel> resourceType, IndividualCustomerMapper individualCustomerMapper) {
+        super(controllerClass, resourceType);
         this.individualCustomerMapper = individualCustomerMapper;
     }
 

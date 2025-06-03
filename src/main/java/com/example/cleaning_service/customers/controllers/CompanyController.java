@@ -87,8 +87,8 @@ public class CompanyController {
     public CompanyDetailsResponseModel updateCompany(@PathVariable UUID id,
                                                      @RequestBody @Valid CompanyUpdateRequest updateRequest,
                                                      @AuthenticationPrincipal User user) {
-        Company updatedCompany = companyService.updateCompanyDetailsById(id, updateRequest, user);
-        CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsModelAssembler.toModel(updatedCompany);
+        Company company = companyService.updateCompanyDetailsById(id, updateRequest, user);
+        CompanyDetailsResponseModel companyDetailsResponseModel = companyDetailsModelAssembler.toModel(company);
         log.info("Updated company details response model: {}", companyDetailsResponseModel.getId());
         return companyDetailsResponseModel;
     }

@@ -1,12 +1,8 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.commons.BusinessEntityService;
-import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.governments.GovernmentModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountRequest;
-import com.example.cleaning_service.customers.dto.governments.GovernmentDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentRequest;
-import com.example.cleaning_service.customers.dto.governments.GovernmentResponseModel;
 import com.example.cleaning_service.customers.dto.governments.GovernmentUpdateRequest;
 import com.example.cleaning_service.customers.entities.AbstractCustomer;
 import com.example.cleaning_service.customers.entities.Account;
@@ -43,11 +39,6 @@ class GovernmentServiceImpl implements GovernmentService {
     private final AbstractCustomerService abstractCustomerService;
     private final OrganizationDetailsService organizationDetailsService;
     private final CustomerService customerService;
-
-
-    private final GovernmentModelAssembler governmentModelAssembler;
-    private final GovernmentDetailsModelAssembler governmentDetailsModelAssembler;
-
     private final GovernmentMapper governmentMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -58,9 +49,6 @@ class GovernmentServiceImpl implements GovernmentService {
             AbstractCustomerService abstractCustomerService,
             OrganizationDetailsService organizationDetailsService,
             CustomerService customerService,
-
-            GovernmentModelAssembler governmentModelAssembler,
-            GovernmentDetailsModelAssembler governmentDetailsModelAssembler,
 
             GovernmentMapper governmentMapper,
             ApplicationEventPublisher applicationEventPublisher) {
@@ -73,16 +61,13 @@ class GovernmentServiceImpl implements GovernmentService {
         this.organizationDetailsService = organizationDetailsService;
         this.customerService = customerService;
 
-        this.governmentModelAssembler = governmentModelAssembler;
-        this.governmentDetailsModelAssembler = governmentDetailsModelAssembler;
-
         this.governmentMapper = governmentMapper;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
     @Transactional
-    public GovernmentResponseModel createGovernment(@Valid GovernmentRequest governmentRequest, User user) {
+    public Government createGovernment(@Valid GovernmentRequest governmentRequest, User user) {
         log.info("Check duplicated fields");
         customerService.checkDuplicatedFields(
                 governmentRequest,
@@ -108,11 +93,7 @@ class GovernmentServiceImpl implements GovernmentService {
         CustomerCreationEvent customerCreationEvent = new CustomerCreationEvent(accountRequest);
         applicationEventPublisher.publishEvent(customerCreationEvent);
 
-        GovernmentResponseModel governmentResponseModel = governmentModelAssembler.toModel(savedGovernment);
-
-        log.info("Successfully created government response: {}", governmentResponseModel);
-
-        return governmentResponseModel;
+        return savedGovernment;
     }
 
     /**
@@ -131,9 +112,8 @@ class GovernmentServiceImpl implements GovernmentService {
 
     @Override
     @Transactional
-    public GovernmentDetailsResponseModel getGovernmentDetailsResponseModelById(UUID id, User user) {
-        Government dbGovernment = getByIdAndUser(id, user);
-        return governmentDetailsModelAssembler.toModel(dbGovernment);
+    public Government getGovernmentDetailsResponseModelById(UUID id, User user) {
+        return getByIdAndUser(id, user);
     }
 
     /**
@@ -162,14 +142,14 @@ class GovernmentServiceImpl implements GovernmentService {
 
     @Override
     @Transactional
-    public GovernmentDetailsResponseModel updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
+    public Government updateCompanyDetailsById(UUID id, @Valid GovernmentUpdateRequest updateRequest, User user) {
         log.info("Updating government details for ID: {} by user: {}", id, user);
         Government government = findGovernmentToChange(id, user);
         updateGovernmentFields(government, updateRequest);
         Government updatedGovernment = saveGovernment(government);
         log.info("Successfully updated company with ID: {}", updatedGovernment.getId());
 
-        return governmentDetailsModelAssembler.toModel(updatedGovernment);
+        return updatedGovernment;
     }
 
     /**

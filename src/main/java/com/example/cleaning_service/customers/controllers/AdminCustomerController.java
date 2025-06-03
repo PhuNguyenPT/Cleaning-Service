@@ -71,7 +71,12 @@ public class AdminCustomerController {
             @Qualifier("pagedResourcesAssemblerAccount") PagedResourcesAssembler<Account> pagedResourcesAssembler,
             AdminAccountModelAssembler adminAccountModelAssembler,
             OrganizationDetailsService organizationDetailsService,
-            AccountRepository accountRepository, AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler, AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler, AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler, AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler, AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler, AccountDetailsModelAssembler accountDetailsModelAssembler) {
+            AccountRepository accountRepository, AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler,
+            AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler,
+            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler,
+            AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler,
+            AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler,
+            AccountDetailsModelAssembler accountDetailsModelAssembler) {
         this.accountService = accountService;
         this.companyService = companyService;
         this.governmentService = governmentService;
