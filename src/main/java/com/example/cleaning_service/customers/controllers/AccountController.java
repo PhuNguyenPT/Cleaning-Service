@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -58,7 +59,8 @@ public class AccountController {
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/me", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
-    public AccountResponseModel getAccountByUser(@AuthenticationPrincipal User user) {
+    public AccountResponseModel getAccountByUser(@AuthenticationPrincipal User user,
+                                                 HttpServletRequest httpServletRequest) {
         Account account = accountService.findAccountWithCustomerByUser(user);
         AccountResponseModel accountResponseModel = accountModelAssembler.toModel(account);
         log.info("Retrieved account model {}", accountResponseModel);
@@ -71,7 +73,7 @@ public class AccountController {
             accountResponseModel.add(customerLink);
         }
 
-        Link userProfileLink = linkTo(methodOn(AuthController.class).getAuthenticatedUser(user, null))
+        Link userProfileLink = linkTo(methodOn(AuthController.class).getAuthenticatedUser(user, httpServletRequest))
                 .withRel("profile");
         log.info("Retrieved user profile link {}", userProfileLink);
 
@@ -98,13 +100,14 @@ public class AccountController {
     @ResponseStatus(HttpStatus.OK)
     public AccountDetailsResponseModel getAccountDetailsById(
             @Parameter(description = "Account ID", required = true) @PathVariable UUID id,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal User user,
+            HttpServletRequest httpServletRequest
     ) {
         Account account = accountService.getAccountDetailsResponseModelById(id, user);
         AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsModelAssembler.toModel(account);
         log.info("Retrieved account details model {}", accountDetailsResponseModel);
 
-        Link accountDefaultLink = linkTo(methodOn(AccountController.class).getAccountByUser(user)).withRel("me");
+        Link accountDefaultLink = linkTo(methodOn(AccountController.class).getAccountByUser(user, httpServletRequest)).withRel("me");
         log.info("Retrieved account link {}", accountDefaultLink);
         accountDetailsResponseModel.add(accountDefaultLink);
 
