@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,15 +40,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class AdminController {
     private final IUserService userService;
     private final UserResponseModelAssembler userResponseModelAssembler;
-    private final PagedResourcesAssembler<User> pagedResourcesAssembler;
     private final UserRepository userRepository;
+    private final PagedResourcesAssembler<User> pagedResourcesAssembler;
 
     public AdminController(IUserService userService, UserResponseModelAssembler userResponseModelAssembler,
-                           PagedResourcesAssembler<User> pagedResourcesAssembler, UserRepository userRepository) {
+                           UserRepository userRepository,
+                           @Qualifier("pagedResourcesAssemblerUser") PagedResourcesAssembler<User> pagedResourcesAssembler) {
         this.userService = userService;
         this.userResponseModelAssembler = userResponseModelAssembler;
-        this.pagedResourcesAssembler = pagedResourcesAssembler;
         this.userRepository = userRepository;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @Operation(summary = "Create a new user (admin)", description = "Creates a new user with the provided details.")
