@@ -1,12 +1,11 @@
 package com.example.cleaning_service.customers.controllers;
 
 import com.example.cleaning_service.customers.assemblers.accounts.AccountDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountModelAssembler;
-import com.example.cleaning_service.customers.assemblers.companies.AdminCompanyDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.governments.AdminGovernmentDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.individuals.AdminIndividualCustomerDetailsModelAssembler;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.AdminNonProfitOrgDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.accounts.AccountModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailModelAssembler;
 import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountResponseModel;
 import com.example.cleaning_service.customers.dto.accounts.AccountUpdateRequest;
@@ -52,15 +51,14 @@ public class AdminCustomerController {
     private final IndividualCustomerService individualCustomerService;
     private final NonProfitOrgService nonProfitOrgService;
     private final PagedResourcesAssembler<Account> pagedResourcesAssembler;
-    private final AdminAccountModelAssembler adminAccountModelAssembler;
+    private final AccountModelAssembler adminAccountModelAssembler;
     private final OrganizationDetailsService organizationDetailsService;
     private final AccountRepository accountRepository;
-    private final AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler;
-    private final AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler;
-    private final AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
-    private final AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler;
-    private final AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler;
-    private final AccountDetailsModelAssembler accountDetailsModelAssembler;
+    private final AccountDetailsModelAssembler adminAccountDetailsModelAssembler;
+    private final CompanyDetailsModelAssembler adminCompanyDetailsModelAssembler;
+    private final GovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler;
+    private final IndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler;
+    private final NonProfitOrgDetailModelAssembler adminNonProfitOrgDetailsModelAssembler;
 
     public AdminCustomerController(
             AccountService accountService,
@@ -69,14 +67,14 @@ public class AdminCustomerController {
             IndividualCustomerService individualCustomerService,
             NonProfitOrgService nonProfitOrgService,
             @Qualifier("pagedResourcesAssemblerAccount") PagedResourcesAssembler<Account> pagedResourcesAssembler,
-            AdminAccountModelAssembler adminAccountModelAssembler,
+            AccountModelAssembler adminAccountModelAssembler,
             OrganizationDetailsService organizationDetailsService,
-            AccountRepository accountRepository, AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler,
-            AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler,
-            AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler,
-            AdminIndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler,
-            AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler,
-            AccountDetailsModelAssembler accountDetailsModelAssembler) {
+            AccountRepository accountRepository,
+            AccountDetailsModelAssembler adminAccountDetailsModelAssembler,
+            CompanyDetailsModelAssembler adminCompanyDetailsModelAssembler,
+            GovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler,
+            IndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler,
+            NonProfitOrgDetailModelAssembler adminNonProfitOrgDetailsModelAssembler) {
         this.accountService = accountService;
         this.companyService = companyService;
         this.governmentService = governmentService;
@@ -91,7 +89,6 @@ public class AdminCustomerController {
         this.adminGovernmentDetailsModelAssembler = adminGovernmentDetailsModelAssembler;
         this.adminIndividualCustomerDetailsModelAssembler = adminIndividualCustomerDetailsModelAssembler;
         this.adminNonProfitOrgDetailsModelAssembler = adminNonProfitOrgDetailsModelAssembler;
-        this.accountDetailsModelAssembler = accountDetailsModelAssembler;
     }
 
     @Operation(
@@ -179,7 +176,7 @@ public class AdminCustomerController {
             @Parameter(description = "Account data to update") @RequestBody @Valid AccountUpdateRequest accountUpdateRequest
     ) {
         Account patchedAccount = accountService.patchAccountDetailsById(id, accountUpdateRequest);
-        AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsModelAssembler.toModel(patchedAccount);
+        AccountDetailsResponseModel accountDetailsResponseModel = adminAccountDetailsModelAssembler.toModel(patchedAccount);
         log.info("Patched account details model {}", accountDetailsResponseModel);
         return accountDetailsResponseModel;
     }
