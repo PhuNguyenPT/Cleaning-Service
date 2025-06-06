@@ -26,12 +26,19 @@ import com.example.cleaning_service.customers.dto.individuals.IndividualCustomer
 import com.example.cleaning_service.customers.dto.individuals.IndividualCustomerResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgResponseModel;
+import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.mappers.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.PagedResourcesAssembler;
 
 @Configuration
 public class CustomerModelAssemblerConfig {
+
+    @Bean(name = {"pagedResourcesAssemblerAccount"})
+    public PagedResourcesAssembler<Account> pagedResourcesAssemblerAccount(PagedResourcesAssembler<Account> pagedResourcesAssembler) {
+        return pagedResourcesAssembler;
+    }
 
     @Bean(name = {"accountDetailsModelAssembler"})
     AccountDetailsModelAssembler accountDetailsModelAssembler(AccountMapper accountMapper) {

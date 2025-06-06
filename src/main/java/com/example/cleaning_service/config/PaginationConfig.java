@@ -14,15 +14,4 @@ public class PaginationConfig {
     public PageableHandlerMethodArgumentResolverCustomizer paginationCustomizer() {
         return resolver -> resolver.setOneIndexedParameters(true);
     }
-
-    @Bean
-    public PagedResourcesAssembler<User> pagedResourcesAssemblerUser(PagedResourcesAssembler<User> pagedResourcesAssembler) {
-        return pagedResourcesAssembler;
-    }
-
-    @Bean
-    public PagedResourcesAssembler<Account> pagedResourcesAssemblerAccount(PagedResourcesAssembler<Account> pagedResourcesAssembler) {
-        return pagedResourcesAssembler;
-    }
-
 }
