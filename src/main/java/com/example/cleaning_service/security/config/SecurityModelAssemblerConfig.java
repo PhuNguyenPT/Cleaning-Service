@@ -8,13 +8,16 @@ import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseProfileModel;
 import com.example.cleaning_service.security.dtos.auth.AuthResponseRegisterModel;
 import com.example.cleaning_service.security.dtos.auth.TokenModel;
+import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.mapper.AuthMapper;
 import com.example.cleaning_service.security.mapper.TokenEntityMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.PagedResourcesAssembler;
 
 @Configuration
-public class ModelAssemblerConfig {
+public class SecurityModelAssemblerConfig {
+
     @Bean
     public AuthResponseRegisterModelAssembler authResponseRegisterModelAssembler(AuthMapper authMapper) {
         return new AuthResponseRegisterModelAssembler(AuthController.class, AuthResponseRegisterModel.class, authMapper);
@@ -33,5 +36,10 @@ public class ModelAssemblerConfig {
     @Bean
     public AuthResponseProfileModelAssembler authResponseProfileModelAssembler(AuthMapper authMapper) {
         return new AuthResponseProfileModelAssembler(AuthController.class, AuthResponseProfileModel.class, authMapper);
+    }
+
+    @Bean
+    public PagedResourcesAssembler<User> pagedResourcesAssemblerUser(PagedResourcesAssembler<User> pagedResourcesAssembler) {
+        return pagedResourcesAssembler;
     }
 }
