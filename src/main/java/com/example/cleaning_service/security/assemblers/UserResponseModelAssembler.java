@@ -11,13 +11,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserResponseModelAssembler extends RepresentationModelAssemblerSupport<User, UserResponseModel> {
 
-    public UserResponseModelAssembler() {
+    private final UserMapper userMapper;
+
+    public UserResponseModelAssembler(UserMapper userMapper) {
         super(AdminController.class, UserResponseModel.class);
+        this.userMapper = userMapper;
     }
 
     @Override
     protected @NonNull UserResponseModel instantiateModel(@NonNull User user) {
-        return UserMapper.fromUserToUserResponseModel(user);
+        return userMapper.fromUserToUserResponseModel(user);
     }
 
     @Override

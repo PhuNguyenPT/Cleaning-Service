@@ -23,4 +23,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @EntityGraph(attributePaths = {"customer"})
     @NonNull Page<Account> findAll(@NonNull Pageable pageable);
+
+    @EntityGraph(attributePaths = {"customer"})
+    Optional<Account> findWithCustomerById(UUID id);
 }
