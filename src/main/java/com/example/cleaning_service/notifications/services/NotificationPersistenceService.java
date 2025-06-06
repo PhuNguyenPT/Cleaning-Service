@@ -6,11 +6,13 @@ import com.example.cleaning_service.notifications.entites.SecurityNotification;
 import com.example.cleaning_service.notifications.repositories.NotificationRepository;
 import com.example.cleaning_service.security.entities.user.User;
 import com.example.cleaning_service.security.services.IUserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -40,8 +42,8 @@ public class NotificationPersistenceService {
     }
 
     @Transactional(readOnly = true)
-    public List<NotificationEntity> getUnreadNotificationsForUser(User user) {
-        return notificationRepository.findByUserAndReadOrderByTimestampDesc(user, false);
+    public Page<NotificationEntity> getUnreadNotificationsForUser(Pageable pageable, User user) {
+        return notificationRepository.findByUserAndReadOrderByTimestampDesc(pageable, user, false);
     }
 
     @Transactional
@@ -50,5 +52,11 @@ public class NotificationPersistenceService {
             notification.setRead(true);
             notificationRepository.save(notification);
         });
+    }
+
+    @Transactional(readOnly = true)
+    public NotificationEntity findByIdAndUser(UUID id, User user) {
+        return notificationRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new EntityNotFoundException("Notification with id " + id + " not found for user " + user.getId()));
     }
 }

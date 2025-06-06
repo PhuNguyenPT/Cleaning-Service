@@ -164,4 +164,11 @@ class AccountServiceImpl implements AccountService {
         }
         return saveAccount(account);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Account findWithCustomerById(UUID id) {
+        return accountRepository.findWithCustomerById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Account with id " + id + " not found"));
+    }
 }

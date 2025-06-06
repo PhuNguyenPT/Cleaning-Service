@@ -2,13 +2,18 @@ package com.example.cleaning_service.customers.configs;
 
 import com.example.cleaning_service.customers.assemblers.accounts.AccountDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.accounts.AccountModelAssembler;
+import com.example.cleaning_service.customers.assemblers.accounts.AdminAccountDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.companies.AdminCompanyDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.companies.CompanyDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.companies.CompanyModelAssembler;
+import com.example.cleaning_service.customers.assemblers.governments.AdminGovernmentDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.governments.GovernmentDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.governments.GovernmentModelAssembler;
+import com.example.cleaning_service.customers.assemblers.individuals.AdminIndividualDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.individuals.IndividualCustomerModelAssembler;
-import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.AdminNonProfitOrgDetailsModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgModelAssembler;
 import com.example.cleaning_service.customers.controllers.*;
 import com.example.cleaning_service.customers.dto.accounts.AccountDetailsResponseModel;
@@ -39,18 +44,18 @@ public class CustomerModelAssemblerConfig {
     }
 
     @Bean(name = {"adminAccountDetailsModelAssembler"})
-    AccountDetailsModelAssembler adminAccountDetailsModelAssembler(AccountMapper accountMapper) {
-        return new AccountDetailsModelAssembler(AdminCustomerController.class, AccountDetailsResponseModel.class, accountMapper);
+    AdminAccountDetailsModelAssembler adminAccountDetailsModelAssembler(AccountMapper accountMapper) {
+        return new AdminAccountDetailsModelAssembler(AdminAccountController.class, AccountDetailsResponseModel.class, accountMapper);
     }
 
     @Bean(name = {"adminAccountModelAssembler"})
     AccountModelAssembler adminAccountModelAssembler(AccountMapper accountMapper) {
-        return new AccountModelAssembler(AdminCustomerController.class, AccountResponseModel.class, accountMapper);
+        return new AccountModelAssembler(AdminAccountController.class, AccountResponseModel.class, accountMapper);
     }
 
     @Bean(name = {"adminCompanyDetailsModelAssembler"})
-    CompanyDetailsModelAssembler adminCompanyDetailsModelAssembler(CompanyMapper companyMapper) {
-        return new CompanyDetailsModelAssembler(AdminCustomerController.class, CompanyDetailsResponseModel.class, companyMapper);
+    AdminCompanyDetailsModelAssembler adminCompanyDetailsModelAssembler(CompanyMapper companyMapper) {
+        return new AdminCompanyDetailsModelAssembler(AdminCustomerController.class, CompanyDetailsResponseModel.class, companyMapper);
     }
 
     @Bean(name = {"companyDetailsModelAssembler"})
@@ -64,8 +69,8 @@ public class CustomerModelAssemblerConfig {
     }
 
     @Bean(name = {"adminGovernmentDetailsModelAssembler"})
-    GovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler(GovernmentMapper governmentMapper) {
-        return new GovernmentDetailsModelAssembler(AdminCustomerController.class, GovernmentDetailsResponseModel.class, governmentMapper);
+    AdminGovernmentDetailsModelAssembler adminGovernmentDetailsModelAssembler(GovernmentMapper governmentMapper) {
+        return new AdminGovernmentDetailsModelAssembler(AdminCustomerController.class, GovernmentDetailsResponseModel.class, governmentMapper);
     }
 
     @Bean(name = {"governmentDetailsModelAssembler"})
@@ -78,9 +83,9 @@ public class CustomerModelAssemblerConfig {
         return new GovernmentModelAssembler(GovernmentController.class, GovernmentResponseModel.class, governmentMapper);
     }
 
-    @Bean(name = {"adminIndividualCustomerDetailsModelAssembler"})
-    IndividualCustomerDetailsModelAssembler adminIndividualCustomerDetailsModelAssembler(IndividualCustomerMapper individualCustomerMapper) {
-        return new IndividualCustomerDetailsModelAssembler(AdminCustomerController.class, IndividualCustomerDetailsResponseModel.class, individualCustomerMapper);
+    @Bean(name = {"adminIndividualDetailsModelAssembler"})
+    AdminIndividualDetailsModelAssembler adminIndividualDetailsModelAssembler(IndividualCustomerMapper individualCustomerMapper) {
+        return new AdminIndividualDetailsModelAssembler(AdminCustomerController.class, IndividualCustomerDetailsResponseModel.class, individualCustomerMapper);
     }
 
     @Bean(name = {"individualCustomerDetailsModelAssembler"})
@@ -94,13 +99,13 @@ public class CustomerModelAssemblerConfig {
     }
 
     @Bean(name = {"adminNonProfitOrgDetailsModelAssembler"})
-    NonProfitOrgDetailModelAssembler adminNonProfitOrgDetailsModelAssembler(NonProfitOrgMapper nonProfitOrgMapper) {
-        return new NonProfitOrgDetailModelAssembler(AdminCustomerController.class, NonProfitOrgDetailsResponseModel.class, nonProfitOrgMapper);
+    AdminNonProfitOrgDetailsModelAssembler adminNonProfitOrgDetailsModelAssembler(NonProfitOrgMapper nonProfitOrgMapper) {
+        return new AdminNonProfitOrgDetailsModelAssembler(AdminCustomerController.class, NonProfitOrgDetailsResponseModel.class, nonProfitOrgMapper);
     }
 
-    @Bean(name = {"nonProfitOrgDetailModelAssembler"})
-    NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler(NonProfitOrgMapper nonProfitOrgMapper) {
-        return new NonProfitOrgDetailModelAssembler(NonProfitOrgController.class, NonProfitOrgDetailsResponseModel.class, nonProfitOrgMapper);
+    @Bean(name = {"nonProfitOrgDetailsModelAssembler"})
+    NonProfitOrgDetailsModelAssembler nonProfitOrgDetailsModelAssembler(NonProfitOrgMapper nonProfitOrgMapper) {
+        return new NonProfitOrgDetailsModelAssembler(NonProfitOrgController.class, NonProfitOrgDetailsResponseModel.class, nonProfitOrgMapper);
     }
 
     @Bean(name = {"nonProfitOrgModelAssembler"})

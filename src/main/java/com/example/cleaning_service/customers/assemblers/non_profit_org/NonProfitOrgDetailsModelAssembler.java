@@ -8,11 +8,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NonProfitOrgDetailModelAssembler extends RepresentationModelAssemblerSupport<NonProfitOrg, NonProfitOrgDetailsResponseModel> {
+public class NonProfitOrgDetailsModelAssembler extends RepresentationModelAssemblerSupport<NonProfitOrg, NonProfitOrgDetailsResponseModel> {
 
     private final NonProfitOrgMapper nonProfitOrgMapper;
 
-    public NonProfitOrgDetailModelAssembler(Class<?> controllerClass, Class<NonProfitOrgDetailsResponseModel> resourceType, NonProfitOrgMapper nonProfitOrgMapper) {
+    public NonProfitOrgDetailsModelAssembler(Class<?> controllerClass, Class<NonProfitOrgDetailsResponseModel> resourceType, NonProfitOrgMapper nonProfitOrgMapper) {
         super(controllerClass, resourceType);
         this.nonProfitOrgMapper = nonProfitOrgMapper;
     }

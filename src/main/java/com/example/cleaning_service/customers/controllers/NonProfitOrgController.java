@@ -1,6 +1,6 @@
 package com.example.cleaning_service.customers.controllers;
 
-import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailModelAssembler;
+import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgDetailsModelAssembler;
 import com.example.cleaning_service.customers.assemblers.non_profit_org.NonProfitOrgModelAssembler;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgDetailsResponseModel;
 import com.example.cleaning_service.customers.dto.non_profit_org.NonProfitOrgRequest;
@@ -31,12 +31,12 @@ import java.util.UUID;
 public class NonProfitOrgController {
     private final NonProfitOrgService nonProfitOrgService;
     private final NonProfitOrgModelAssembler nonProfitOrgModelAssembler;
-    private final NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler;
+    private final NonProfitOrgDetailsModelAssembler nonProfitOrgDetailsModelAssembler;
 
-    public NonProfitOrgController(NonProfitOrgService nonProfitOrgService, NonProfitOrgModelAssembler nonProfitOrgModelAssembler, NonProfitOrgDetailModelAssembler nonProfitOrgDetailModelAssembler) {
+    public NonProfitOrgController(NonProfitOrgService nonProfitOrgService, NonProfitOrgModelAssembler nonProfitOrgModelAssembler, NonProfitOrgDetailsModelAssembler nonProfitOrgDetailsModelAssembler) {
         this.nonProfitOrgService = nonProfitOrgService;
         this.nonProfitOrgModelAssembler = nonProfitOrgModelAssembler;
-        this.nonProfitOrgDetailModelAssembler = nonProfitOrgDetailModelAssembler;
+        this.nonProfitOrgDetailsModelAssembler = nonProfitOrgDetailsModelAssembler;
     }
 
     @Operation(summary = "Create a Non-profit Organization", description = "Creates a new non-profit organization associated with the authenticated user.")
@@ -69,7 +69,7 @@ public class NonProfitOrgController {
     public NonProfitOrgDetailsResponseModel getNonProfitOrgById(@PathVariable UUID id,
                                                                 @AuthenticationPrincipal User user) {
         NonProfitOrg nonProfitOrg = nonProfitOrgService.getNonProfitOrgDetailsResponseModelById(id, user);
-        return nonProfitOrgDetailModelAssembler.toModel(nonProfitOrg);
+        return nonProfitOrgDetailsModelAssembler.toModel(nonProfitOrg);
     }
 
     @Operation(summary = "Update Non-profit Organization", description = "Updates a non-profit organization's details. Only non-null fields are updated.")
@@ -87,7 +87,7 @@ public class NonProfitOrgController {
                                                                           @RequestBody @Valid NonProfitOrgUpdateRequest updateRequest,
                                                                           @AuthenticationPrincipal User user) {
         NonProfitOrg nonProfitOrg = nonProfitOrgService.updateNonProfitOrgDetailsById(id, updateRequest, user);
-        return nonProfitOrgDetailModelAssembler.toModel(nonProfitOrg);
+        return nonProfitOrgDetailsModelAssembler.toModel(nonProfitOrg);
 
     }
 

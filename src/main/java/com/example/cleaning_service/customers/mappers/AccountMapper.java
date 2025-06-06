@@ -21,6 +21,7 @@ public class AccountMapper {
                 account.getId(),
                 account.getUser() != null ? account.getUser().getUsername() : null,
                 account.getCustomer() != null ? account.getCustomer().getEmail() : null,
+                account.getCustomer().getId() != null ? account.getCustomer().getId() : null,
                 account.getCustomer() != null ? account.getCustomer().getName() : null
         );
     }

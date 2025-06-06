@@ -1,11 +1,13 @@
 package com.example.cleaning_service.customers.dto.accounts;
 
 import com.example.cleaning_service.customers.enums.EAssociationType;
+import lombok.Getter;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.lang.NonNull;
 
 import java.util.UUID;
 
+@Getter
 public class AccountDetailsResponseModel extends RepresentationModel<AccountDetailsResponseModel> {
     private final UUID id;
     private final String notes;
@@ -17,22 +19,6 @@ public class AccountDetailsResponseModel extends RepresentationModel<AccountDeta
         this.notes = notes;
         this.isPrimary = isPrimary;
         this.associationType = associationType;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public Boolean getPrimary() {
-        return isPrimary;
-    }
-
-    public EAssociationType getAssociationType() {
-        return associationType;
     }
 
     @Override

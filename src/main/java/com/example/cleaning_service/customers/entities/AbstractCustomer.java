@@ -7,6 +7,7 @@ import com.example.cleaning_service.customers.enums.EPaymentType;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
 import com.example.cleaning_service.validator.ITaxIdentifiable;
 import jakarta.persistence.*;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "customer_details", schema = "customer")
+@Setter
 public abstract class AbstractCustomer extends BusinessEntity implements ICustomer, ITaxIdentifiable,
         IRegistrationNumberIdentifiable
 {
@@ -57,26 +59,14 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return loyaltyType;
     }
 
-    public void setLoyaltyType(ELoyaltyType loyaltyType) {
-        this.loyaltyType = loyaltyType;
-    }
-
     @Override
     public String getTaxId() {
         return taxId;
     }
 
-    public void setTaxId(String taxId) {
-        this.taxId = taxId;
-    }
-
     @Override
     public String getRegistrationNumber() {
         return registrationNumber;
-    }
-
-    public void setRegistrationNumber(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
     }
 
     @Override
@@ -99,17 +89,9 @@ public abstract class AbstractCustomer extends BusinessEntity implements ICustom
         return billingAddress;
     }
 
-    public void setBillingAddress(String billingAddress) {
-        this.billingAddress = billingAddress;
-    }
-
     @Override
     public EPaymentType getPaymentMethod() {
         return paymentMethod;
-    }
-
-    public void setPaymentMethod(EPaymentType paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     @Override

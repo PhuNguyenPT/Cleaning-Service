@@ -12,6 +12,7 @@ public interface AccountService {
     Account getAccountDetailsResponseModelById(UUID id, User user);
     Account findById(UUID id);
     Account patchAccountDetailsById(UUID id, AccountUpdateRequest accountUpdateRequest);
+    Account findWithCustomerById(UUID id);
 
     Account findAccountWithCustomerByUser(User user);
     void checkAccountReferenceCustomer(User user);

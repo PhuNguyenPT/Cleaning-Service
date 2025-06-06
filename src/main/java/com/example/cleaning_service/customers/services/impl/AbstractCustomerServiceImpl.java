@@ -1,8 +1,7 @@
 package com.example.cleaning_service.customers.services.impl;
 
 import com.example.cleaning_service.customers.dto.AbstractCustomerRequest;
-import com.example.cleaning_service.customers.entities.AbstractCustomer;
-import com.example.cleaning_service.customers.entities.CustomerPreferredDay;
+import com.example.cleaning_service.customers.entities.*;
 import com.example.cleaning_service.customers.mappers.CustomerPreferredDayMapper;
 import com.example.cleaning_service.customers.services.AbstractCustomerService;
 import org.springframework.stereotype.Service;
