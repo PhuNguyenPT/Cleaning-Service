@@ -74,6 +74,7 @@ public class AdminAccountController {
             @Parameter(description = "Pagination parameters") @ParameterObject Pageable pageable
     ) {
         Page<Account> accountPage = accountRepository.findAll(pageable);
+        pagedResourcesAssembler.setForceFirstAndLastRels(true);
         PagedModel<AccountResponseModel> accountResponseModels = pagedResourcesAssembler.toModel(
                 accountPage, adminAccountModelAssembler
         );
