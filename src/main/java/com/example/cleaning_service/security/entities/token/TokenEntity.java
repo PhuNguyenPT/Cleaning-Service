@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Setter
 @Getter
@@ -22,7 +23,7 @@ public class TokenEntity {
     private String username;
     private boolean blacklisted;
 
-    @TimeToLive
+    @TimeToLive(unit = TimeUnit.MILLISECONDS)
     private Long timeToLive;
 
     public TokenEntity(String token, String username, Long timeToLive) {
