@@ -39,14 +39,14 @@ public class User extends Auditable implements UserDetails {
     private boolean isCredentialsNonExpired;
 
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE })
     @JoinTable(name = "user_roles",
             schema = "security",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE })
     @JoinTable(name = "user_permissions",
             schema = "security",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -158,13 +158,11 @@ public class User extends Auditable implements UserDetails {
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", password='[PROTECTED]'" +
+                ", password='" + password + '\'' +
                 ", isEnabled=" + isEnabled +
                 ", isAccountNonExpired=" + isAccountNonExpired +
                 ", isAccountNonLocked=" + isAccountNonLocked +
                 ", isCredentialsNonExpired=" + isCredentialsNonExpired +
-                ", roles=" + roles +
-                ", permissions=" + permissions +
                 '}';
     }
 }
