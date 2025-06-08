@@ -140,22 +140,8 @@ public class AdminAccountController {
     private Link getCustomerLink(Account account) {
         Assert.notNull(account, "Account must not be null");
         Assert.notNull(account.getCustomer(), "Customer must not be null");
-        switch (account.getCustomer()) {
-            case Company c -> {
-                return getAdminCustomerLink(account.getId(), c.getId());
-            }
-            case Government g -> {
-                return getAdminCustomerLink(account.getId(), g.getId());
-            }
-            case IndividualCustomer ic -> {
 
-                return getAdminCustomerLink(account.getId(), ic.getId());
-            }
-            case NonProfitOrg npo -> {
-                return getAdminCustomerLink(account.getId(), npo.getId());
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + account.getCustomer());
-        }
+        return getAdminCustomerLink(account.getId(), account.getCustomer().getId());
     }
 
     private Link getAdminCustomerLink(UUID accountId, UUID customerId) {
