@@ -8,13 +8,11 @@ import com.example.cleaning_service.customers.entities.Account;
 import com.example.cleaning_service.customers.entities.IOrganization;
 import com.example.cleaning_service.customers.services.AccountService;
 import com.example.cleaning_service.customers.services.OrganizationDetailsService;
-import com.example.cleaning_service.security.controllers.AuthController;
 import com.example.cleaning_service.security.entities.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -23,9 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Slf4j
 @RestController
@@ -37,7 +32,10 @@ public class AccountController {
     private final OrganizationDetailsService organizationDetailsService;
     private final AccountDetailsModelAssembler accountDetailsModelAssembler;
 
-    public AccountController(AccountService accountService, AccountModelAssembler accountModelAssembler, OrganizationDetailsService organizationDetailsService, AccountDetailsModelAssembler accountDetailsModelAssembler) {
+    public AccountController(AccountService accountService,
+                             AccountModelAssembler accountModelAssembler,
+                             OrganizationDetailsService organizationDetailsService,
+                             AccountDetailsModelAssembler accountDetailsModelAssembler) {
         this.accountService = accountService;
         this.accountModelAssembler = accountModelAssembler;
         this.organizationDetailsService = organizationDetailsService;
@@ -59,25 +57,10 @@ public class AccountController {
     @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping(path = "/me", produces = {"application/hal+json"})
     @ResponseStatus(HttpStatus.OK)
-    public AccountResponseModel getAccountByUser(@AuthenticationPrincipal User user,
-                                                 HttpServletRequest httpServletRequest) {
+    public AccountResponseModel getAccountByUser(@AuthenticationPrincipal User user) {
         Account account = accountService.findAccountWithCustomerByUser(user);
         AccountResponseModel accountResponseModel = accountModelAssembler.toModel(account);
         log.info("Retrieved account model {}", accountResponseModel);
-
-        if (account.getCustomer() != null) {
-            Link customerLink = organizationDetailsService.getLinkByIOrganization(
-                    (IOrganization) account.getCustomer()
-            );
-            log.info("Retrieved customer link {}", customerLink);
-            accountResponseModel.add(customerLink);
-        }
-
-        Link userProfileLink = linkTo(methodOn(AuthController.class).getAuthenticatedUser(user, httpServletRequest))
-                .withRel("profile");
-        log.info("Retrieved user profile link {}", userProfileLink);
-
-        accountResponseModel.add(userProfileLink);
 
         return accountResponseModel;
     }
@@ -100,16 +83,19 @@ public class AccountController {
     @ResponseStatus(HttpStatus.OK)
     public AccountDetailsResponseModel getAccountDetailsById(
             @Parameter(description = "Account ID", required = true) @PathVariable UUID id,
-            @AuthenticationPrincipal User user,
-            HttpServletRequest httpServletRequest
+            @AuthenticationPrincipal User user
     ) {
         Account account = accountService.getAccountDetailsResponseModelById(id, user);
         AccountDetailsResponseModel accountDetailsResponseModel = accountDetailsModelAssembler.toModel(account);
         log.info("Retrieved account details model {}", accountDetailsResponseModel);
 
-        Link accountDefaultLink = linkTo(methodOn(AccountController.class).getAccountByUser(user, httpServletRequest)).withRel("me");
-        log.info("Retrieved account link {}", accountDefaultLink);
-        accountDetailsResponseModel.add(accountDefaultLink);
+        if (account.getCustomer() != null) {
+            Link customerLink = organizationDetailsService.getLinkByIOrganization(
+                    (IOrganization) account.getCustomer()
+            );
+            log.info("Retrieved customer link {}", customerLink);
+            accountDetailsResponseModel.add(customerLink);
+        }
 
         return accountDetailsResponseModel;
     }
