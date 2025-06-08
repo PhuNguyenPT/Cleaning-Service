@@ -6,9 +6,13 @@ import com.example.cleaning_service.customers.enums.EPaymentType;
 import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "individual_customers", schema = "customer")
 @ValidTaxId

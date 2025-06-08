@@ -2,9 +2,13 @@ package com.example.cleaning_service.customers.entities;
 
 import com.example.cleaning_service.customers.enums.EDay;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "customer_preferred_days", schema = "customer")
 public class CustomerPreferredDay {
@@ -21,18 +25,6 @@ public class CustomerPreferredDay {
     }
 
     public CustomerPreferredDay(EDay preferredDay) {
-        this.preferredDay = preferredDay;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public EDay getPreferredDay() {
-        return preferredDay;
-    }
-
-    public void setPreferredDay(EDay preferredDay) {
         this.preferredDay = preferredDay;
     }
 }

@@ -6,9 +6,13 @@ import com.example.cleaning_service.customers.enums.EPaymentType;
 import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "governments", schema = "customer")
 @ValidTaxId
@@ -38,41 +42,9 @@ public non-sealed class Government extends AbstractCustomer implements IOrganiza
         this.requiresEmergencyCleaning = requiresEmergencyCleaning;
     }
 
-    public String getContractorName() {
-        return contractorName;
-    }
-
-    public void setContractorName(String contractorName) {
-        this.contractorName = contractorName;
-    }
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
     @Override
     public EOrganizationType getOrganizationType() {
         return this.organizationType;
-    }
-
-    public boolean isTaxExempt() {
-        return isTaxExempt;
-    }
-
-    public void setTaxExempt(boolean taxExempt) {
-        isTaxExempt = taxExempt;
-    }
-
-    public boolean isRequiresEmergencyCleaning() {
-        return requiresEmergencyCleaning;
-    }
-
-    public void setRequiresEmergencyCleaning(boolean requiresEmergencyCleaning) {
-        this.requiresEmergencyCleaning = requiresEmergencyCleaning;
     }
 
     @Override

@@ -7,15 +7,17 @@ import com.example.cleaning_service.customers.enums.EPaymentType;
 import com.example.cleaning_service.validator.IRegistrationNumberIdentifiable;
 import com.example.cleaning_service.validator.ITaxIdentifiable;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "customer_details", schema = "customer")
-@Setter
 public abstract class AbstractCustomer extends BusinessEntity implements ICustomer, ITaxIdentifiable,
         IRegistrationNumberIdentifiable
 {
