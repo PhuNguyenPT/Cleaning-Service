@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -44,6 +45,7 @@ class OrganizationDetailsServiceImpl implements OrganizationDetailsService {
     @Override
     @Transactional
     public Link getLinkByIOrganization(IOrganization organization) {
+        Assert.notNull(organization, "Organization must not be null");
         log.info("Attempting to retrieve link for {}", organization);
         return switch (organization) {
             case Company company -> linkTo(methodOn(CompanyController.class).getCompanyById(company.getId(), new User())).withRel("customer");

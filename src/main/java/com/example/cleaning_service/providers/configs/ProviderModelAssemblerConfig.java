@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AssemblerConfig {
+public class ProviderModelAssemblerConfig {
     @Bean
     public ProviderDetailsModelAssembler providerDetailsModelAssembler(ProviderMapper providerMapper) {
         return new ProviderDetailsModelAssembler(ProviderController.class, ProviderDetailsModel.class, providerMapper);

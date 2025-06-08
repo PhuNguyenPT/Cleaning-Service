@@ -5,9 +5,13 @@ import com.example.cleaning_service.validator.ValidRegistrationNumber;
 import com.example.cleaning_service.validator.ValidTaxId;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "companies", schema = "customer")
 @ValidTaxId
@@ -34,14 +38,6 @@ public non-sealed class Company extends AbstractCustomer implements IOrganizatio
 
         super(taxId, registrationNumber, billingAddress, paymentMethod, preferredDays, name, address, phone, email, city, state, zip, country, notes);
 
-        this.companyType = companyType;
-    }
-
-    public ECompanyType getCompanyType() {
-        return companyType;
-    }
-
-    public void setCompanyType(ECompanyType companyType) {
         this.companyType = companyType;
     }
 

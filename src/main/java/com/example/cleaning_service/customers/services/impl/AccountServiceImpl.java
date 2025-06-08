@@ -122,7 +122,7 @@ class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public Account getAccountDetailsResponseModelById(UUID id, User user) {
-        Account account = findById(id);
+        Account account = findWithCustomerById(id);
         if (!account.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("User " + user.getUsername()  + " is not authorized to access this account with id " + id);
         }
